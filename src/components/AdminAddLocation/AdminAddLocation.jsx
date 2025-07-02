@@ -1,0 +1,214 @@
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from "react";
+import "./AdminAddLocation.css";
+import { IoIosClose } from "react-icons/io";
+import Select from "react-select";
+
+const regionOptions = [
+  { value: "Metro", label: "Metro" },
+  { value: "R1", label: "R1" },
+  { value: "R2", label: "R2" },
+  { value: "R3", label: "R3" },
+];
+
+const provinceOptions = [
+  { value: "Northern ", label: "Northern Province" },
+  { value: "North Central", label: "North Central Province" },
+  { value: "North Western ", label: "North Western Province" },
+  { value: "Central ", label: "Central Province" },
+  { value: "Eastern ", label: "Eastern Province" },
+  { value: "Western ", label: "Western Province" },
+  { value: "Sabaragamuwa ", label: "Sabaragamuwa Province" },
+  { value: "Uva ", label: "Uva Province" },
+  { value: "Southern ", label: "Southern Province" },
+];
+
+const AdminAddLocation = ({
+  onSubmit,
+  onClose,
+  isEdit = false,
+  editLocation = null,
+}) => {
+  const [formData, setFormData] = useState({
+    locationCode: "",
+    locationName: "",
+    region: "",
+    province: "",
+  });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (isEdit && editLocation) {
+      setFormData({
+        locationCode: editLocation.locationCode || "",
+        locationName: editLocation.locationName || "",
+        region: editLocation.region || "",
+        province: editLocation.province || "",
+      });
+    }
+  }, [isEdit, editLocation]);
+  // Location Code validation function
+  const validateLocationCode = (code) => {
+    // Check if code matches LOC_XXX pattern where XXX is 3 digits starting from 001
+    const locationCodePattern = /^LOC_\d{3}$/;
+
+    if (!code) {
+      return "Location Code is required";
+    }
+
+    if (!locationCodePattern.test(code)) {
+      return "Location Code must be in format LOC_XXX (e.g., LOC_001, LOC_002)";
+    }
+
+    // Extract the number part and validate it's >= 001
+    const numberPart = parseInt(code.substring(4));
+    if (numberPart < 1) {
+      return "Location Code number must start from LOC_001 or higher";
+    }
+
+    return null; // No error
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Real-time validation for Location Code
+    if (name === "locationCode") {
+      const codeError = validateLocationCode(value);
+      if (codeError) {
+        setErrors((prev) => ({ ...prev, locationCode: codeError }));
+      } else {
+        setErrors((prev) => ({ ...prev, locationCode: undefined }));
+      }
+    } else {
+      // Clear other field errors when user types
+      if (value && errors[name])
+        setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  };
+  const handleRegionChange = (selectedOption) => {
+    setFormData((prev) => ({ ...prev, region: selectedOption?.value || "" }));
+    if (selectedOption?.value && errors.region)
+      setErrors((prev) => ({ ...prev, region: undefined }));
+  };
+
+  const handleProvinceChange = (selectedOption) => {
+    setFormData((prev) => ({ ...prev, province: selectedOption?.value || "" }));
+    if (selectedOption?.value && errors.province)
+      setErrors((prev) => ({ ...prev, province: undefined }));
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    // Validate Location Code with custom validation
+    const locationCodeError = validateLocationCode(formData.locationCode);
+    if (locationCodeError) {
+      newErrors.locationCode = locationCodeError;
+    }
+
+    // Validate other fields
+    if (!formData.locationName)
+      newErrors.locationName = "Location Name is required";
+    if (!formData.region) newErrors.region = "Region is required";
+    if (!formData.province) newErrors.province = "Province is required";
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+    onSubmit(formData);
+  };
+
+  return (
+    <div className="AdminAddLocation-modal">
+      <div className="AdminAddLocation-content">
+        <div className="AdminAddLocation-header">
+          <h2>{isEdit ? "Edit Location" : "Add Location"}</h2>
+          <button onClick={onClose}>
+            <IoIosClose size={30} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="AdminAddLocation-form">
+          <div className="AdminAddLocation-grid">
+            {" "}
+            <div className="AdminAddLocation-field">
+              <label>Location Code:</label>
+              {errors.locationCode && (
+                <span className="AdminAddLocation-form-error-text">
+                  {errors.locationCode}
+                </span>
+              )}
+              <input
+                type="text"
+                name="locationCode"
+                value={formData.locationCode}
+                onChange={handleChange}
+                placeholder="LOC_001"
+                style={{
+                  borderColor: errors.locationCode ? "#dc3545" : "#ccc",
+                }}
+              />
+              <small className="AdminAddLocation-helper-text">
+                Format: LOC_XXX (e.g., LOC_001, LOC_002, LOC_010)
+              </small>
+            </div>
+            <div className="AdminAddLocation-field">
+              <label>Location Name:</label>
+              {errors.locationName && (
+                <span className="AdminAddLocation-form-error-text">
+                  {errors.locationName}
+                </span>
+              )}
+              <input
+                type="text"
+                name="locationName"
+                value={formData.locationName}
+                onChange={handleChange}
+                placeholder="e.g., Colombo"
+              />
+            </div>
+            <div className="AdminAddLocation-field">
+              <label>Region:</label>
+              {errors.region && (
+                <span className="AdminAddLocation-form-error-text">
+                  {errors.region}
+                </span>
+              )}
+              <Select
+                options={regionOptions}
+                value={regionOptions.find(
+                  (opt) => opt.value === formData.region
+                )}
+                onChange={handleRegionChange}
+                placeholder="Select Region"
+                isClearable
+              />
+            </div>{" "}
+            <div className="AdminAddLocation-field">
+              <label>Province:</label>
+              {errors.province && (
+                <span className="AdminAddLocation-form-error-text">
+                  {errors.province}
+                </span>
+              )}
+              <Select
+                options={provinceOptions}
+                value={provinceOptions.find(
+                  (opt) => opt.value === formData.province
+                )}
+                onChange={handleProvinceChange}
+                placeholder="Select Province"
+                isClearable
+              />
+            </div>
+          </div>
+          <div className="AdminAddLocation-form-submit">
+            <button type="submit">{isEdit ? "Save" : "Add"}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AdminAddLocation;

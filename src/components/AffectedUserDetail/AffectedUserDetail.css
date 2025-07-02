@@ -1,0 +1,97 @@
+
+.affected-user-card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  margin: 0 auto;
+  width: 97%; 
+  max-width: 1200px;
+  box-sizing: border-box;
+}
+
+.affected-user-card .card-body {
+  padding: 1rem;
+}
+
+@media (max-width: 992px) {
+  .affected-user-card {
+    width: 99%; 
+  }
+}
+.affected-user-table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+.affected-user-table th,
+.affected-user-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.8rem;
+  text-align: left;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.affected-user-table th {
+  background-color: #f8f9fa;
+}
+
+.affected-user-table th:nth-child(1),
+.affected-user-table td:nth-child(1),
+.affected-user-table th:nth-child(2),
+.affected-user-table td:nth-child(2),
+.affected-user-table th:nth-child(3),
+.affected-user-table td:nth-child(3) {
+  width: 15%;
+}
+
+.affected-user-table th:nth-child(5),
+.affected-user-table td:nth-child(5) {
+  width: 40%;
+}
+
+.Incident-History-thead th {
+  background-color: #7ec8e3;
+}
+
+.category span {
+  color: red;
+}
+
+.card-body h5 span {
+  color: red;
+}
+
+.category {
+  background-color: #d4f1f4;
+  padding: 1rem;
+  width: 100%;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  box-sizing: border-box;
+  border-radius: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+
+.affected-user-table {
+  font-size: calc(1rem + 0.5vw); 
+}
+
+.affected-user-table th,
+.affected-user-table td {
+  padding: calc(0.8rem + 0.2vw); 
+}
+.card-title{
+  margin-left: 10px;
+  font-size: 20px;
+  
+}
+.affected-user-table input[type="text"] {
+  border: none;
+  outline: none; 
+  box-shadow: none; 
+}

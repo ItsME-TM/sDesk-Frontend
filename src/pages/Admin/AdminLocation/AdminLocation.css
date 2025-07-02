@@ -1,0 +1,361 @@
+.AdminLocation-main-content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  max-height: 92vh;
+}
+
+.AdminLocation-direction-bar {
+  display: flex;
+  align-items: center;
+  background-color: antiquewhite;
+  min-height: 30px;
+  padding-left: 20px;
+  font-size: 15px;
+}
+
+.AdminLocation-content2 {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.AdminLocation-TitleBar {
+  display: flex;
+  flex-direction: row;
+  height: 50px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.AdminLocation-TitleBar-NameAndIcon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px 0px 10px 20px;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.AdminLocation-TitleBar-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px 20px 10px 0px;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.AdminLocation-TitleBar-buttons-AddUser {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  border: 2px solid #ffffff;
+  gap: 5px;
+  font-weight: 600;
+  background-color: #b10e0e;
+  color: aliceblue;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.AdminLocation-TitleBar-buttons-ExportData {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  border: 2px solid #ffffff;
+  gap: 5px;
+  font-weight: 600;
+  background-color: #000000;
+  color: aliceblue;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.AdminLocation-showSearchBar {
+  display: flex;
+  flex-direction: row;
+  height: 40px;
+  max-height: 40px;
+  align-items: center;
+  width: 100%;
+  background-color: rgb(255, 255, 255);
+  justify-content: space-between;
+}
+
+.AdminLocation-showSearchBar-Show {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin: 0px 0px 0px 20px;
+  font-weight: 600;
+}
+
+.AdminLocation-showSearchBar-Show-select {
+  display: flex;
+  border: 1px solid #ccc;
+  width: 150px;
+  font-size: 14px;
+  height: 25px;
+  border-radius: 5px;
+}
+
+.AdminLocation-showSearchBar-SearchBar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin: 0px 20px 0px 0px;
+}
+
+.AdminLocation-showSearchBar-SearchBar-input {
+  display: flex;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  width: 210px;
+  font-size: 13px;
+  height: 25px;
+  border-radius: 5px;
+}
+
+.AdminLocation-table {
+  flex: 1;
+  height: 100%;
+  padding: 20px;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+.AdminLocation-table table {
+  border-collapse: collapse;
+  background-color: #f8f9fa;
+  width: 100%;
+}
+
+.AdminLocation-table th,
+.AdminLocation-table td {
+  padding: 12px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.AdminLocation-table th {
+  background-color: #e9ecef;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: center;
+}
+
+.AdminLocation-table td {
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* Column-specific alignment */
+.AdminLocation-table th:nth-child(1),
+.AdminLocation-table td:nth-child(1) {
+  text-align: center; /* Location Code - center */
+  font-weight: 600;
+}
+
+.AdminLocation-table th:nth-child(2),
+.AdminLocation-table td:nth-child(2) {
+  text-align: left; /* Location Name - left */
+  padding-left: 20px;
+}
+
+.AdminLocation-table th:nth-child(3),
+.AdminLocation-table td:nth-child(3) {
+  text-align: center; /* Region - center */
+}
+
+.AdminLocation-table th:nth-child(4),
+.AdminLocation-table td:nth-child(4) {
+  text-align: left; /* Province - left */
+  padding-left: 20px;
+}
+
+.AdminLocation-table th:nth-child(5),
+.AdminLocation-table td:nth-child(5) {
+  text-align: center; /* Actions - center */
+}
+
+/* Table row styling improvements */
+.AdminLocation-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.AdminLocation-table tbody tr:hover {
+  background-color: #f1f3f5;
+}
+
+.AdminLocation-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.AdminLocation-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+/* Table header improvements */
+.AdminLocation-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #343a40;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.AdminLocation-table-edit-btn,
+.AdminLocation-table-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.AdminLocation-table-edit-btn {
+  color: #007bff;
+}
+
+.AdminLocation-table-edit-btn:hover {
+  color: #0056b3;
+}
+
+.AdminLocation-table-delete-btn {
+  color: #dc3545;
+}
+
+.AdminLocation-table-delete-btn:hover {
+  color: #a71d2a;
+}
+
+/* Action Buttons Styling */
+.AdminLocation-actions-cell {
+  padding: 8px 12px !important;
+  text-align: center;
+}
+
+.AdminLocation-actions-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.AdminLocation-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.AdminLocation-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.AdminLocation-action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Button */
+.AdminLocation-edit-btn {
+  background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
+}
+
+.AdminLocation-edit-btn:hover {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Delete Button */
+.AdminLocation-delete-btn {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  color: white;
+}
+
+.AdminLocation-delete-btn:hover {
+  background: linear-gradient(135deg, #d32f2f, #b71c1c);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+/* Ripple Effect */
+.AdminLocation-action-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.AdminLocation-action-btn:active::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Tooltip on hover */
+.AdminLocation-action-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .AdminLocation-action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .AdminLocation-actions-container {
+    gap: 6px;
+  }
+}
+
+/* Loading state for buttons */
+.AdminLocation-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.AdminLocation-action-btn:disabled:hover {
+  box-shadow: none !important;
+  background: #ccc !important;
+}

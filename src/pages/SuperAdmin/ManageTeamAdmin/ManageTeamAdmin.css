@@ -1,0 +1,404 @@
+.superadmin-container {
+  padding: 32px;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.superadmin-container h2 {
+  margin-bottom: 24px;
+}
+
+.teamadmin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+  background: #fff;
+}
+
+.teamadmin-table th,
+.teamadmin-table td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.teamadmin-table th {
+  background: #007bff;
+  color: #fff;
+}
+
+.teamadmin-table tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+.teamadmin-form-container {
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 600px;
+}
+
+.teamadmin-form-container h3 {
+  margin-bottom: 16px;
+}
+
+.teamadmin-form-container input[type="text"],
+.teamadmin-form-container input[type="email"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.teamadmin-form-container label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.form-actions {
+  margin-top: 12px;
+}
+
+.form-actions button {
+  margin-right: 8px;
+  padding: 8px 16px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions button[type="button"] {
+  background: #6c757d;
+}
+
+.error {
+  color: #d32f2f;
+  margin-bottom: 16px;
+}
+
+/* Modal overlay for pop-up card */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal card content */
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 32px 28px 24px 28px;
+  min-width: 700px;
+  max-width: 1000px;
+  width: 100%;
+  position: relative;
+  animation: modalPopIn 0.18s cubic-bezier(0.4, 2, 0.6, 1) both;
+  max-height: 98vh;
+  min-height: 520px;
+  padding-bottom: 18px;
+}
+
+@keyframes modalPopIn {
+  0% {
+    transform: scale(0.95) translateY(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.close-btn:hover {
+  color: #d32f2f;
+}
+
+.add-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 0.98rem;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select {
+  width: 100%;
+  min-width: 180px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #f9f9f9;
+  margin-bottom: 2px;
+}
+
+.form-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 4px;
+}
+
+.add-btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.add-btn:hover {
+  background: #0056b3;
+}
+
+.error {
+  color: #d32f2f;
+  margin-bottom: 10px;
+  font-size: 0.98rem;
+}
+
+/* Superadmin header row */
+.superadmin-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+/* Add User button styling */
+.add-user-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 22px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.08);
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.add-user-btn:hover {
+  background: #b52a37;
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.16);
+}
+
+/* Categories input area (checkbox group) */
+.form-group .category-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fafbfc;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  min-height: 80px;
+  max-height: 180px;
+  min-width: 180px;
+  max-width: 340px;
+  overflow-y: auto;
+}
+
+.category-checkbox-group-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  background: #fafbfc;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  min-height: 40px;
+  min-width: 180px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Edit and Delete button styles */
+.edit-btn {
+  background: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background 0.18s;
+}
+.edit-btn:hover {
+  background: #e0a800;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.delete-btn:hover {
+  background: #b52a37;
+}
+
+/* --- Professional Modal Styles for SuperAdmin --- */
+.sa-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sa-modal-confirm,
+.sa-modal-info {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  padding: 32px 28px 24px 28px;
+  min-width: 320px;
+  max-width: 90vw;
+  text-align: center;
+  animation: sa-fadein 0.2s;
+}
+
+.sa-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1a237e;
+}
+
+.sa-modal-message {
+  font-size: 1.08rem;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.sa-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.sa-btn {
+  padding: 7px 22px;
+  border-radius: 5px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.sa-btn-cancel {
+  background: #e0e0e0;
+  color: #333;
+}
+.sa-btn-cancel:hover {
+  background: #bdbdbd;
+}
+.sa-btn-confirm {
+  background: #1976d2;
+  color: #fff;
+}
+.sa-btn-confirm:hover {
+  background: #0d47a1;
+}
+
+.sa-modal-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.1rem;
+  color: #388e3c;
+  font-weight: 500;
+  padding: 24px 32px;
+  border-left: 5px solid #388e3c;
+  border-radius: 8px;
+  background: #f1f8e9;
+  box-shadow: 0 2px 12px rgba(56, 142, 60, 0.08);
+}
+.sa-modal-info-icon {
+  font-size: 1.7em;
+  color: #388e3c;
+}
+
+@keyframes sa-fadein {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive for small screens */
+@media (max-width: 600px) {
+  .modal-content {
+    min-width: 90vw;
+    max-width: 98vw;
+    padding: 18px 6vw 18px 6vw;
+  }
+  .form-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

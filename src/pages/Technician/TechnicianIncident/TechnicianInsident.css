@@ -1,0 +1,136 @@
+
+.technician-dashboard {
+    display: flex; 
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+
+.technician-dashboard-main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; 
+    width: 100%;
+}
+
+
+.technician-main-content {
+    background-color: #f4f6f9; 
+    border-radius: 10px;
+    margin: 0 15px 15px 15px;
+    padding: 15px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.technicianinsident-tickets-creator {
+    background-color: #f0f0f0; 
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 15px;
+}
+
+.technicianinsident-svr-desk {
+    font-weight: bold;
+    margin-right: 10px; 
+}
+
+.technicianinsident-created-ticket {
+    margin-left: 5px;
+}
+
+.technician-details-update-btn {
+    padding: 6px 14px;
+    margin-bottom: 3%;
+    background-color: #c91111;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s;
+}
+
+.technician-details-update-btn:hover{
+    background-color: #555;
+}
+
+.success-message {
+    padding: 10px 15px;
+    margin-top: 15px;
+    border-radius: 5px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+@media (min-width: 992px) {
+    .technician-main-content {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 991px) {
+    .technician-dashboard {
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .technician-main-content {
+        margin: 0 10px 10px 10px;
+        padding: 15px;
+    }
+    
+    .technicianinsident-tickets-creator {
+        margin: 10px 10px 0 10px;
+    }
+}
+
+@media (max-width: 767px) {
+    .technician-main-content {
+        margin: 0 5px 5px 5px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    
+    .technicianinsident-tickets-creator {
+        margin: 5px 5px 0 5px;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+    
+    .technician-details-update-btn {
+        font-size: 14px;
+        padding: 5px 12px;
+    }
+}
+@media (max-width: 575px) {
+    .technician-dashboard-main {
+        padding: 0 5px;
+    }
+    
+    .technician-main-content {
+        padding: 8px;
+    }
+    
+    .technician-details-update-btn {
+        padding: 4px 10px;
+        font-size: 13px;
+    }
+    
+    .technicianinsident-svr-desk,
+    .technicianinsident-created-ticket {
+        font-size: 13px;
+    }
+}
+.Technician-layout-dashboard .technician-dashboard {
+    height: 100%;
+    width: 100%;
+}
+
+.Technician-layout-dashboard-main .technician-dashboard {
+    height: auto;
+    min-height: 100%;
+    flex-direction: column;
+}

@@ -1,0 +1,45 @@
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetAuthState } from '../../redux/auth/authSlice';
+import './LogIn.css';
+
+function LogIn() {
+const dispatch = useDispatch();
+const { loading, error } = useSelector((state) => state.auth);
+
+useEffect(() => {
+    dispatch(resetAuthState());
+}, [dispatch]);
+
+const handleMicrosoftLogin = () => {
+    const params = new URLSearchParams({
+    client_id: '2dfa1784-299b-4bf9-91be-400d831396ed',
+    response_type: 'code',
+    redirect_uri: 'http://localhost:3000/auth/callback',
+    response_mode: 'query',
+    scope: 'openid profile email User.Read',
+    state: '12345',
+    });
+    window.location.href = `https://login.microsoftonline.com/6339b7c7-ee52-4336-adb9-c35e1f8eba82/oauth2/v2.0/authorize?${params.toString()}`;
+};
+
+return (
+    <div className="signup-container">
+    <div className="signup-card">
+        <h3 className="signup-title">Sign In</h3>
+        <button
+        type="button"
+        className="register-button"
+        style={{ background: '#2F2F7F', color: 'white' }}
+        onClick={handleMicrosoftLogin}
+        disabled={loading}
+        >
+        {loading ? 'Processing...' : 'Login with Microsoft'}
+        </button>
+        {error && <p className="error">{error}</p>}
+    </div>
+    </div>
+);
+}
+
+export default LogIn;

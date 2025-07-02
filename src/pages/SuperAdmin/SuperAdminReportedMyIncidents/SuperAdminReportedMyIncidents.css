@@ -1,0 +1,179 @@
+.SuperAdminReportedMyIncidents-main-content {
+  padding: 1.5rem;
+  background: #f7f8fa;
+  color: #232323;
+  min-height: 100vh;
+}
+
+.SuperAdminReportedMyIncidents-direction-bar {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #1a73e8;
+  display: flex;
+  align-items: center;
+}
+
+.SuperAdminReportedMyIncidents-tickets-creator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.SuperAdminReportedMyIncidents-content2 {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.07);
+}
+
+.SuperAdminReportedMyIncidents-TitleBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.SuperAdminReportedMyIncidents-TitleBar-NameAndIcon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.SuperAdminReportedMyIncidents-TitleBar-buttons-ExportData {
+  background: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.SuperAdminReportedMyIncidents-TitleBar-buttons-ExportData:hover {
+  background: #1761c1;
+}
+
+.SuperAdminReportedMyIncidents-showSearchBar {
+  margin-bottom: 1.2rem;
+}
+
+.SuperAdminReportedMyIncidents-showSearchBar-Show {
+  gap: 1.5rem;
+}
+
+.SuperAdminReportedMyIncidents-showSearchBar-Show-select,
+.SuperAdminReportedMyIncidents-showSearchBar-Show-select2 {
+  background: #fff;
+  color: #232323;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  margin-left: 0.5rem;
+}
+
+.SuperAdminReportedMyIncidents-showSearchBar-SearchBar {
+  display: flex;
+  align-items: center;
+  background: #f1f3f6;
+  border-radius: 4px;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid #cfd8dc;
+}
+.SuperAdminReportedMyIncidents-showSearchBar-SearchBar-input {
+  background: transparent;
+  border: none;
+  color: #232323;
+  margin-left: 0.5rem;
+  outline: none;
+}
+
+.SuperAdminReportedMyIncidents-table {
+  margin-top: 1.2rem;
+}
+.SuperAdminReportedMyIncidents-table-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+.SuperAdminReportedMyIncidents-table-table th,
+.SuperAdminReportedMyIncidents-table-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #e0e3e8;
+  text-align: left;
+}
+.SuperAdminReportedMyIncidents-table-table th {
+  background: #f1f3f6;
+  color: #1a73e8;
+  font-weight: 600;
+}
+.SuperAdminReportedMyIncidents-refno {
+  color: #1a73e8;
+  font-weight: 500;
+}
+.SuperAdminReportedMyIncidents-status-text {
+  font-weight: 500;
+}
+
+.SuperAdminReportedMyIncidents-content3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.2rem;
+}
+.SuperAdminReportedMyIncidents-content3-team-entry-info {
+  color: #888;
+  font-size: 0.95rem;
+}
+.SuperAdminReportedMyIncidents-content3-team-pagination-buttons button {
+  background: #fff;
+  color: #232323;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  margin: 0 0.2rem;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.SuperAdminReportedMyIncidents-content3-team-pagination-buttons button.active,
+.SuperAdminReportedMyIncidents-content3-team-pagination-buttons button:hover {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+  .loading-spinner {
+    border: 4px solid #e0e3e8;
+    border-top: 4px solid #1a73e8;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  color: #c62828;
+  background: #fff0f0;
+  border-radius: 6px;
+  padding: 1rem;
+  text-align: center;
+}
