@@ -17,12 +17,12 @@ function MicrosoftCallback() {
     if (!code) {
       dispatch(loginWithMicrosoftFailure('No authorization code found'));
       return;
-    }
-
+    }    const appUrl = (import.meta.env.VITE_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+    
     dispatch(loginWithMicrosoftRequest({ 
       code, 
       state, 
-      redirect_uri: `${import.meta.env.VITE_APP_URL || 'http://localhost:3000'}/auth/callback` 
+      redirect_uri: `${appUrl}/auth/callback` 
     }));
   }, [dispatch]);
 
