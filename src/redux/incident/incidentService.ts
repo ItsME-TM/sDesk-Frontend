@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Incident } from "./incidentTypes";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 // Get all incidents
 export const fetchAllIncidents = async () => {

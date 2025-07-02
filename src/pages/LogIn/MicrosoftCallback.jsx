@@ -19,7 +19,11 @@ function MicrosoftCallback() {
       return;
     }
 
-    dispatch(loginWithMicrosoftRequest({ code, state, redirect_uri: 'http://localhost:3000/auth/callback' }));
+    dispatch(loginWithMicrosoftRequest({ 
+      code, 
+      state, 
+      redirect_uri: `${import.meta.env.VITE_APP_URL || 'http://localhost:3000'}/auth/callback` 
+    }));
   }, [dispatch]);
 
   useEffect(() => {

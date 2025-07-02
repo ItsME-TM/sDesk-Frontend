@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { SLTUser } from './sltusersTypes';
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 // Update user role by service number
 export const updateUserRoleById = async (serviceNum: string, role: string) => {

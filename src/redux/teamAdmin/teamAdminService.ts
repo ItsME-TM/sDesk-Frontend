@@ -2,7 +2,7 @@
 import axios from "axios";
 import { TeamAdmin } from "./teamAdminTypes";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 // Fetch a team admin by service number
 export const fetchTeamAdminByServiceNumber = async (serviceNum: string) => {

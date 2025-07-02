@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
     const response = await axios.post(`${API_BASE}/auth/login`, {

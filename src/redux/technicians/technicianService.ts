@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Technician } from "./technicianTypes";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export const fetchTechnicians = async () => {
   return axios.get(`${API_BASE}/technicians`, { withCredentials: true });
