@@ -8,7 +8,7 @@ import AdminAddCategory from '../../../components/AdminAddCategory/AdminAddCateg
 import ConfirmPopup from '../../../components/ConfirmPopup/ConfirmPopup';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCategoryItemsRequest, deleteCategoryItemRequest, fetchMainCategoriesRequest } from '../../../redux/categories/categorySlice';
-import * as XLSX from 'xlsx';
+import { CSVLink } from 'react-csv';
 
 const AdminCategory = () => {
     const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
@@ -78,25 +78,23 @@ const AdminCategory = () => {
 
     const handleChange = (e) => {
         setSelectShowOption(e.target.value);
-    };
-
-    const handleSearch = (e) => {
+    };    const handleSearch = (e) => {
         setSearchQuery(e.target.value);
     };
 
-    const handleExport = () => {
-        // Prepare data for export (use filteredCategories for current view, or categories for all)
-        const exportData = filteredCategories.map(row => ({
-            'CAT ID': row.catID,
-            'Category Name': row.categoryName,
-            'Sub Category Name': row.subCategoryName,
-            'Parent Category Name': row.parentCategoryName,
-        }));
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Categories');
-        XLSX.writeFile(workbook, 'categories.xlsx');
-    };
+    const csvHeaders = [
+        { label: 'CAT ID', key: 'CAT ID' },
+        { label: 'Category Name', key: 'Category Name' },
+        { label: 'Sub Category Name', key: 'Sub Category Name' },
+        { label: 'Parent Category Name', key: 'Parent Category Name' }
+    ];
+
+    const exportData = filteredCategories.map(row => ({
+        'CAT ID': row.catID,
+        'Category Name': row.categoryName,
+        'Sub Category Name': row.subCategoryName,
+        'Parent Category Name': row.parentCategoryName,
+    }));
 
     const filteredCategories = categories.filter(category => {
         const matchesSearch =
@@ -125,11 +123,16 @@ const AdminCategory = () => {
                         >
                             <IoIosAddCircleOutline />
                             Add Category
-                        </button>
-                        <button className="AdminCategory-TitleBar-buttons-ExportData" onClick={handleExport}>
+                        </button>                        <CSVLink
+                            data={exportData}
+                            headers={csvHeaders}
+                            filename="categories.csv"
+                            className="AdminCategory-TitleBar-buttons-ExportData"
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
                             <TiExportOutline />
                             Export Data
-                        </button>
+                        </CSVLink>
                     </div>
                 </div>
                 <div className="AdminCategory-showSearchBar">
