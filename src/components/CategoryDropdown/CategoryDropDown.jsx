@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
 import { sDesk_t2_category_dataset } from '../../data/sDesk_t2_category_dataset';
-import './CategoryDropdown.css';
+import './CategoryDropDown.css';
 
 const CategoryDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
