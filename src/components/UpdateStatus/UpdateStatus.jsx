@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './UpdateStatus.css';
 import { FaPlusSquare } from "react-icons/fa";
-import CategoryDropdown from '../CategoryDropdown/CategoryDropdown';
+import CategoryDropdown from '../CategoryDropdown/CategoryDropDown';
 import LocationDropdown from '../LocationDropdown/LocationDropdown';
 
 const UpdateStatus = ({
