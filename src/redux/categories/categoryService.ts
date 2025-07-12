@@ -2,12 +2,12 @@ import axios from "axios";
 import { MainCategory, SubCategory, CategoryItem } from "./categoryTypes";
 import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
-
-
 // Main Category Services
 export const fetchMainCategories = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, "/categories/main"), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -18,7 +18,9 @@ export const fetchMainCategories = async () => {
 
 export const fetchMainCategoryById = async (id: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/categories/main/${id}`), { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, `/categories/main/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -29,7 +31,9 @@ export const fetchMainCategoryById = async (id: string) => {
 
 export const createMainCategory = async (data: Partial<MainCategory>) => {
   try {
-    return await axios.post(`${API_BASE}/categories/main`, data, { withCredentials: true });
+    return await axios.post(buildUrl(API_BASE, "/categories/main"), data, {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -38,9 +42,14 @@ export const createMainCategory = async (data: Partial<MainCategory>) => {
   }
 };
 
-export const updateMainCategory = async (id: string, data: Partial<MainCategory>) => {
+export const updateMainCategory = async (
+  id: string,
+  data: Partial<MainCategory>
+) => {
   try {
-    return await axios.put(`${API_BASE}/categories/main/${id}`, data, { withCredentials: true });
+    return await axios.put(buildUrl(API_BASE, `/categories/main/${id}`), data, {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -51,7 +60,9 @@ export const updateMainCategory = async (id: string, data: Partial<MainCategory>
 
 export const deleteMainCategory = async (id: string) => {
   try {
-    return await axios.delete(`${API_BASE}/categories/main/${id}`, { withCredentials: true });
+    return await axios.delete(buildUrl(API_BASE, `/categories/main/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -63,7 +74,9 @@ export const deleteMainCategory = async (id: string) => {
 // Sub Category Services
 export const fetchSubCategories = async () => {
   try {
-    return await axios.get(`${API_BASE}/categories/sub`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, "/categories/sub"), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -74,7 +87,9 @@ export const fetchSubCategories = async () => {
 
 export const fetchSubCategoryById = async (id: string) => {
   try {
-    return await axios.get(`${API_BASE}/categories/sub/${id}`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, `/categories/sub/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -85,7 +100,9 @@ export const fetchSubCategoryById = async (id: string) => {
 
 export const createSubCategory = async (data: Partial<SubCategory>) => {
   try {
-    return await axios.post(`${API_BASE}/categories/sub`, data, { withCredentials: true });
+    return await axios.post(buildUrl(API_BASE, "/categories/sub"), data, {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -94,9 +111,14 @@ export const createSubCategory = async (data: Partial<SubCategory>) => {
   }
 };
 
-export const updateSubCategory = async (id: string, data: Partial<SubCategory>) => {
+export const updateSubCategory = async (
+  id: string,
+  data: Partial<SubCategory>
+) => {
   try {
-    return await axios.put(`${API_BASE}/categories/sub/${id}`, data, { withCredentials: true });
+    return await axios.put(buildUrl(API_BASE, `/categories/sub/${id}`), data, {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -107,7 +129,9 @@ export const updateSubCategory = async (id: string, data: Partial<SubCategory>) 
 
 export const deleteSubCategory = async (id: string) => {
   try {
-    return await axios.delete(`${API_BASE}/categories/sub/${id}`, { withCredentials: true });
+    return await axios.delete(buildUrl(API_BASE, `/categories/sub/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -116,9 +140,14 @@ export const deleteSubCategory = async (id: string) => {
   }
 };
 
-export const fetchSubCategoriesByMainCategoryId = async (mainCategoryId: string) => {
+export const fetchSubCategoriesByMainCategoryId = async (
+  mainCategoryId: string
+) => {
   try {
-    return await axios.get(`${API_BASE}/categories/sub/by-main/${mainCategoryId}`, { withCredentials: true });
+    return await axios.get(
+      buildUrl(API_BASE, `/categories/sub/by-main/${mainCategoryId}`),
+      { withCredentials: true }
+    );
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -130,7 +159,9 @@ export const fetchSubCategoriesByMainCategoryId = async (mainCategoryId: string)
 // Category Item Services
 export const fetchCategoryItems = async () => {
   try {
-    return await axios.get(`${API_BASE}/categories/item`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, "/categories/item"), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -141,7 +172,9 @@ export const fetchCategoryItems = async () => {
 
 export const fetchCategoryItemById = async (id: string) => {
   try {
-    return await axios.get(`${API_BASE}/categories/item/${id}`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, `/categories/item/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -151,13 +184,23 @@ export const fetchCategoryItemById = async (id: string) => {
 };
 
 // PATCH: Ensure subCategoryId is sent as a string, not a number
-export const createCategoryItem = async (data: { name: string; subCategoryId: string }) => {
+export const createCategoryItem = async (data: {
+  name: string;
+  subCategoryId: string;
+}) => {
   try {
     // Only send the required fields, and ensure subCategoryId is a string
-    return await axios.post(`${API_BASE}/categories/item`, {
-      name: data.name?.trim(),
-      subCategoryId: typeof data.subCategoryId === 'string' ? data.subCategoryId : String(data.subCategoryId)
-    }, { withCredentials: true });
+    return await axios.post(
+      buildUrl(API_BASE, "/categories/item"),
+      {
+        name: data.name?.trim(),
+        subCategoryId:
+          typeof data.subCategoryId === "string"
+            ? data.subCategoryId
+            : String(data.subCategoryId),
+      },
+      { withCredentials: true }
+    );
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -166,9 +209,14 @@ export const createCategoryItem = async (data: { name: string; subCategoryId: st
   }
 };
 
-export const updateCategoryItem = async (id: string, data: { name: string; subCategoryId: string }) => {
+export const updateCategoryItem = async (
+  id: string,
+  data: { name: string; subCategoryId: string }
+) => {
   try {
-    return await axios.put(`${API_BASE}/categories/item/${id}`, data, { withCredentials: true });
+    return await axios.put(buildUrl(API_BASE, `/categories/item/${id}`), data, {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -179,7 +227,9 @@ export const updateCategoryItem = async (id: string, data: { name: string; subCa
 
 export const deleteCategoryItem = async (id: string) => {
   try {
-    return await axios.delete(`${API_BASE}/categories/item/${id}`, { withCredentials: true });
+    return await axios.delete(buildUrl(API_BASE, `/categories/item/${id}`), {
+      withCredentials: true,
+    });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
