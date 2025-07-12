@@ -9,6 +9,9 @@ import {
   updateUserRoleRequest,
   updateUserRoleSuccess,
   updateUserRoleFailure,
+  fetchAllUsersRequest,
+  fetchAllUsersSuccess,
+  fetchAllUsersFailure,
 } from './sltusersSlice';
 import * as sltusersService from './sltusersService';
 
@@ -61,8 +64,20 @@ function* updateUserRoleSaga(action) {
   }
 }
 
+function* fetchAllUsersSaga() {
+  try {
+    const response = yield call(sltusersService.fetchAllUsers);
+    yield put(fetchAllUsersSuccess(response.data));
+  } catch (error) {
+    console.error('fetchAllUsersSaga error:', error);
+    yield put(fetchAllUsersFailure(error.message || 'Failed to fetch all users'));
+  }
+}
+
 export default function* sltusersSaga() {
   yield takeLatest(fetchUserByServiceNumberRequest.type, fetchUserByServiceNumberSaga);
   yield takeLatest(fetchUserByEmailRequest.type, fetchUserByEmailSaga);
   yield takeLatest(updateUserRoleRequest.type, updateUserRoleSaga);
+  yield takeLatest(fetchAllUsersRequest.type, fetchAllUsersSaga);
 }
+

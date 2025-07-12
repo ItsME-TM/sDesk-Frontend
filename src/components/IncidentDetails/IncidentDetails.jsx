@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import LocationDropdown from '../LocationDropdown/LocationDropdown';
+import CategoryDropdown from '../CategoryDropdown/CategoryDropdown';
 import { IoMdAdd, IoMdRemove } from 'react-icons/io';
 import './IncidentDetails.css';
+import { fetchCategoriesRequest } from '../../redux/categories/categorySlice';
 
 const IncidentDetails = ({
     userData,
@@ -17,6 +21,18 @@ const IncidentDetails = ({
     setFormData,
 }) => {
     const [selectedPriority, setSelectedPriority] = useState(formData.priority || '');
+    const [localIsLocationPopupOpen, setLocalIsLocationPopupOpen] = useState(false);
+    const [localIsCategoryPopupOpen, setLocalIsCategoryPopupOpen] = useState(false);
+
+    // Fetch categories from backend using redux
+    const dispatch = useDispatch();
+    const categoryDataset = useSelector((state) => state.categories.list);
+    const categoryLoading = useSelector((state) => state.categories.loading);
+    const categoryError = useSelector((state) => state.categories.error);
+
+    useEffect(() => {
+        dispatch(fetchCategoriesRequest());
+    }, [dispatch]);
 
     const handleChange = (event) => {
         const newPriority = event.target.value;
@@ -39,7 +55,8 @@ const IncidentDetails = ({
         <div className="AddInicident-content2-IncidentDetails">
             <div className="AddInicident-content2-IncidentDetails-TitleBar">
                 Incident Details
-            </div>            <div className="AddInicident-content2-IncidentDetails-IncidentInfoContainer">
+            </div>
+            <div className="AddInicident-content2-IncidentDetails-IncidentInfoContainer">
                 <div className="AddInicident-content2-IncidentDetails-IncidentInfoContainer-userDetails">
                     Reported by {userData && userData.length > 0 ? userData[0].user_name : 'Current User'}
                 </div>
@@ -48,7 +65,7 @@ const IncidentDetails = ({
                         Select Incident Type :
                     </div>
                     <div className="AddInicident-content2-IncidentDetails-IncidentInfoContainer-userDetails category-container">
-                        {formData.category.name ? (
+                        {formData.category && formData.category.name ? (
                             <>
                                 Category: {formData.category.name}{' '}
                                 <IoMdRemove
@@ -60,14 +77,14 @@ const IncidentDetails = ({
                             <>
                                 Category:{' '}
                                 <IoMdAdd
-                                    onClick={() => setIsCategoryPopupOpen(true)}
+                                    onClick={() => setLocalIsCategoryPopupOpen(true)}
                                     className="category-icon"
                                 />
                             </>
                         )}
                     </div>
                     <div className="AddInicident-content2-IncidentDetails-IncidentInfoContainer-userDetails location-container">
-                        {formData.location.name ? (
+                        {formData.location && formData.location.name ? (
                             <>
                                 Location: {formData.location.name}{' '}
                                 <IoMdRemove
@@ -79,7 +96,7 @@ const IncidentDetails = ({
                             <>
                                 Location:{' '}
                                 <IoMdAdd
-                                    onClick={() => setIsLocationPopupOpen(true)}
+                                    onClick={() => setLocalIsLocationPopupOpen(true)}
                                     className="location-icon"
                                 />
                             </>
@@ -145,6 +162,33 @@ const IncidentDetails = ({
                     </div>
                 </div>
             </div>
+            {/* Category Dropdown Popup */}
+            {localIsCategoryPopupOpen && (
+                <CategoryDropdown
+                    categoryDataset={categoryDataset}
+                    onSelect={(category) => {
+                        setFormData((prev) => ({
+                            ...prev,
+                            category,
+                        }));
+                        setLocalIsCategoryPopupOpen(false);
+                    }}
+                    onClose={() => setLocalIsCategoryPopupOpen(false)}
+                />
+            )}
+            {/* Location Dropdown Popup */}
+            {localIsLocationPopupOpen && (
+                <LocationDropdown
+                    onSelect={(location) => {
+                        setFormData((prev) => ({
+                            ...prev,
+                            location,
+                        }));
+                        setLocalIsLocationPopupOpen(false);
+                    }}
+                    onClose={() => setLocalIsLocationPopupOpen(false)}
+                />
+            )}
         </div>
     );
 };

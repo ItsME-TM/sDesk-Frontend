@@ -3,12 +3,16 @@ import {
   fetchCategoriesFailure,
   fetchCategoriesRequest,
   fetchCategoriesSuccess,
+  fetchMainCategoriesRequest,
+  fetchMainCategoriesSuccess,
+  fetchMainCategoriesFailure,
   createCategoryRequest,
   createCategorySuccess,
   createCategoryFailure,
   fetchSubCategoriesByMainCategoryIdRequest,
   fetchSubCategoriesByMainCategoryIdSuccess,
   fetchSubCategoriesByMainCategoryIdFailure,
+  createSubCategoryRequest,
   createCategoryItemRequest,
   createCategoryItemSuccess,
   createCategoryItemFailure,
@@ -99,9 +103,15 @@ function* handleCreateMainCategory(action: PayloadAction<CreateMainCategoryPaylo
   }
 }
 
-function* handleCreateCategoryItem(action: PayloadAction<CreateSubCategoryPayload>) {
+function* handleCreateCategoryItem(action: PayloadAction<{ name: string; subCategoryId: string }>) {
   try {
-    const response = yield call(createCategoryItem, action.payload);
+    // Ensure subCategoryId is always a string and not empty
+    const subCategoryId = String(action.payload.subCategoryId || '').trim();
+    if (!subCategoryId) {
+      yield put({ type: 'categories/createCategoryItemFailure', payload: 'Sub Category is required' });
+      return;
+    }
+    const response = yield call(createCategoryItem, { name: action.payload.name, subCategoryId });
     yield put({ type: 'categories/createCategoryItemSuccess', payload: response.data });
   } catch (error) {
     if (error && error.code === 'DUPLICATE_NAME') {
@@ -138,7 +148,7 @@ function* handleUpdateCategoryItem(action: PayloadAction<{ id: string; name: str
   try {
     const { id, name, subCategoryId } = action.payload;
     // The backend expects subCategoryId as a key
-    const response = yield call(() => updateCategoryItem(id, { name, subCategoryId }));
+    const response = yield call(updateCategoryItem, id, { name, subCategoryId });
     yield put(updateCategoryItemSuccess(response.data));
     yield put(fetchCategoryItemsRequest());
   } catch (error: any) {
@@ -164,14 +174,11 @@ function* handleCreateSubCategory(action: PayloadAction<CreateSubCategoryPayload
 export default function* categorySaga() {
   yield takeLatest(fetchCategoriesRequest.type, handleFetchCategories);
   yield takeLatest(createCategoryRequest.type, handleCreateCategory);
-  yield takeLatest('categories/fetchMainCategoriesRequest', handleFetchMainCategories);
+  yield takeLatest(fetchMainCategoriesRequest.type, handleFetchMainCategories);
   yield takeLatest(fetchSubCategoriesByMainCategoryIdRequest.type, handleFetchSubCategoriesByMainCategoryId);
   yield takeLatest(createCategoryItemRequest.type, handleCreateCategoryItem);
   yield takeLatest(fetchCategoryItemsRequest.type, handleFetchCategoryItems);
   yield takeLatest(deleteCategoryItemRequest.type, handleDeleteCategoryItem);
   yield takeLatest(updateCategoryItemRequest.type, handleUpdateCategoryItem);
-  yield takeLatest('categories/createSubCategoryRequest', handleCreateSubCategory);
-  yield takeLatest('categories/createMainCategoryRequest', handleCreateMainCategory);
-  yield takeLatest('categories/createCategoryRequest', handleCreateMainCategory);
-  yield takeLatest('categories/createCategoryItemRequest', handleCreateCategoryItem);
+  yield takeLatest(createSubCategoryRequest.type, handleCreateSubCategory);
 }

@@ -8,24 +8,96 @@ import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_datas
 import { IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { fetchAssignedToMeRequest } from '../../../redux/incident/incidentSlice';
+import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident'; // Import the TechnicianInsident component
 import './TechnicianMyAssignedIncidents.css';
+import './IncidentPopup.css'; // New CSS for the modal
 
 const TechnicianMyAssignedIncidents = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const [showIncidentPopup, setShowIncidentPopup] = useState(false);
+    const [selectedIncident, setSelectedIncident] = useState(null);
     
     // Redux state
     const { assignedToMe, loading, error } = useSelector((state) => state.incident);
+    const { user } = useSelector((state) => state.auth);
     
-    const currentTechnician = sDesk_t2_users_dataset.find(
-        user => user.service_number === 'SV001' && user.role === 'technician'
-    );
-
-    if (!currentTechnician) {
-        return <div>Error: Technician user not found.</div>;
+    // Debug logging
+    console.log('[TechnicianMyAssignedIncidents] User state:', user);
+    console.log('[TechnicianMyAssignedIncidents] User role:', user?.role);
+    console.log('[TechnicianMyAssignedIncidents] assignedToMe data:', assignedToMe);
+    console.log('[TechnicianMyAssignedIncidents] loading:', loading);
+    console.log('[TechnicianMyAssignedIncidents] error:', error);
+    
+    // Real authentication check - no mock users
+    if (!user) {
+        return (
+            <div className="TechnicianMyAssignedIncidents-main-content">
+                <div className="TechnicianMyAssignedIncidents-direction-bar">
+                    Incidents {'>'} My Assigned Incidents
+                </div>
+                <div className="TechnicianMyAssignedIncidents-content2">
+                    <div className="auth-required-container" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        padding: '20px',
+                        textAlign: 'center'
+                    }}>
+                        <h3>Authentication Required</h3>
+                        <p>Please log in with your Microsoft account to view assigned incidents.</p>
+                        <button 
+                            onClick={() => window.location.href = '/LogIn'}
+                            style={{
+                                padding: '10px 20px',
+                                backgroundColor: '#0078d4',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '16px'
+                            }}
+                        >
+                            Go to Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
+    if (user.role !== 'technician') {
+        return (
+            <div className="TechnicianMyAssignedIncidents-main-content">
+                <div className="TechnicianMyAssignedIncidents-direction-bar">
+                    Incidents {'>'} My Assigned Incidents
+                </div>
+                <div className="TechnicianMyAssignedIncidents-content2">
+                    <div className="role-error-container" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        padding: '20px',
+                        textAlign: 'center'
+                    }}>
+                        <h3>Access Denied</h3>
+                        <p>This page is only accessible to technicians.</p>
+                        <p>Your current role: <strong>{user.role}</strong></p>
+                        <p>Contact your administrator if you believe this is an error.</p>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
-    const assignedUser = currentTechnician.service_number;
+    const currentUser = user;
+
+    const assignedUser = currentUser.serviceNum;
     
     // Local state
     const [searchTerm, setSearchTerm] = useState('');
@@ -36,8 +108,18 @@ const TechnicianMyAssignedIncidents = () => {
 
     // Fetch assigned incidents on component mount
     useEffect(() => {
-        dispatch(fetchAssignedToMeRequest(assignedUser));
-    }, [dispatch, assignedUser]);
+        if (assignedUser && currentUser) {
+            console.log('[TechnicianMyAssignedIncidents] Fetching incidents for user:', assignedUser);
+            console.log('[TechnicianMyAssignedIncidents] Current assignedToMe state:', assignedToMe);
+            console.log('[TechnicianMyAssignedIncidents] Current loading state:', loading);
+            console.log('[TechnicianMyAssignedIncidents] Current error state:', error);
+            
+            // FIX: Use serviceNum as the key for Redux action
+            dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+            
+            console.log('[TechnicianMyAssignedIncidents] Dispatched fetchAssignedToMeRequest');
+        }
+    }, [dispatch, assignedUser, currentUser]);
 
     const getCategoryName = (categoryNumber) => {
         for (const parent of sDesk_t2_category_dataset) {
@@ -69,7 +151,10 @@ const TechnicianMyAssignedIncidents = () => {
         return locationNumber;    };
 
     // Loading and error states
-    if (loading) {
+    console.log('[TechnicianMyAssignedIncidents] Render - loading:', loading, 'error:', error, 'assignedToMe:', assignedToMe?.length || 0);
+    
+    // Only show loading spinner if loading is true AND assignedToMe is empty
+    if (loading && (!assignedToMe || assignedToMe.length === 0)) {
         return (
             <div className="TechnicianMyAssignedIncidents-main-content">
                 <div className="TechnicianMyAssignedIncidents-direction-bar">
@@ -79,6 +164,9 @@ const TechnicianMyAssignedIncidents = () => {
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading assigned incidents...</p>
+                        <div style={{marginTop: '10px', fontSize: '12px', color: '#666'}}>
+                            Debug: User={assignedUser}, Loading={String(loading)}, Error={String(error)}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,7 +182,11 @@ const TechnicianMyAssignedIncidents = () => {
                 <div className="TechnicianMyAssignedIncidents-content2">
                     <div className="error-container">
                         <p>Error loading assigned incidents: {error}</p>
-                        <button onClick={() => dispatch(fetchAssignedToMeRequest(assignedUser))}>
+                        <p>Debug info: User={assignedUser}, Backend=http://localhost:8000</p>
+                        <button onClick={() => {
+                            console.log('[TechnicianMyAssignedIncidents] Retrying with user:', assignedUser);
+                            dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+                        }}>
                             Retry
                         </button>
                     </div>
@@ -126,26 +218,8 @@ const TechnicianMyAssignedIncidents = () => {
     const currentRows = filteredData.slice(indexOfFirst, indexOfLast);    const handleRowClick = (refNo) => {
         const incident = assignedToMe.find(item => item.incident_number === refNo);
         if (incident) {
-            const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
-            if (informant) {
-                navigate('/technician/TechnicianIncident', {
-                    state: {
-                        formData: {
-                            serviceNo: informant.service_number,
-                            tpNumber: informant.tp_number,
-                            name: informant.user_name,
-                            designation: informant.designation,
-                            email: informant.email,
-                        },
-                        incidentDetails: {
-                            refNo: incident.incident_number,
-                            category: getCategoryName(incident.category),
-                            location: getLocationName(incident.location), // Use the location name
-                            priority: incident.priority,
-                        }
-                    }
-                });
-            }
+            setSelectedIncident(incident);
+            setShowIncidentPopup(true);
         }
     };
 
@@ -226,7 +300,7 @@ const TechnicianMyAssignedIncidents = () => {
                 <div className="TechnicianMyAssignedIncidents-TitleBar">
                     <div className="TechnicianMyAssignedIncidents-TitleBar-NameAndIcon">
                         <FaHistory size={20} />
-                        My Assigned Incidents - {currentAdmin.user_name}
+                        My Assigned Incidents - {currentUser.name || currentUser.display_name || currentUser.serviceNum}
                     </div>
                     <div className="TechnicianMyAssignedIncidents-TitleBar-buttons">
                         <button className="TechnicianMyAssignedIncidents-TitleBar-buttons-ExportData">
@@ -320,8 +394,17 @@ const TechnicianMyAssignedIncidents = () => {
                     </div>
                 </div>
             </div>
+            {showIncidentPopup && selectedIncident && (
+                <div className="incident-popup-overlay">
+                    <div className="incident-popup-content">
+                        <button className="incident-popup-close-btn" onClick={() => setShowIncidentPopup(false)}>X</button>
+                        <TechnicianInsident incidentData={selectedIncident} isPopup={true} loggedInUser={currentUser} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default TechnicianMyAssignedIncidents;
+

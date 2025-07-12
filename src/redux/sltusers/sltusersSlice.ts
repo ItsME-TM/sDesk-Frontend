@@ -3,6 +3,7 @@ import { SLTUsersState } from './sltusersTypes';
 
 const initialState: SLTUsersState = {
   user: null,
+  allUsers: [],
   loading: false,
   error: null,
 };
@@ -19,6 +20,10 @@ const sltusersSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
+    fetchAllUsersRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
     fetchUserByServiceNumberSuccess(state, action) {
       state.loading = false;
       state.user = action.payload;
@@ -30,7 +35,8 @@ const sltusersSlice = createSlice({
     fetchUserByEmailSuccess(state, action) {
       state.loading = false;
       state.user = action.payload;
-    },    fetchUserByEmailFailure(state, action) {
+    },
+    fetchUserByEmailFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
     },
@@ -45,7 +51,16 @@ const sltusersSlice = createSlice({
     updateUserRoleFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
-    },    clearUser(state) {
+    },
+    fetchAllUsersSuccess(state, action) {
+      state.loading = false;
+      state.allUsers = action.payload;
+    },
+    fetchAllUsersFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    clearUser(state) {
       state.user = null;
       state.error = null;
     },
@@ -62,6 +77,9 @@ export const {
   updateUserRoleRequest,
   updateUserRoleSuccess,
   updateUserRoleFailure,
+  fetchAllUsersRequest,
+  fetchAllUsersSuccess,
+  fetchAllUsersFailure,
   clearUser,
 } = sltusersSlice.actions;
 

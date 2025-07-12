@@ -1,11 +1,32 @@
-import React, { useState,  useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
-import { sDesk_t2_location_dataset } from '../../data/sDesk_t2_location_dataset';
 import './LocationDropdown.css';
 
 const LocationDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
+    const [locations, setLocations] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/locations');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setLocations(data);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchLocations();
+    }, []);
 
     const toggleExpand = (key) => {
         setExpanded((prev) => ({
@@ -14,8 +35,8 @@ const LocationDropdown = ({ onSelect, onClose }) => {
         }));
     };
 
-    const handleSelect = (sublocation) => {
-        onSelect({ name: sublocation.loc_name, number: sublocation.loc_number });
+    const handleSelect = (location) => {
+        onSelect({ name: location.locationName, number: location.locationCode });
         onClose();
     };
 
@@ -25,6 +46,14 @@ const LocationDropdown = ({ onSelect, onClose }) => {
             document.body.style.overflow = 'auto';
         };
     }, []);
+
+    if (isLoading) {
+        return <div className="AdminLocationTree-content">Loading locations...</div>;
+    }
+
+    if (error) {
+        return <div className="AdminLocationTree-content">Error: {error.message}</div>;
+    }
 
     return (
         <div className="AdminLocationTree-content">
@@ -39,7 +68,7 @@ const LocationDropdown = ({ onSelect, onClose }) => {
                     </button>
                 </div>
                 <div className="AdminLocationTree-content-TreePopup-Body">
-                    {sDesk_t2_location_dataset.map((mainLocation, index) => (
+                    {locations.map((mainLocation, index) => (
                         <div key={index} className="AdminLocationTree-node">
                             <div
                                 className="AdminLocationTree-content-TreePopup-Body-Label"
@@ -50,20 +79,19 @@ const LocationDropdown = ({ onSelect, onClose }) => {
                                 ) : (
                                     <IoMdArrowDropright className="arrow-icon" />
                                 )}
-                                {mainLocation.district_name}
+                                {mainLocation.locationName}
                             </div>
                             {expanded[`main-${index}`] && (
                                 <div className="AdminLocationTree-content-TreePopup-Body-SubNodes">
-                                    {mainLocation.sublocations.map((sublocation, subIndex) => (
-                                        <div key={subIndex} className="AdminLocationTree-sublocation">
-                                            <div
-                                                className="AdminLocationTree-content-TreePopup-Body-SubNodes-Label AdminLocationTree-item"
-                                                onClick={() => handleSelect(sublocation)}
-                                            >
-                                                {sublocation.loc_name}
-                                            </div>
+                                    {/* Assuming locations don't have sub-levels like categories, just display them directly */}
+                                    <div key={mainLocation.id} className="AdminLocationTree-sublocation">
+                                        <div
+                                            className="AdminLocationTree-content-TreePopup-Body-SubNodes-Label AdminLocationTree-item"
+                                            onClick={() => handleSelect(mainLocation)}
+                                        >
+                                            {mainLocation.locationName}
                                         </div>
-                                    ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -74,4 +102,4 @@ const LocationDropdown = ({ onSelect, onClose }) => {
     );
 };
 
-export default LocationDropdown; 
+export default LocationDropdown;

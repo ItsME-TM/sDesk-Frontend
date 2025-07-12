@@ -1,8 +1,29 @@
 import React from 'react';
 import './IncidentHistory.css';
 import { CiLink } from "react-icons/ci";
+// import { sDesk_t2_category_dataset } from '../../data/sDesk_t2_category_dataset';
+import { sDesk_t2_location_dataset } from '../../data/sDesk_t2_location_dataset';
 
-const IncidentHistory = ({ refNo, category, location, priority, historyData }) => {
+const IncidentHistory = ({ refNo, category, location, priority, historyData, users }) => {
+
+    // TODO: Replace with backend lookup or prop-based category name resolution
+    const getCategoryName = (categoryNumber) => categoryNumber;
+
+    const getLocationName = (locationNumber) => {
+        for (const district of sDesk_t2_location_dataset) {
+            for (const sublocation of district.sublocations) {
+                if (sublocation.loc_number === locationNumber) {
+                    return sublocation.loc_name;
+                }
+            }
+        }
+        return locationNumber;    };
+
+    const getUserName = (serviceNumber) => {
+        const user = users.find(user => user.service_number === serviceNumber);
+        return user ? user.display_name || user.user_name : serviceNumber;
+    };
+
     return (
         <div className="incident-history-container">
             <div className="incident-history-card card">
@@ -24,8 +45,8 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData }) =
                             {historyData.length > 0 ? (
                                 historyData.map((entry, index) => (
                                     <tr key={index}>
-                                        <td className="assigned-column">{entry.assignedTo}</td>
-                                        <td className="updated-by-column">{entry.updatedBy}</td>
+                                        <td className="assigned-column">{getUserName(entry.assignedTo)}</td>
+                                        <td className="updated-by-column">{getUserName(entry.updatedBy)}</td>
                                         <td className="updated-on-column">{entry.updatedOn}</td>
                                         <td className="status-column">{entry.status}</td>
                                         <td className="comments-column">{entry.comments}</td>
@@ -39,8 +60,8 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData }) =
                         </tbody>
                     </table>
                     <p className="incident-history-category">
-                        Category - <span>{category}</span> :
-                        Location - <span>{location}</span> :
+                        Category - <span>{getCategoryName(category)}</span> :
+                        Location - <span>{getLocationName(location)}</span> :
                         Priority - <span>{priority}</span>
                     </p>
                 </div>

@@ -1,115 +1,354 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
 import { useNavigate } from 'react-router-dom';
 import './AdminMyTeamIncidentViewAll.css';
 
 const AdminMyTeamIncidentViewAll = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [mainCategories, setMainCategories] = useState([]);
 
-  const currentAdmin = sDesk_t2_users_dataset.find(
-    user => user.service_number === 'SV001' && user.role === 'admin'
-  );
+  
+  const { incidents, loading, error } = useSelector((state) => state.incident);
+  const { user } = useSelector((state) => state.auth);
+
+  console.log('Redux state - incidents:', incidents);
+  console.log('Redux state - loading:', loading);
+  console.log('Redux state - error:', error);
+  console.log('Redux state - user:', user);
+
+  const currentAdmin = user;
+
+  const [directIncidents, setDirectIncidents] = useState([]);
+
+ 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        
+        try {
+          const incidentRes = await fetch('http://localhost:8000/incident/all-teams');
+          if (incidentRes.ok) {
+            const incidentData = await incidentRes.json();
+            console.log('Direct API call - incidents:', incidentData);
+            setDirectIncidents(incidentData);
+          }
+        } catch (error) {
+          console.error('Direct API call failed:', error);
+        }
+
+     
+        dispatch(fetchAllIncidentsRequest());
+
+       
+        try {
+          console.log('Fetching main categories from API...');
+          const mainCategoriesRes = await fetch('http://localhost:8000/categories/main', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          console.log('Main categories API response status:', mainCategoriesRes.status);
+          
+          if (mainCategoriesRes.ok) {
+            const mainCategoriesData = await mainCategoriesRes.json();
+            console.log('Main categories from API - raw response:', mainCategoriesData);
+            
+            if (Array.isArray(mainCategoriesData)) {
+              console.log('Setting main categories from API:', mainCategoriesData);
+              setMainCategories(mainCategoriesData);
+            } else {
+              console.log('API returned non-array data');
+              setMainCategories([]);
+            }
+          } else {
+            console.log('Main categories API failed with status:', mainCategoriesRes.status);
+            setMainCategories([]);
+          }
+        } catch (error) {
+          console.error('Main categories API error:', error);
+          setMainCategories([]);
+        }
+
+        try {
+          const categoriesRes = await fetch('http://localhost:8000/categories/item', {
+            credentials: 'include'
+          });
+          if (categoriesRes.ok) {
+            const categoriesData = await categoriesRes.json();
+            console.log('Categories API response:', categoriesData);
+            
+            // Process API data to transform it to the expected format
+            if (Array.isArray(categoriesData) && categoriesData.length > 0) {
+              const transformedFromAPI = categoriesData.map(item => ({
+                grandchild_category_number: item.category_code,
+                grandchild_category_name: item.name,
+                child_category_name: item.subCategory?.name || 'Unknown Sub',
+                child_category_number: item.subCategory?.category_code || 'Unknown',
+                parent_category_number: item.subCategory?.mainCategory?.category_code || 'Unknown',
+                parent_category_name: item.subCategory?.mainCategory?.name || 'Unknown',
+                // For backwards compatibility
+                category_code: item.category_code,
+                name: item.name
+              }));
+              
+              console.log('Using transformed API data:', transformedFromAPI);
+              setCategories(transformedFromAPI);
+            } else {
+              console.log('API returned empty data');
+              setCategories([]);
+            }
+          } else {
+            console.log('Categories API failed');
+            setCategories([]);
+          }
+        } catch (error) {
+          console.log('Categories API error:', error);
+          setCategories([]);
+        }
+
+        try {
+          const usersRes = await fetch('http://localhost:8000/sltusers', {
+            credentials: 'include'
+          });
+          if (usersRes.ok) {
+            const usersData = await usersRes.json();
+            setUsers(usersData);
+          } else {
+            console.log('Users API failed');
+            setUsers([]);
+          }
+        } catch (error) {
+          console.log('Users API error:', error);
+          setUsers([]);
+        }
+
+        try {
+          const locationsRes = await fetch('http://localhost:8000/locations', {
+            credentials: 'include'
+          });
+          if (locationsRes.ok) {
+            const locationsData = await locationsRes.json();
+            setLocations(locationsData);
+          } else {
+            console.log('Locations API failed');
+            setLocations([]);
+          }
+        } catch (error) {
+          console.log('Locations API error:', error);
+          setLocations([]);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, user, currentAdmin]);
+
+  if (!user) {
+    return <div>Error: User not found. Please login again.</div>;
+  }
 
   if (!currentAdmin) {
     return <div>Error: Admin user not found.</div>;
   }
 
-  const adminTeam = sDesk_t2_category_dataset.find(
-    parent => parent.parent_category_number === currentAdmin.parent_category_number
-  )?.parent_category_name || 'Unknown';
+  const adminTeam = currentAdmin.parent_category_name || 'Unknown Team';
 
-  const getCategoryName = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        const item = subcategory.items.find(
-          item => item.grandchild_category_number === categoryNumber
-        );
-        if (item) {
-          return item.grandchild_category_name;
-        }
-      }
+  const getMainCategoryNameFromDatabase = (categoryItemCode) => {
+    console.log('Looking up main category for:', categoryItemCode);
+    
+    // First, try to find from the loaded categories (API data)
+    const categoryItem = categories.find(cat => cat.grandchild_category_number === categoryItemCode);
+    if (categoryItem) {
+      console.log('Found category item by code:', categoryItem);
+      return categoryItem.parent_category_name;
     }
-    return categoryNumber;
+    
+    // If not found in API data, search by name
+    const categoryByName = categories.find(cat => 
+      cat.grandchild_category_name && 
+      cat.grandchild_category_name.toLowerCase() === categoryItemCode.toLowerCase()
+    );
+    if (categoryByName) {
+      console.log('Found category item by name:', categoryByName);
+      return categoryByName.parent_category_name;
+    }
+    
+    // Check if the code itself is a main category
+    const mainCategory = mainCategories.find(mainCat => 
+      mainCat.category_code === categoryItemCode || mainCat.parent_category_number === categoryItemCode
+    );
+    if (mainCategory) {
+      console.log('Found in main categories:', mainCategory);
+      return mainCategory.name || mainCategory.parent_category_name;
+    }
+    
+    console.log('No category found for:', categoryItemCode);
+    return 'Unknown';
   };
 
-  const getTeamNumber = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-          return parent.parent_category_number;
-        }
-      }
-    }
-    return 'Unknown';
+  const getCategoryName = (categoryNumber) => {
+    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
+    return category ? category.grandchild_category_name : categoryNumber;
   };
 
   const getSubcategoryName = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-          return subcategory.child_category_name;
-        }
-      }
-    }
-    return 'Unknown';
+    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
+    return category ? category.child_category_name : 'Unknown';
   };
 
   const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
+    const foundUser = users.find(user => user.service_number === serviceNumber);
+    return foundUser ? foundUser.user_name : serviceNumber;
   };
 
   const getLocationName = (locationCode) => {
-    for (const district of sDesk_t2_location_dataset) {
-      const location = district.sublocations.find(loc => loc.loc_number === locationCode);
-      if (location) {
-        return location.loc_name;
-      }
-    }
-    return locationCode;
+    const location = locations.find(loc => loc.loc_number === locationCode);
+    return location ? location.loc_name : locationCode;
   };
 
-  const tableData = sDesk_t2_incidents_dataset
-    .filter(incident => getTeamNumber(incident.category) === currentAdmin.parent_category_number)
-    .map(incident => ({
-      refNo: incident.incident_number,
-      assignedTo: getUserName(incident.handler),
-      affectedUser: getUserName(incident.informant),
-      category: getCategoryName(incident.category),
-      subcategory: getSubcategoryName(incident.category),
-      status: incident.status,
-      location: getLocationName(incident.location),
-      rawCategory: incident.category,
-    }));
+  const incidentsToUse = incidents && incidents.length > 0 ? incidents : directIncidents;
+  
+  console.log('=== DEBUGGING DATA FLOW ===');
+  console.log('Redux incidents:', incidents);
+  console.log('Direct incidents:', directIncidents);
+  console.log('Using incidents:', incidentsToUse);
+  console.log('Current admin:', currentAdmin);
+  console.log('Categories loaded:', categories.length);
+  console.log('Main categories loaded:', mainCategories.length);
+  console.log('Main categories data:', mainCategories);
+  console.log('Users loaded:', users.length);
+  console.log('Locations loaded:', locations.length);
+  
+
+  const processedIncidents = [];
+  
+  if (incidentsToUse && incidentsToUse.length > 0) {
+    incidentsToUse.forEach((dbIncident, index) => {
+      console.log(`Processing incident ${index}:`, dbIncident);
+      console.log(`Incident category:`, dbIncident.category);
+      
+     
+      const processedIncident = {
+        incident_number: dbIncident.incident_number,
+        informant: dbIncident.informant,
+        location: dbIncident.location,
+        handler: dbIncident.handler,
+        update_by: dbIncident.update_by,
+        category: dbIncident.category,
+        update_on: dbIncident.update_on,
+        status: dbIncident.status,
+        priority: dbIncident.priority,
+        description: dbIncident.description,
+        notify_infromant: dbIncident.notify_informant,
+        urgent_notification_to: dbIncident.urgent_notification_to,
+        Attachment: dbIncident.Attachment
+      };
+      
+      processedIncidents.push(processedIncident);
+    });
+  }
+  
+  console.log('Processed incidents:', processedIncidents);
+  
+
+  const transformedTeamIncidents = processedIncidents;
+
+  console.log('Final team incidents for table:', transformedTeamIncidents);
+
+  const tableData = transformedTeamIncidents.map(incident => ({
+    refNo: incident.incident_number,
+    assignedTo: incident.handler,
+    affectedUser: incident.informant, 
+    category: incident.category, 
+    subcategory: incident.category, 
+    mainCategory: getMainCategoryNameFromDatabase(incident.category), 
+    
+    status: incident.status,
+    location: incident.location, 
+    rawCategory: incident.category,
+  }));
+
+  console.log('Table data:', tableData);
+  console.log('Table data with main categories:', tableData.map(item => ({
+    refNo: item.refNo,
+    rawCategory: item.rawCategory,
+    mainCategory: item.mainCategory
+  })));
+  console.log('Available main categories for dropdown:', mainCategories.map(cat => cat.name || cat.parent_category_name));
+  console.log('Sample categories array:', categories.slice(0, 3));
+  console.log('Unique incident categories:', [...new Set(tableData.map(item => item.rawCategory))]);
+  console.log('Unique main categories from incidents:', [...new Set(tableData.map(item => item.mainCategory))]);
+  console.log('Category filter value:', categoryFilter);
 
   const filteredData = tableData.filter(item => {
     const matchesSearch = Object.values(item).some(val =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
-    const matchesCategory = categoryFilter ? item.subcategory === categoryFilter : true;
-    return matchesSearch && matchesStatus && matchesCategory;
+    
+    // Category filtering with improved logic
+    let matchesCategory = true;
+    if (categoryFilter) {
+      const itemMainCategory = item.mainCategory;
+      matchesCategory = itemMainCategory === categoryFilter;
+      
+      console.log('Category filtering debug:', {
+        refNo: item.refNo,
+        rawCategory: item.rawCategory,
+        itemMainCategory,
+        categoryFilter,
+        matchesCategory
+      });
+    }
+    
+    const finalMatch = matchesSearch && matchesStatus && matchesCategory;
+    
+    if (categoryFilter) {
+      console.log('Final filtering result:', {
+        refNo: item.refNo,
+        matchesSearch,
+        matchesStatus,
+        matchesCategory,
+        finalMatch
+      });
+    }
+    
+    return finalMatch;
   });
+
+  console.log('Filtered data:', filteredData);
+  console.log('Search term:', searchTerm);
+  console.log('Status filter:', statusFilter);
+  console.log('Category filter:', categoryFilter);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
+  console.log('Current rows for display:', currentRows);
+
   const handleRowClick = (refNo) => {
-    const incident = sDesk_t2_incidents_dataset.find(item => item.incident_number === refNo);
+    const incident = transformedTeamIncidents.find(item => item.incident_number === refNo);
     if (incident) {
-      const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
+      const informant = users.find(user => user.service_number === incident.informant);
       if (informant) {
         navigate('/admin/AdminUpdateIncident', {
           state: {
@@ -133,6 +372,36 @@ const AdminMyTeamIncidentViewAll = () => {
   };
 
   const renderTableRows = () => {
+    console.log('=== RENDERING TABLE ROWS ===');
+    console.log('Current rows:', currentRows);
+    console.log('Current rows length:', currentRows.length);
+    
+    
+    if (currentRows.length === 0) {
+    
+      return (
+        <>
+          <tr>
+            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+              DEBUG: No incidents found.<br/>
+              Total incidents: {transformedTeamIncidents.length}<br/>
+              Filtered: {filteredData.length}<br/>
+              Redux loading: {loading ? 'true' : 'false'}<br/>
+              Redux error: {error || 'none'}<br/>
+            </td>
+          </tr>
+          <tr style={{ backgroundColor: '#f0f0f0' }}>
+            <td className='team-refno'>TEST001</td>
+            <td>Test Technician</td>
+            <td>Test User</td>
+            <td>Test Category</td>
+            <td>Test Location</td>
+            <td className='team-status-text'>Open</td>
+          </tr>
+        </>
+      );
+    }
+    
     return currentRows.map((row, idx) => (
       <tr
         key={idx}
@@ -157,7 +426,8 @@ const AdminMyTeamIncidentViewAll = () => {
       return Array.from({ length: totalPages }, (_, i) => (
         <button
           key={i + 1}
-          onClick={() => setCurrentPage(i + 1)} // Fixed: Changed from onChange to onClick
+          onClick={() => setCurrentPage(i + 1)} 
+          
           className={currentPage === i + 1 ? 'active' : ''}
         >
           {i + 1}
@@ -188,12 +458,20 @@ const AdminMyTeamIncidentViewAll = () => {
     return buttons;
   };
 
-  const teamSubcategories = sDesk_t2_category_dataset
-    .find(parent => parent.parent_category_number === currentAdmin.parent_category_number)
-    ?.subcategories.map(sub => ({
-      number: sub.child_category_number,
-      name: sub.child_category_name,
-    })) || [];
+  if (error) {
+    return (
+      <div className="AdminincidentViewAll-main-content">
+        <div className="AdminincidentViewAll-direction-bar">
+          Incidents {'>'} My Team Incidents
+        </div>
+        <div className="AdminincidentViewAll-content2">
+          <div style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+            Error loading incidents: {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="AdminincidentViewAll-main-content">
@@ -244,9 +522,9 @@ const AdminMyTeamIncidentViewAll = () => {
               className="AdminincidentViewAll-showSearchBar-Show-select2"
             >
               <option value="">All Categories</option>
-              {teamSubcategories.map(sub => (
-                <option key={sub.number} value={sub.name}>
-                  {sub.name}
+              {mainCategories.map(category => (
+                <option key={category.category_code || category.parent_category_number} value={category.name || category.parent_category_name}>
+                  {category.name || category.parent_category_name}
                 </option>
               ))}
             </select>

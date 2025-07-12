@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
-import { sDesk_t2_category_dataset } from '../../data/sDesk_t2_category_dataset';
-import './CategoryDropDown.css';
+import './CategoryDropdown.css';
 
-const CategoryDropdown = ({ onSelect, onClose }) => {
+const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
     const [expanded, setExpanded] = useState({});
+    const [mainCategories, setMainCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/categories/main');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setMainCategories(data);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const toggleExpand = (key) => {
         setExpanded((prev) => ({
@@ -15,9 +36,17 @@ const CategoryDropdown = ({ onSelect, onClose }) => {
     };
 
     const handleSelect = (item) => {
-        onSelect({ name: item.grandchild_category_name, number: item.grandchild_category_number });
+        onSelect({ name: item.name, number: item.category_code });
         onClose();
     };
+
+    if (isLoading) {
+        return <div className="AdminCategoryTree-content">Loading categories...</div>;
+    }
+
+    if (error) {
+        return <div className="AdminCategoryTree-content">Error: {error.message}</div>;
+    }
 
     return (
         <div className="AdminCategoryTree-content">
@@ -32,43 +61,43 @@ const CategoryDropdown = ({ onSelect, onClose }) => {
                     </button>
                 </div>
                 <div className="AdminCategoryTree-content-TreePopup-Body">
-                    {sDesk_t2_category_dataset.map((mainCategory, index) => (
-                        <div key={index} className="AdminCategoryTree-node">
+                    {mainCategories.map((mainCategory) => (
+                        <div key={mainCategory.id} className="AdminCategoryTree-node">
                             <div
                                 className="AdminCategoryTree-content-TreePopup-Body-Label"
-                                onClick={() => toggleExpand(`main-${index}`)}
+                                onClick={() => toggleExpand(`main-${mainCategory.id}`)}
                             >
-                                {expanded[`main-${index}`] ? (
+                                {expanded[`main-${mainCategory.id}`] ? (
                                     <IoMdArrowDropdown className="arrow-icon" />
                                 ) : (
                                     <IoMdArrowDropright className="arrow-icon" />
                                 )}
-                                {mainCategory.parent_category_name}
+                                {mainCategory.name}
                             </div>
-                            {expanded[`main-${index}`] && (
+                            {expanded[`main-${mainCategory.id}`] && (
                                 <div className="AdminCategoryTree-content-TreePopup-Body-SubNodes">
-                                    {mainCategory.subcategories.map((subcategory, subIndex) => (
-                                        <div key={subIndex} className="AdminCategoryTree-subnode">
+                                    {mainCategory.subCategories.map((subcategory) => (
+                                        <div key={subcategory.id} className="AdminCategoryTree-subnode">
                                             <div
                                                 className="AdminCategoryTree-content-TreePopup-Body-SubNodes-Label"
-                                                onClick={() => toggleExpand(`main-${index}-sub-${subIndex}`)}
+                                                onClick={() => toggleExpand(`sub-${subcategory.id}`)}
                                             >
-                                                {expanded[`main-${index}-sub-${subIndex}`] ? (
+                                                {expanded[`sub-${subcategory.id}`] ? (
                                                     <IoMdArrowDropdown className="arrow-icon" />
                                                 ) : (
                                                     <IoMdArrowDropright className="arrow-icon" />
                                                 )}
-                                                {subcategory.child_category_name}
+                                                {subcategory.name}
                                             </div>
-                                            {expanded[`main-${index}-sub-${subIndex}`] && (
+                                            {expanded[`sub-${subcategory.id}`] && (
                                                 <div className="AdminCategoryTree-items">
-                                                    {subcategory.items.map((item, itemIndex) => (
+                                                    {subcategory.categoryItems.map((item) => (
                                                         <div
-                                                            key={itemIndex}
+                                                            key={item.id}
                                                             className="AdminCategoryTree-item"
                                                             onClick={() => handleSelect(item)}
                                                         >
-                                                            {item.grandchild_category_name}
+                                                            {item.name}
                                                         </div>
                                                     ))}
                                                 </div>
@@ -85,4 +114,4 @@ const CategoryDropdown = ({ onSelect, onClose }) => {
     );
 };
 
-export default CategoryDropdown; 
+export default CategoryDropdown;
