@@ -4,7 +4,7 @@ import { Bell, Asterisk, Pause, Truck, Mail, Flame } from 'lucide-react';
 import StatCard from '../TechnicianDashBoard/StatCard';
 import FaultCategoryChart from '../TechnicianDashBoard/FaultCategoryChart';
 import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import './TechnicianDashBoard.css'; 
+// import './TechnicianDashBoard.css'; 
 
 const TechnicianDashboard = () => {
   const [ticketStats, setTicketStats] = useState([
