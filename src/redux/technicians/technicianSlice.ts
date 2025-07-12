@@ -61,7 +61,9 @@ const technicianSlice = createSlice({
       state.loading = false;
       state.error = null;
       state.technicians = state.technicians.filter(
-        (tech) => tech.id !== action.payload
+        (tech) =>
+          tech.id !== action.payload &&
+          tech.serviceNum !== action.payload
       );
     },
     deleteTechnicianFailure(state, action) {
