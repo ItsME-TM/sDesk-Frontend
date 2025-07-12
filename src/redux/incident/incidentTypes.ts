@@ -1,4 +1,3 @@
-// incidentTypes.ts
 export interface Incident {
   incident_number: string;
   informant: string;
@@ -35,6 +34,17 @@ export interface Category {
   name: string;
 }
 
+export interface IncidentHistory {
+  incidentNumber: string;
+  assignedTo: string;
+  updatedBy: string;
+  updatedOn: string;
+  status: string;
+  comments: string;
+  category?: string;
+  location?: string;
+}
+
 export interface IncidentState {
   incidents: Incident[];
   assignedToMe: Incident[];
@@ -42,6 +52,9 @@ export interface IncidentState {
   teamIncidents: Incident[];
   currentIncident: Incident | null;
   categories: Category[]; // Add this line
+  incidentHistory: IncidentHistory[]; // Add incident history
+  currentTechnician: any | null; // Add current technician
   loading: boolean;
   error: string | null;
 }
+

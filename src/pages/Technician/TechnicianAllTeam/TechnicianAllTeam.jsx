@@ -1,59 +1,139 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset'; // Import the location dataset
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
+import { useDispatch, useSelector } from 'react-redux';
+import { 
+    fetchAllIncidentsRequest, 
+    fetchCurrentTechnicianRequest 
+} from '../../../redux/incident/incidentSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
 import './TechnicianAllTeam.css';
 
 const TechnicianAllTeam = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    
+    // Redux state
+    const { incidents, currentTechnician, loading, error } = useSelector((state) => state.incident);
+    const { user } = useSelector((state) => state.auth);
+    const { allUsers } = useSelector((state) => state.sltusers);
+    const { locations } = useSelector((state) => state.location);
+    const { categoryItems } = useSelector((state) => state.categories);
+    
+    // Local state for UI
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [teamIncidents, setTeamIncidents] = useState([]);
 
-    const currentAdmin = sDesk_t2_users_dataset.find(user => user.service_number === 'SV001' && user.role === 'admin');
+    // Check if user is technician
+    if (!user || user.role !== 'technician') {
+        return (
+            <div className="TechnicianAllTeam-main-content">
+                <div className="TechnicianAllTeam-tickets-creator">
+                    <span className="TechnicianAllTeam-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianAllTeam-created-ticket">All Team</span>
+                </div>
+                <div className="TechnicianAllTeam-content2">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        padding: '20px',
+                        textAlign: 'center'
+                    }}>
+                        <h3>Access Denied</h3>
+                        <p>This page is only accessible to technicians.</p>
+                        <p>Your current role: <strong>{user?.role || 'Unknown'}</strong></p>
+                        <p>Contact your administrator if you believe this is an error.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-    const getCategoryName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                const item = subcategory.items.find(item => item.grandchild_category_number === categoryNumber);
-                if (item) {
-                    return item.grandchild_category_name;
-                }
-            }
+    // Fetch data on component mount
+    useEffect(() => {
+        // Fetch all incidents
+        dispatch(fetchAllIncidentsRequest());
+
+        // Fetch current technician data
+        if (user && user.serviceNum) {
+            dispatch(fetchCurrentTechnicianRequest({ serviceNum: user.serviceNum }));
         }
-        return categoryNumber;
+
+        // Fetch categories, users, and locations
+        dispatch(fetchCategoryItemsRequest());
+        dispatch(fetchAllUsersRequest());
+        dispatch(fetchLocationsRequest());
+    }, [dispatch, user]);
+
+    // Filter team incidents when incidents or technician data changes
+    useEffect(() => {
+        if (incidents && incidents.length > 0 && currentTechnician && categoryItems.length > 0) {
+            console.log('Filtering team incidents...');
+            console.log('Current technician team:', currentTechnician.team);
+            console.log('Total incidents:', incidents.length);
+            console.log('Categories:', categoryItems.length);
+
+            // Find categories that belong to the technician's team
+            const teamCategories = categoryItems.filter(cat => {
+                // The category has subCategory.mainCategory relationship
+                const mainCategoryId = cat.subCategory?.mainCategory?.id;
+                const mainCategoryName = cat.subCategory?.mainCategory?.name;
+                
+                // Check if this category belongs to technician's team
+                return mainCategoryId === currentTechnician.team || mainCategoryName === currentTechnician.team;
+            });
+
+            console.log('Team categories found:', teamCategories.length);
+            const teamCategoryNames = teamCategories.map(cat => cat.name);
+            console.log('Team category names:', teamCategoryNames);
+
+            // Filter incidents that belong to team categories
+            const filteredIncidents = incidents.filter(incident => 
+                teamCategoryNames.includes(incident.category)
+            );
+
+            console.log('Filtered team incidents:', filteredIncidents.length);
+            setTeamIncidents(filteredIncidents);
+        }
+    }, [incidents, currentTechnician, categoryItems]);
+
+    // Helper functions
+    const getCategoryName = (categoryName) => {
+        return categoryName || 'Unknown Category';
     };
 
     const getUserName = (serviceNumber) => {
-        const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-        return user ? user.user_name : serviceNumber;
+        const foundUser = allUsers.find(user => user.serviceNum === serviceNumber || user.service_number === serviceNumber);
+        return foundUser ? (foundUser.display_name || foundUser.user_name || foundUser.name) : serviceNumber;
     };
 
-    const getLocationName = (locationNumber) => {
-        for (const district of sDesk_t2_location_dataset) {
-            const location = district.sublocations.find(loc => loc.loc_number === locationNumber);
-            if (location) {
-                return location.loc_name;
-            }
-        }
-        return locationNumber;
+    const getLocationName = (locationId) => {
+        const location = locations.find(loc => loc.id === locationId || loc.loc_number === locationId);
+        return location ? (location.name || location.loc_name) : locationId;
     };
 
-    const tableData = sDesk_t2_incidents_dataset.map(incident => ({
+    // Process incidents data for table display
+    const tableData = teamIncidents.map(incident => ({
         refNo: incident.incident_number,
         assignedTo: getUserName(incident.handler),
         affectedUser: getUserName(incident.informant),
         category: getCategoryName(incident.category),
         status: incident.status,
         rawCategory: incident.category,
-        location: getLocationName(incident.location), // Use the new function to get the location name
+        location: getLocationName(incident.location),
+        priority: incident.priority,
     }));
 
     const filteredData = tableData.filter(item => {
@@ -71,23 +151,26 @@ const TechnicianAllTeam = () => {
     const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
     const handleRowClick = (refNo) => {
-        const incident = sDesk_t2_incidents_dataset.find(item => item.incident_number === refNo);
+        const incident = teamIncidents.find(item => item.incident_number === refNo);
         if (incident) {
-            const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
+            const informant = allUsers.find(user => 
+                user.serviceNum === incident.informant || 
+                user.service_number === incident.informant
+            );
             if (informant) {
                 navigate('/technician/TechnicianMyReportedUpdate', {
                     state: {
                         formData: {
-                            serviceNo: informant.service_number,
-                            tpNumber: informant.tp_number,
-                            name: informant.user_name,
-                            designation: informant.designation,
+                            serviceNo: informant.serviceNum || informant.service_number,
+                            tpNumber: informant.tp_number || informant.contactNumber || '',
+                            name: informant.display_name || informant.user_name || informant.name,
+                            designation: informant.designation || informant.role,
                             email: informant.email,
                         },
                         incidentDetails: {
                             refNo: incident.incident_number,
                             category: getCategoryName(incident.category),
-                            location: getLocationName(incident.location), // Use the new function to get the location name
+                            location: getLocationName(incident.location),
                             priority: incident.priority,
                             status: incident.status,
                         },
@@ -153,10 +236,83 @@ const TechnicianAllTeam = () => {
         return buttons;
     };
 
-    const uniqueCategories = sDesk_t2_category_dataset
-        .flatMap(parent => parent.subcategories.flatMap(sub => sub.items))
-        .map(item => ({ number: item.grandchild_category_number, name: item.grandchild_category_name }))
-        .filter((v, i, a) => a.findIndex(t => t.number === v.number) === i);
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="TechnicianAllTeam-main-content">
+                <div className="TechnicianAllTeam-tickets-creator">
+                    <span className="TechnicianAllTeam-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianAllTeam-created-ticket">All Team</span>
+                </div>
+                <div className="TechnicianAllTeam-content2">
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        fontSize: '18px'
+                    }}>
+                        Loading team incidents...
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state
+    if (error) {
+        return (
+            <div className="TechnicianAllTeam-main-content">
+                <div className="TechnicianAllTeam-tickets-creator">
+                    <span className="TechnicianAllTeam-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianAllTeam-created-ticket">All Team</span>
+                </div>
+                <div className="TechnicianAllTeam-content2">
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        textAlign: 'center'
+                    }}>
+                        <h3 style={{ color: '#d32f2f' }}>Error Loading Team Incidents</h3>
+                        <p>{error}</p>
+                        <button 
+                            onClick={() => dispatch(fetchAllIncidentsRequest())}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: '#1976d2',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const uniqueCategories = categoryItems.map(cat => ({
+        number: cat.name,
+        name: cat.name
+    })).filter((v, i, a) => a.findIndex(t => t.number === v.number) === i);
+
+    // Debug logging
+    console.log('🔍 TechnicianAllTeam Debug Info:');
+    console.log('  User:', user);
+    console.log('  Team Incidents:', teamIncidents);
+    console.log('  Loading:', loading);
+    console.log('  Error:', error);
+    console.log('  Categories:', categoryItems.length);
+    console.log('  Users:', allUsers.length);
+    console.log('  Locations:', locations.length);
 
     return (
         <div className="TechnicianAllTeam-main-content">
@@ -169,7 +325,7 @@ const TechnicianAllTeam = () => {
                 <div className="TechnicianAllTeam-TitleBar">
                     <div className="TechnicianAllTeam-TitleBar-NameAndIcon">
                         <FaHistory size={20} />
-                        Incident History - All - Team
+                        Incident History - {user?.team || 'Team'} - All Team Members
                     </div>
                     <div className="TechnicianAllTeam-TitleBar-buttons">
                         <button className="TechnicianAllTeam-TitleBar-buttons-ExportData">

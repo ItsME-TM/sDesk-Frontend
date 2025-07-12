@@ -3,7 +3,6 @@
     flex-direction: column;
     flex-grow: 1;
     margin: 10px 10px 0px 0px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     border: 1px solid #ccc;
     border-radius: 10px;
     padding-bottom: 2px;
@@ -23,6 +22,7 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+    margin-top: 1%;
   }
     .AddInicident-content2-UserDetails-UserInfo-Cube1 {
     display: flex;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './UpdateStatus.css';
 import { FaPlusSquare } from "react-icons/fa";
-import CategoryDropdown from '../CategoryDropdown/CategoryDropDown';
+import CategoryDropdown from '../CategoryDropdown/CategoryDropdown';
 import LocationDropdown from '../LocationDropdown/LocationDropdown';
 
 const UpdateStatus = ({
@@ -10,7 +10,8 @@ const UpdateStatus = ({
   categoryDataset,
   locationDataset,
   incident,
-  onStatusChange
+  onStatusChange,
+  loggedInUser // <-- add this prop
 }) => {
   const [isCategoryPopupOpen, setIsCategoryPopupOpen] = useState(false);
   const [isLocationPopupOpen, setIsLocationPopupOpen] = useState(false);
@@ -62,8 +63,8 @@ const UpdateStatus = ({
   const updateStatusData = () => {
     const data = {
       updatedBy,
-      category: selectedCategory.name,
-      location: selectedLocation.name,
+      category: selectedCategory.number,
+      location: selectedLocation.number,
       transferTo,
       description,
       priority,
@@ -96,11 +97,14 @@ const UpdateStatus = ({
   }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status]);
 
   useEffect(() => {
-    if (incident) {
-      // Set Update By
-      const updatedByUser = usersDataset.find(user => user.service_number === incident.update_by);
-      setUpdatedBy(updatedByUser ? updatedByUser.user_name : incident.update_by || '');
-
+    // Always set Update By to the currently logged-in user's name
+    if (loggedInUser && loggedInUser.name) {
+      setUpdatedBy(loggedInUser.name);
+    } else {
+      setUpdatedBy('');
+    }
+    // Set other fields if incident exists
+    if (incident && usersDataset.length > 0 && categoryDataset.length > 0 && locationDataset.length > 0) {
       // Set Status
       setStatus(incident.status || '');
 
@@ -113,56 +117,47 @@ const UpdateStatus = ({
       // Set Notification To
       if (incident.urgent_notification_to) {
         const notificationUser = usersDataset.find(user => user.service_number === incident.urgent_notification_to);
-        setNotificationTo(notificationUser ? notificationUser.user_name : incident.urgent_notification_to);
+        setNotificationTo(notificationUser ? notificationUser.display_name || notificationUser.user_name : incident.urgent_notification_to);
+      }
+
+      // Set Transfer To (handler)
+      if (incident.handler) {
+        const handlerUser = usersDataset.find(user => user.service_number === incident.handler);
+        setTransferTo(handlerUser ? handlerUser.service_number : incident.handler); // Keep service_number for transferTo
       }
 
       // Load technicians
       const filteredTechnicians = usersDataset.filter(user => user.role === 'technician');
       setTechnicians(filteredTechnicians);
 
-      // Load notification options
+      // Load notification options (supervisors and admins)
       const supervisorsAndAdmins = usersDataset
         .filter(user => user.role === 'supervisor' || user.role === 'admin')
-        .map(user => user.user_name);
+        .map(user => user.service_number); // Store service_number, display name in dropdown
       setNotificationOptions(supervisorsAndAdmins);
 
       // Set category name
-      let categoryName = '';
-      if (categoryDataset && incident.category) {
-        for (const parent of categoryDataset) {
-          for (const subcategory of parent.subcategories) {
-            const grandchild = subcategory.items.find(item => item.grandchild_category_number === incident.category);
-            if (grandchild) {
-              categoryName = grandchild.grandchild_category_name;
-              break;
-            }
-          }
-          if (categoryName) break;
-        }
-      }
-      setSelectedCategory({ name: categoryName || incidentData.category || '' });
+      const categoryItem = categoryDataset.find(item => item.grandchild_category_number === incident.category);
+      setSelectedCategory({
+        name: categoryItem ? categoryItem.grandchild_category_name : incidentData.category || '',
+        number: categoryItem ? categoryItem.grandchild_category_number : ''
+      });
 
       // Set location name
-      let locationName = '';
-      if (locationDataset && incident.location) {
-        for (const district of locationDataset) {
-          const sublocation = district.sublocations.find(loc => loc.loc_number === incident.location);
-          if (sublocation) {
-            locationName = sublocation.loc_name;
-            break;
-          }
-        }
-      }
-      setSelectedLocation({ name: locationName || incidentData.location || '' });
+      const locationItem = locationDataset.find(item => item.loc_number === incident.location);
+      setSelectedLocation({
+        name: locationItem ? locationItem.loc_name : incidentData.location || '',
+        number: locationItem ? locationItem.loc_number : ''
+      });
     }
-  }, [incident, usersDataset, categoryDataset, locationDataset, incidentData]);
+  }, [incident, usersDataset, categoryDataset, locationDataset, incidentData, loggedInUser]);
 
   return (
     <div className="update-status-container">
       <div className="update-status-card card">
         <div className="card-body">
           <h5 className="update-status-title">
-            Update Status - <span>{incidentData.refNo}</span>
+            Update Status - <span>{incidentData.regNo}</span>
           </h5>
 
           <div className="form-row">
@@ -173,11 +168,8 @@ const UpdateStatus = ({
                 className="form-control"
                 id="updateBy"
                 value={updatedBy}
-                onChange={(e) => {
-                  setUpdatedBy(e.target.value);
-                  updateStatusData();
-                }}
                 style={{ fontSize: '12px' }}
+                readOnly
               />
             </div>
 
@@ -220,11 +212,14 @@ const UpdateStatus = ({
                 onChange={(e) => setNotificationTo(e.target.value)}
               >
                 <option value="">Select One</option>
-                {notificationOptions.map((option, index) => (
-                  <option key={index} value={option}>
-                    {option}
-                  </option>
-                ))}
+                {notificationOptions.map((serviceNum, index) => {
+                  const user = usersDataset.find(u => u.service_number === serviceNum);
+                  return user ? (
+                    <option key={index} value={serviceNum}>
+                      {user.display_name || user.user_name}
+                    </option>
+                  ) : null;
+                })}
               </select>
             </div>
 
@@ -240,12 +235,18 @@ const UpdateStatus = ({
                 }}
               >
                 <option value="">Select One</option>
+                <option value="tier2-auto">Automatically Assign For Tier2</option>
                 {technicians.map(technician => (
-                  <option key={technician.service_number} value={technician.user_name}>
-                    {technician.user_name}
+                  <option key={technician.service_number} value={technician.service_number}>
+                    {technician.display_name || technician.user_name}
                   </option>
                 ))}
               </select>
+              {transferTo === "tier2-auto" && (
+                <div style={{ color: '#007bff', fontWeight: 'bold', marginTop: '5px', fontSize: '13px' }}>
+                  Automatically Assign For Tier2
+                </div>
+              )}
             </div>
           </div>
 

@@ -1,207 +1,278 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import './TechnicianInsident.css';
-import { IoIosArrowForward } from 'react-icons/io';
-import UpdateStatus from '../../../components/UpdateStatus/UpdateStatus';
-import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
-import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
-import { fetchIncidentByIdRequest, updateIncidentRequest } from '../../../redux/incident/incidentSlice';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import "./TechnicianInsident.css";
+import { IoIosArrowForward } from "react-icons/io";
+import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
+import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
+import AffectedUserDetails from "../../../components/AffectedUserDetails/AffectedUserDetails";
+import { 
+  getIncidentByNumberRequest, 
+  fetchIncidentHistoryRequest 
+} from "../../../redux/incident/incidentSlice";
+import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice";
+import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
+import { fetchUserByServiceNumberRequest, fetchAllUsersRequest } from "../../../redux/sltusers/sltusersSlice";
 
-const TechnicianInsident = () => {
+const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { incidentId } = useParams();
   const dispatch = useDispatch();
-  
-  // Redux state
-  const { currentIncident, loading, error } = useSelector((state) => state.incident);
-  
+  const { refNo: paramsRefNo } = useParams();
+
+  // Redux state for update status
+  const incidentState = useSelector((state) => state.incident);
+  const categoryState = useSelector((state) => state.categories);
+  const locationState = useSelector((state) => state.location);
+  const usersState = useSelector((state) => state.sltusers);
+
+  const currentRefNo = isPopup ? incidentData.incident_number : paramsRefNo;
+
   // Local state
   const [formData, setFormData] = useState({
-    serviceNo: '',
-    tpNumber: '',
-    name: '',
-    designation: '',
-    email: '',
+    serviceNo: "",
+    tpNumber: undefined,
+    name: "",
+    designation: "",
+    email: "",
   });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Auto-fill Name, Designation, Email when Service No changes
+  useEffect(() => {
+    const serviceNo = formData.serviceNo?.trim();
+    
+    // Clear fields if Service No is empty
+    if (!serviceNo) {
+      setFormData((prev) => ({
+        ...prev,
+        name: '',
+        designation: '',
+        email: '',
+      }));
+      return;
+    }
+
+    // Wait for users to be loaded before attempting auto-fill
+    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+      return;
+    }
+
+    // Find user by serviceNum or service_number from slt_users table
+    const user = usersState.allUsers?.find(
+      (u) => String(u.serviceNum || u.service_number) === String(serviceNo)
+    );
+    
+    if (user) {
+      // Auto-fill found user details
+      setFormData((prev) => ({
+        ...prev,
+        name: user.display_name || user.user_name || '',
+        designation: user.role || '',
+        email: user.email || '',
+      }));
+    } else {
+      // Clear fields if user not found
+      setFormData((prev) => ({
+        ...prev,
+        name: '',
+        designation: '',
+        email: '',
+      }));
+    }
+  }, [formData.serviceNo, usersState.allUsers]);
 
   const [incidentDetails, setIncidentDetails] = useState({
-    refNo: '',
-    category: '',
-    location: '',
-    priority: '',
-    status: '',
-    assignedTo: '',
-    updateBy: '',
-    updatedOn: '',
-    comments: ''
+    refNo: "",
+    category: "",
+    location: "",
+    priority: "",
+    status: "",
+    assignedTo: "",
+    updateBy: "",
+    updatedOn: "",
+    comments: "",
   });
 
-  const [incident, setIncident] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [historyData, setHistoryData] = useState([]);
+  // Remove local incident state; always use Redux state or prop
+  const [isLoading, setIsLoading] = useState(false); // Start with false
+  const [error, setError] = useState(null);
   const [updateStatusData, setUpdateStatusData] = useState({
-    updatedBy: '',
-    category: '',
-    location: '',
-    transferTo: '',
-    description: '',
-    priority: '',
-    status: ''
+    updatedBy: "",
+    category: "",
+    location: "",
+    transferTo: "",
+    description: "",
+    priority: "",
+    status: "",
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
-  };
-  // Fetch incident from Redux if incidentId is provided
+  // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
-    if (incidentId) {
-      dispatch(fetchIncidentByIdRequest(incidentId));
+    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+      dispatch(fetchAllUsersRequest());
     }
-  }, [dispatch, incidentId]);
+  }, [dispatch, usersState.allUsers]);
 
-  // Handle incident data from location state or Redux
+  // Fetch incident and user details using Redux
   useEffect(() => {
-    // Check if data comes from navigation state
-    if (location.state?.formData) {
-      setFormData(location.state.formData);
+    if (!currentRefNo) {
+      setError("No incident Ref No provided.");
+      return;
     }
 
-    // Use Redux currentIncident if available, otherwise use location state
-    const incidentToUse = currentIncident || (location.state?.incidentDetails ? 
-      { 
-        incident_number: location.state.incidentDetails.refNo,
-        ...location.state.incidentDetails 
-      } : null);
+    setError(null);
 
-    if (incidentToUse) {
-      const details = location.state?.incidentDetails;
-      
-      // Map incident fields to display fields
-      setIncidentDetails({
-        refNo: incidentToUse.incident_number || details?.refNo || '',
-        category: details?.category || incidentToUse.category || '',
-        location: details?.location || incidentToUse.location || '',
-        priority: incidentToUse.priority || details?.priority || '',
-        status: incidentToUse.status || 'Open',
-        assignedTo: getUserName(incidentToUse.handler) || 'Unassigned',
-        updateBy: getUserName(incidentToUse.update_by) || 'System',
-        updatedOn: incidentToUse.update_on || incidentToUse.updated_at || new Date().toLocaleString(),
-        comments: incidentToUse.description || 'No comments'
+    // Dispatch Redux actions to fetch data
+    dispatch(fetchCategoriesRequest());
+    dispatch(fetchLocationsRequest());
+    dispatch(fetchAllUsersRequest()); // Enable to load users for auto-fill
+    
+    if (isPopup && incidentData) {
+      // For popup mode, use provided incident data immediately
+      // Set initial form data with informant as Service No
+      setFormData({
+        serviceNo: incidentData.informant || "",
+        tpNumber: undefined,
+        name: "", // Will be auto-filled by useEffect
+        designation: "", // Will be auto-filled by useEffect
+        email: "", // Will be auto-filled by useEffect
       });
+      // Fetch incident history
+      dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
+    } else {
+      // For non-popup mode, fetch incident data
+      dispatch(getIncidentByNumberRequest({ incident_number: currentRefNo }));
+      dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
+    }
+  }, [currentRefNo, dispatch]); // Remove incidentData and isPopup from deps to prevent loops
 
-      // Set the full incident data
-      setIncident({
-        ...incidentToUse,
-        update_by: incidentToUse.update_by || '123',
-        status: incidentToUse.status || 'Open',
-      });      // Prepare history data if available
-      if (incidentToUse.history) {
-        setHistoryData(incidentToUse.history.map(item => ({
-          assignedTo: getUserName(item.handler) || 'Unassigned',
-          updatedBy: getUserName(item.update_by) || 'System',
-          updatedOn: item.update_on || new Date().toLocaleString(),
-          status: item.status || 'Pending',
-          comments: item.description || 'No comments'
-        })));
-      } else {
-        // If no history, use current incident as the only history entry
-        setHistoryData([{
-          assignedTo: getUserName(incidentToUse.handler) || 'Unassigned',
-          updatedBy: getUserName(incidentToUse.update_by) || 'System',
-          updatedOn: incidentToUse.update_on || incidentToUse.updated_at || new Date().toLocaleString(),
-          status: incidentToUse.status || 'Pending',
-          comments: incidentToUse.description || 'No comments'
-        }]);
-      }
-    } else if (location.state?.incidentDetails) {
-      const details = location.state.incidentDetails;
+  // Update local state when Redux state changes
+  useEffect(() => {
+    // Update user data from Redux
+    if (usersState.user) {
+      const userData = usersState.user;
+      setFormData(prev => ({
+        ...prev,
+        serviceNo: userData?.service_number || prev.serviceNo,
+        name: userData?.display_name || userData?.user_name || prev.name,
+        designation: userData?.role || prev.designation,
+        email: userData?.email || prev.email,
+      }));
+    }
+  }, [usersState.user]);
+
+  // Separate useEffect for incident details to avoid loops
+  useEffect(() => {
+    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    if (currentIncident) {
       setIncidentDetails({
-        ...details,
-        status: 'Open',
-        assignedTo: getUserName(details.assignedTo) || details.assignedTo,
-        updateBy: getUserName(details.updateBy) || details.updateBy,
-        updatedOn: new Date().toLocaleString(),
-        comments: details.description || 'No comments'
-      });
-      setIncident({
-        incident_number: details.refNo,
-        category: details.category,
-        location: details.location,
-        priority: details.priority,
-        update_by: '123',
-        status: 'Open',
-        description: details.description || '',
-        urgent_notification_to: '',
+        refNo: currentIncident.incident_number || "",
+        category: currentIncident.category || "",
+        location: currentIncident.location || "",
+        priority: currentIncident.priority || "",
+        status: currentIncident.status || "",
+        assignedTo: currentIncident.handler || "",
+        updateBy: currentIncident.update_by || "",
+        updatedOn: currentIncident.update_on || currentIncident.updated_at || "",
+        comments: currentIncident.description || "",
       });
     }
-    setIsLoading(false);
-  }, [location.state, currentIncident]);
+  }, [incidentData, incidentState.currentIncident, isPopup]);
+
+  // Separate useEffect for loading and error states
+  useEffect(() => {
+    // For popup mode, don't wait for incident loading since we already have the data
+    if (isPopup) {
+      setIsLoading(false);
+      return;
+    }
+    
+    // For non-popup mode, only wait for incident loading, not categories/locations
+    setIsLoading(incidentState.loading);
+
+    // Update error state
+    const anyError = incidentState.error || categoryState.error || locationState.error;
+    setError(anyError);
+  }, [incidentState.loading, incidentState.error, categoryState.error, locationState.error, isPopup]);
 
   const handleUpdateStatusChange = (data) => {
     setUpdateStatusData(data);
   };
+  // --- FIX: Track update request and fetch history only after update is successful ---
+  const [pendingHistoryIncidentNo, setPendingHistoryIncidentNo] = useState(null);
   const handleUpdateClick = () => {
-    if (!incident) return;
+    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    if (!currentIncident) return;
 
-    const updateData = {
-      id: incident.id || incident.incident_number,
-      category: updateStatusData.category || incident.category,
-      location: updateStatusData.location || incident.location,
-      priority: updateStatusData.priority || incident.priority,
-      status: updateStatusData.status || incident.status,
-      handler: updateStatusData.transferTo || incident.handler,
-      description: updateStatusData.description || incident.description,
-      updatedBy: updateStatusData.updatedBy,
+    // Prepare data for update
+    const updatePayload = {
+      incident_number: currentIncident.incident_number,
+      data: {
+        category: updateStatusData.category || currentIncident.category,
+        location: updateStatusData.location || currentIncident.location,
+        priority: updateStatusData.priority || currentIncident.priority,
+        status: updateStatusData.status || currentIncident.status,
+        handler: updateStatusData.transferTo || currentIncident.handler,
+        description: updateStatusData.description || currentIncident.description,
+        update_by: updateStatusData.updatedBy || currentIncident.update_by,
+        // Add this line to support auto-assign Tier2
+        automaticallyAssignForTier2: updateStatusData.transferTo === 'tier2-auto',
+      },
     };
 
-    dispatch(updateIncidentRequest(updateData));
-
-    // Local state updates for immediate UI feedback
-    const currentDate = new Date().toLocaleString();
-    const newHistoryEntry = {
-      assignedTo: getUserName(updateStatusData.transferTo) || 'Not Assigned',
-      updatedBy: getUserName(updateStatusData.updatedBy) || updateStatusData.updatedBy,
-      updatedOn: currentDate,
-      status: updateStatusData.status || 'Open',
-      comments: updateStatusData.description || 'No comments'
-    };
-
-    const updatedHistory = [...historyData, newHistoryEntry];
-    setHistoryData(updatedHistory);
-
-    // Update incident details with new values
-    setIncidentDetails(prev => ({
-      ...prev,
-      category: updateStatusData.category || prev.category,
-      location: updateStatusData.location || prev.location,
-      priority: updateStatusData.priority || prev.priority,
-      status: updateStatusData.status || prev.status,
-      assignedTo: getUserName(updateStatusData.transferTo) || prev.assignedTo,
-      updateBy: getUserName(updateStatusData.updatedBy) || prev.updateBy,
-      updatedOn: currentDate,
-      comments: updateStatusData.description || prev.comments
-    }));
-
-    setShowSuccessMessage(true);
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 3000);
+    // Dispatch Redux action to update incident
+    dispatch({ type: "incident/updateIncidentRequest", payload: updatePayload });
+    // Mark that we want to fetch history for this incident after update is successful
+    setPendingHistoryIncidentNo(currentIncident.incident_number);
   };
+
+  // Show success message, close popup, and fetch history if update is successful (popup mode)
+  const lastHandledIncidentRef = useRef(null);
+  useEffect(() => {
+    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    // Only run if we have a pending history fetch for this incident
+    if (
+      isPopup &&
+      pendingHistoryIncidentNo &&
+      incidentState &&
+      incidentState.loading === false &&
+      !incidentState.error &&
+      currentIncident &&
+      incidentState.incidents.some(
+        (i) => i.incident_number === currentIncident.incident_number
+      ) &&
+      lastHandledIncidentRef.current !== currentIncident.incident_number
+    ) {
+      // Fetch latest incident history after update is successful
+      dispatch(fetchIncidentHistoryRequest({ incident_number: currentIncident.incident_number }));
+      setShowSuccessMessage(true);
+      lastHandledIncidentRef.current = currentIncident.incident_number;
+      setPendingHistoryIncidentNo(null); // Reset
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        // Close popup if parent provided a close handler (optional)
+        if (typeof window !== "undefined" && window.dispatchEvent) {
+          window.dispatchEvent(new CustomEvent("incident-popup-close"));
+        }
+      }, 1500);
+    }
+  }, [incidentState, isPopup, incidentData, incidentState.currentIncident, dispatch, pendingHistoryIncidentNo]);
 
   const handleBackClick = () => {
-    navigate('/technician/TechnicianAssignedIncidents');
+    navigate("/technician/TechnicianAssignedIncidents");
   };
-  if (loading || isLoading) {
+  if (isLoading) {
     return (
-      <div className="container-fluid d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+      <div
+        className="container-fluid d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
@@ -211,86 +282,160 @@ const TechnicianInsident = () => {
 
   if (error) {
     return (
-      <div className="container-fluid d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+      <div
+        className="container-fluid d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
         <div className="alert alert-danger" role="alert">
           <h4 className="alert-heading">Error!</h4>
           <p>Error loading incident: {error}</p>
-          <button 
-            className="btn btn-primary" 
-            onClick={() => incidentId ? dispatch(fetchIncidentByIdRequest(incidentId)) : navigate(-1)}
+          <button
+            className="btn btn-primary"
+            onClick={() => window.location.reload()}
           >
-            {incidentId ? 'Retry' : 'Go Back'}
+            Retry
           </button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="technician-dashboard container-fluid p-0">
-      <div className="technician-dashboard-main row m-0">
-        <div className="technicianinsident-tickets-creator col-12 d-flex align-items-center mb-3">
-          <span className="technicianinsident-svr-desk">Dashboard</span>
-          <IoIosArrowForward className="mx-2" />
-          <span className="technicianinsident-created-ticket">Incident Update</span>
+  // Add a fallback UI if incident is null after loading
+  const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+  if (!currentIncident && !isLoading && !error) {
+    return (
+      <div
+        className="container-fluid d-flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <div className="alert alert-warning" role="alert">
+          <h4 className="alert-heading">No Data</h4>
+          <p>No incident data found for Ref No: {currentRefNo}</p>
+          <button className="btn btn-primary" onClick={() => navigate(-1)}>
+            Go Back
+          </button>
         </div>
-        
-        <div className="technician-main-content col-12">
-          <div className="row">
-            <div className="col-12 mb-3">
-              <AffectedUserDetail formData={formData} />
-            </div>
-            
-            <div className="col-12 mb-3">
-              <IncidentHistory
-                refNo={incidentDetails.refNo}
-                category={incidentDetails.category}
-                location={incidentDetails.location}
-                priority={incidentDetails.priority}
-                status={incidentDetails.status}
-                assignedTo={incidentDetails.assignedTo}
-                updateBy={incidentDetails.updateBy}
-                updatedOn={incidentDetails.updatedOn}
-                comments={incidentDetails.comments}
-                historyData={historyData}
-              />
-            </div>
-            
-            {incident && (
+      </div>
+    );
+  }
+
+  // Helper functions to get name from id
+  const getCategoryName = (id) => {
+    if (!id) return "";
+    const found = categoryState.categoryItems?.find((c) => c.id === id || c.category_id === id);
+    return found ? found.name || found.category_name : id;
+  };
+  const getLocationName = (id) => {
+    if (!id) return "";
+    const found = locationState.list?.find((l) => l.id === id || l.location_id === id);
+    return found ? found.name || found.location_name : id;
+  };
+
+  // Map incidentDetails and historyData to use names
+  const incidentDetailsWithNames = {
+    ...incidentDetails,
+    category: getCategoryName(incidentDetails.category),
+    location: getLocationName(incidentDetails.location),
+  };
+  // Get history data from Redux state
+  const historyDataWithNames = incidentState.incidentHistory?.map((h) => ({
+    assignedTo: h.assignedTo,
+    updatedBy: h.updatedBy,
+    updatedOn: new Date(h.updatedOn).toLocaleString(),
+    status: h.status,
+    comments: h.comments,
+    category: getCategoryName(h.category),
+    location: getLocationName(h.location),
+  })) || [];
+
+  // DEBUG PANEL: Show state at the top for troubleshooting
+  return (
+    <div>
+      {/* Debug panel removed for production UI */}
+      <div className="technician-dashboard container-fluid p-0">
+        <div className="technician-dashboard-main row m-0">
+          <div className="technicianinsident-tickets-creator col-12 d-flex align-items-center mb-3">
+            <span className="technicianinsident-svr-desk">Dashboard</span>
+            <IoIosArrowForward className="mx-2" />
+            <span className="technicianinsident-created-ticket">
+              Incident Update
+            </span>
+          </div>
+
+          <div className="technician-main-content col-12">
+            <div className="row">
               <div className="col-12 mb-3">
-                <UpdateStatus
-                  incidentData={incidentDetails}
-                  incident={incident}
-                  usersDataset={sDesk_t2_users_dataset}
-                  categoryDataset={sDesk_t2_category_dataset}
-                  locationDataset={sDesk_t2_location_dataset}
-                  onStatusChange={handleUpdateStatusChange}
+                <AffectedUserDetails
+                  formData={formData}
+                  setFormData={setFormData}
+                  handleInputChange={handleInputChange}
                 />
               </div>
-            )}
-            
-            <div className="col-12 d-flex justify-content-between">
-              <button 
-                className="technician-details-back-btn"
-                onClick={handleBackClick}
-              >
-                Go Back
-              </button>
-              <button 
-                className="technician-details-update-btn"
-                onClick={handleUpdateClick}
-              >
-                Update
-              </button>
-            </div>
-            
-            {showSuccessMessage && (
-              <div className="col-12 mt-3">
-                <div className="alert alert-success">
-                  Incident updated successfully!
-                </div>
+
+              <div className="col-12 mb-3">
+                <IncidentHistory
+                  refNo={incidentDetailsWithNames.refNo}
+                  category={incidentDetailsWithNames.category}
+                  location={incidentDetailsWithNames.location}
+                  priority={incidentDetailsWithNames.priority}
+                  status={incidentDetailsWithNames.status}
+                  assignedTo={incidentDetailsWithNames.assignedTo}
+                  updateBy={incidentDetailsWithNames.updateBy}
+                  updatedOn={incidentDetailsWithNames.updatedOn}
+                  comments={incidentDetailsWithNames.comments}
+                  historyData={historyDataWithNames}
+                  users={usersState.allUsers || []}
+                />
               </div>
-            )}
+              {currentIncident && (
+                <div className="col-12 mb-3">
+                  <UpdateStatus
+                    incidentData={{
+                      regNo: currentIncident.incident_number,
+                      updateBy: currentIncident.update_by,
+                      category: currentIncident.category,
+                      location: currentIncident.location,
+                      urgentNotificationTo: currentIncident.urgent_notification_to,
+                      description: currentIncident.description,
+                      priority: currentIncident.priority,
+                      status: currentIncident.status,
+                      handler: currentIncident.handler,
+                    }}
+                    incident={currentIncident}
+                    onStatusChange={handleUpdateStatusChange}
+                    usersDataset={usersState.allUsers || []}
+                    categoryDataset={categoryState.categoryItems || []}
+                    locationDataset={locationState.list || []}
+                    loggedInUser={loggedInUser}
+                  />
+                </div>
+              )}
+
+              <div className="col-12 d-flex justify-content-between">
+                {!isPopup && (
+                  <button
+                    className="technician-details-back-btn"
+                    onClick={handleBackClick}
+                  >
+                    Go Back
+                  </button>
+                )}
+                <button
+                  className="technician-details-update-btn"
+                  onClick={handleUpdateClick}
+                >
+                  Update
+                </button>
+              </div>
+
+              {showSuccessMessage && (
+                <div className="col-12 mt-3">
+                  <div className="alert alert-success">
+                    Incident updated successfully!
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -299,3 +444,4 @@ const TechnicianInsident = () => {
 };
 
 export default TechnicianInsident;
+

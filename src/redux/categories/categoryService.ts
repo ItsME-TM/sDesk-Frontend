@@ -151,9 +151,14 @@ export const fetchCategoryItemById = async (id: string) => {
   }
 };
 
-export const createCategoryItem = async (data: Partial<CategoryItem>) => {
+// PATCH: Ensure subCategoryId is sent as a string, not a number
+export const createCategoryItem = async (data: { name: string; subCategoryId: string }) => {
   try {
-    return await axios.post(`${API_BASE}/categories/item`, data, { withCredentials: true });
+    // Only send the required fields, and ensure subCategoryId is a string
+    return await axios.post(`${API_BASE}/categories/item`, {
+      name: data.name?.trim(),
+      subCategoryId: typeof data.subCategoryId === 'string' ? data.subCategoryId : String(data.subCategoryId)
+    }, { withCredentials: true });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;

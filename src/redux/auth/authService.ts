@@ -13,51 +13,26 @@ const axiosInstance = axios.create({
 });
 
 export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
-    const url = `/auth/login`;
-    console.log('🔍 Making request to:', `${API_BASE}${url}`);
-    console.log('🔍 API_BASE:', API_BASE);
-    console.log('🔍 Request data:', { code, state, redirect_uri });
-    
-    try {
-        const response = await axiosInstance.post(url, {
-            code,
-            state,
-            redirect_uri,
-            client_id: '2dfa1784-299b-4bf9-91be-400d831396ed',
-            client_secret: 'YOUR_CLIENT_SECRET', 
-        });
-        return response;
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error;
-    }
+    const response = await axios.post(`${API_BASE}/auth/login`, {
+        code,
+        state,
+        redirect_uri,
+        client_id: '2dfa1784-299b-4bf9-91be-400d831396ed',
+        client_secret: 'YOUR_CLIENT_SECRET', 
+    }, { withCredentials: true });
+    return response; 
 };
 
 export const logout = async () => {
-    try {
-        return await axiosInstance.post(`/auth/logout`, {});
-    } catch (error) {
-        console.error('Logout error:', error);
-        throw error;
-    }
+    return axios.post(`${API_BASE}/auth/logout`, {}, { withCredentials: true });
 };
 
 export const fetchLoggedUser = async () => {
     console.log('[AuthService] Hit the fetchLoggedUser API');
-    try {
-        return await axiosInstance.get(`/auth/logged-user`);
-    } catch (error) {
-        console.error('Fetch logged user error:', error);
-        throw error;
-    }
+    return await axios.get(`${API_BASE}/auth/logged-user`, { withCredentials: true });
 };
 
 export const refreshToken = async () => {
     console.log('[AuthService] Hit the refreshToken API');
-    try {
-        return await axiosInstance.post(`/auth/refresh-token`, {});
-    } catch (error) {
-        console.error('Refresh token error:', error);
-        throw error;
-    }
+    return await axios.post(`${API_BASE}/auth/refresh-token`, {}, { withCredentials: true });
 };
