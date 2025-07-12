@@ -1,14 +1,13 @@
 import axios from "axios";
 import { MainCategory, SubCategory, CategoryItem } from "./categoryTypes";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 
 
 // Main Category Services
 export const fetchMainCategories = async () => {
   try {
-    return await axios.get(`${API_BASE}/categories/main`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
@@ -19,7 +18,7 @@ export const fetchMainCategories = async () => {
 
 export const fetchMainCategoryById = async (id: string) => {
   try {
-    return await axios.get(`${API_BASE}/categories/main/${id}`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, `/categories/main/${id}`), { withCredentials: true });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw error.response?.data || error.message;
