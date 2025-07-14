@@ -3,6 +3,7 @@ import { SLTUsersState } from './sltusersTypes';
 
 const initialState: SLTUsersState = {
   user: null,
+  users: [],
   loading: false,
   error: null,
 };
@@ -49,6 +50,19 @@ const sltusersSlice = createSlice({
       state.user = null;
       state.error = null;
     },
+    // Fetch all users
+    fetchAllUsersRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchAllUsersSuccess(state, action) {
+      state.loading = false;
+      state.users = action.payload;
+    },
+    fetchAllUsersFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -63,6 +77,9 @@ export const {
   updateUserRoleSuccess,
   updateUserRoleFailure,
   clearUser,
+  fetchAllUsersRequest,
+  fetchAllUsersSuccess,
+  fetchAllUsersFailure,
 } = sltusersSlice.actions;
 
 export default sltusersSlice.reducer;

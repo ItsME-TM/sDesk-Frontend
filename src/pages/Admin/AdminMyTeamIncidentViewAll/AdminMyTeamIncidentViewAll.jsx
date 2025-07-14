@@ -1,104 +1,145 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
+import { fetchMainCategoriesRequest, fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
 import { useNavigate } from 'react-router-dom';
 import './AdminMyTeamIncidentViewAll.css';
 
 const AdminMyTeamIncidentViewAll = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const currentAdmin = sDesk_t2_users_dataset.find(
-    user => user.service_number === 'SV001' && user.role === 'admin'
-  );
+ 
+  const { incidents, loading, error } = useSelector((state) => state.incident);
+  const { user } = useSelector((state) => state.auth);
+  const { mainCategories, categoryItems } = useSelector((state) => state.categories);
+  const { locations } = useSelector((state) => state.location);
+  const { users } = useSelector((state) => state.sltusers);
+
+  const currentAdmin = user;
+
+  
+  useEffect(() => {
+    dispatch(fetchAllIncidentsRequest());
+    dispatch(fetchMainCategoriesRequest());
+    dispatch(fetchCategoryItemsRequest());
+    dispatch(fetchLocationsRequest());
+    dispatch(fetchAllUsersRequest());
+  }, [dispatch]);
+
+  if (!user) {
+    return <div>Error: User not found. Please login again.</div>;
+  }
 
   if (!currentAdmin) {
     return <div>Error: Admin user not found.</div>;
   }
 
-  const adminTeam = sDesk_t2_category_dataset.find(
-    parent => parent.parent_category_number === currentAdmin.parent_category_number
-  )?.parent_category_name || 'Unknown';
+  const adminTeam = currentAdmin.parent_category_name || 'Unknown Team';
 
-  const getCategoryName = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        const item = subcategory.items.find(
-          item => item.grandchild_category_number === categoryNumber
-        );
-        if (item) {
-          return item.grandchild_category_name;
-        }
-      }
+  const getMainCategoryNameFromDatabase = (categoryItemCode) => {
+   
+    const categoryItem = categoryItems.find(cat => cat.category_code === categoryItemCode);
+    if (categoryItem) {
+      return categoryItem.subCategory?.mainCategory?.name || 'Unknown';
     }
-    return categoryNumber;
+
+    const categoryByName = categoryItems.find(cat => 
+      cat.name && 
+      cat.name.toLowerCase() === categoryItemCode.toLowerCase()
+    );
+    if (categoryByName) {
+      return categoryByName.subCategory?.mainCategory?.name || 'Unknown';
+    }
+  
+    const mainCategory = mainCategories.find(mainCat => 
+      mainCat.category_code === categoryItemCode || mainCat.name === categoryItemCode
+    );
+    if (mainCategory) {
+      return mainCategory.name;
+    }
+    
+    return 'Unknown';
   };
 
-  const getTeamNumber = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-          return parent.parent_category_number;
-        }
-      }
-    }
-    return 'Unknown';
+  const getCategoryName = (categoryNumber) => {
+    const category = categoryItems.find(cat => cat.category_code === categoryNumber);
+    return category ? category.name : categoryNumber;
   };
 
   const getSubcategoryName = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-          return subcategory.child_category_name;
-        }
-      }
-    }
-    return 'Unknown';
+    const category = categoryItems.find(cat => cat.category_code === categoryNumber);
+    return category ? category.subCategory?.name || 'Unknown' : 'Unknown';
   };
 
   const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
+    const foundUser = users.find(user => user.service_number === serviceNumber || user.serviceNum === serviceNumber);
+    return foundUser ? foundUser.user_name || foundUser.display_name : serviceNumber;
   };
 
   const getLocationName = (locationCode) => {
-    for (const district of sDesk_t2_location_dataset) {
-      const location = district.sublocations.find(loc => loc.loc_number === locationCode);
-      if (location) {
-        return location.loc_name;
-      }
-    }
-    return locationCode;
+    const location = locations.find(loc => loc.loc_number === locationCode);
+    return location ? location.loc_name : locationCode;
   };
 
-  const tableData = sDesk_t2_incidents_dataset
-    .filter(incident => getTeamNumber(incident.category) === currentAdmin.parent_category_number)
-    .map(incident => ({
-      refNo: incident.incident_number,
-      assignedTo: getUserName(incident.handler),
-      affectedUser: getUserName(incident.informant),
-      category: getCategoryName(incident.category),
-      subcategory: getSubcategoryName(incident.category),
-      status: incident.status,
-      location: getLocationName(incident.location),
-      rawCategory: incident.category,
-    }));
+  
+  const incidentsToUse = incidents || [];
+
+  const transformedTeamIncidents = incidentsToUse.map((dbIncident) => {
+    return {
+      incident_number: dbIncident.incident_number,
+      informant: dbIncident.informant,
+      location: dbIncident.location,
+      handler: dbIncident.handler,
+      update_by: dbIncident.update_by,
+      category: dbIncident.category,
+      update_on: dbIncident.update_on,
+      status: dbIncident.status,
+      priority: dbIncident.priority,
+      description: dbIncident.description,
+      notify_informant: dbIncident.notify_informant,
+      urgent_notification_to: dbIncident.urgent_notification_to,
+      Attachment: dbIncident.Attachment
+    };
+  });
+
+  const tableData = transformedTeamIncidents.map(incident => ({
+    refNo: incident.incident_number,
+    assignedTo: incident.handler,
+    affectedUser: incident.informant, 
+    category: incident.category, 
+    subcategory: incident.category, 
+    mainCategory: getMainCategoryNameFromDatabase(incident.category), 
+    status: incident.status,
+    location: incident.location, 
+    rawCategory: incident.category,
+  }));
 
   const filteredData = tableData.filter(item => {
     const matchesSearch = Object.values(item).some(val =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
-    const matchesCategory = categoryFilter ? item.subcategory === categoryFilter : true;
-    return matchesSearch && matchesStatus && matchesCategory;
+    
+   
+    let matchesCategory = true;
+    if (categoryFilter) {
+      const itemMainCategory = item.mainCategory;
+      matchesCategory = itemMainCategory === categoryFilter;
+    }
+    
+    const finalMatch = matchesSearch && matchesStatus && matchesCategory;
+    
+    return finalMatch;
   });
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -107,16 +148,18 @@ const AdminMyTeamIncidentViewAll = () => {
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
   const handleRowClick = (refNo) => {
-    const incident = sDesk_t2_incidents_dataset.find(item => item.incident_number === refNo);
+    const incident = transformedTeamIncidents.find(item => item.incident_number === refNo);
     if (incident) {
-      const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
+      const informant = users.find(user => 
+        user.service_number === incident.informant || user.serviceNum === incident.informant
+      );
       if (informant) {
         navigate('/admin/AdminUpdateIncident', {
           state: {
             formData: {
-              serviceNo: informant.service_number,
+              serviceNo: informant.service_number || informant.serviceNum,
               tpNumber: informant.tp_number,
-              name: informant.user_name,
+              name: informant.user_name || informant.display_name,
               designation: informant.designation,
               email: informant.email,
             },
@@ -133,6 +176,26 @@ const AdminMyTeamIncidentViewAll = () => {
   };
 
   const renderTableRows = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+            Loading incidents...
+          </td>
+        </tr>
+      );
+    }
+        
+    if (currentRows.length === 0) {
+      return (
+        <tr>
+          <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+            {error ? `Error: ${error}` : 'No incidents found.'}
+          </td>
+        </tr>
+      );
+    }
+    
     return currentRows.map((row, idx) => (
       <tr
         key={idx}
@@ -140,10 +203,10 @@ const AdminMyTeamIncidentViewAll = () => {
         style={{ cursor: 'pointer' }}
       >
         <td className='team-refno'>{row.refNo}</td>
-        <td>{row.assignedTo}</td>
-        <td>{row.affectedUser}</td>
-        <td>{row.category}</td>
-        <td>{row.location}</td>
+        <td>{getUserName(row.assignedTo)}</td>
+        <td>{getUserName(row.affectedUser)}</td>
+        <td>{getCategoryName(row.category)}</td>
+        <td>{getLocationName(row.location)}</td>
         <td className='team-status-text'>{row.status}</td>
       </tr>
     ));
@@ -157,7 +220,8 @@ const AdminMyTeamIncidentViewAll = () => {
       return Array.from({ length: totalPages }, (_, i) => (
         <button
           key={i + 1}
-          onClick={() => setCurrentPage(i + 1)} // Fixed: Changed from onChange to onClick
+          onClick={() => setCurrentPage(i + 1)} 
+          
           className={currentPage === i + 1 ? 'active' : ''}
         >
           {i + 1}
@@ -188,12 +252,20 @@ const AdminMyTeamIncidentViewAll = () => {
     return buttons;
   };
 
-  const teamSubcategories = sDesk_t2_category_dataset
-    .find(parent => parent.parent_category_number === currentAdmin.parent_category_number)
-    ?.subcategories.map(sub => ({
-      number: sub.child_category_number,
-      name: sub.child_category_name,
-    })) || [];
+  if (error) {
+    return (
+      <div className="AdminincidentViewAll-main-content">
+        <div className="AdminincidentViewAll-direction-bar">
+          Incidents {'>'} My Team Incidents
+        </div>
+        <div className="AdminincidentViewAll-content2">
+          <div style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
+            Error loading incidents: {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="AdminincidentViewAll-main-content">
@@ -244,9 +316,9 @@ const AdminMyTeamIncidentViewAll = () => {
               className="AdminincidentViewAll-showSearchBar-Show-select2"
             >
               <option value="">All Categories</option>
-              {teamSubcategories.map(sub => (
-                <option key={sub.number} value={sub.name}>
-                  {sub.name}
+              {mainCategories && mainCategories.map(category => (
+                <option key={category.category_code || category.id} value={category.name}>
+                  {category.name}
                 </option>
               ))}
             </select>
