@@ -3,6 +3,9 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
+import { fetchMainCategoriesRequest, fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
 import { useNavigate } from 'react-router-dom';
 import './AdminMyTeamIncidentViewAll.css';
 
@@ -14,151 +17,24 @@ const AdminMyTeamIncidentViewAll = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [mainCategories, setMainCategories] = useState([]);
 
-  
+ 
   const { incidents, loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
-
-  console.log('Redux state - incidents:', incidents);
-  console.log('Redux state - loading:', loading);
-  console.log('Redux state - error:', error);
-  console.log('Redux state - user:', user);
+  const { mainCategories, categoryItems } = useSelector((state) => state.categories);
+  const { locations } = useSelector((state) => state.location);
+  const { users } = useSelector((state) => state.sltusers);
 
   const currentAdmin = user;
 
-  const [directIncidents, setDirectIncidents] = useState([]);
-
- 
+  
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        
-        try {
-          const incidentRes = await fetch('http://localhost:8000/incident/all-teams');
-          if (incidentRes.ok) {
-            const incidentData = await incidentRes.json();
-            console.log('Direct API call - incidents:', incidentData);
-            setDirectIncidents(incidentData);
-          }
-        } catch (error) {
-          console.error('Direct API call failed:', error);
-        }
-
-     
-        dispatch(fetchAllIncidentsRequest());
-
-       
-        try {
-          console.log('Fetching main categories from API...');
-          const mainCategoriesRes = await fetch('http://localhost:8000/categories/main', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          console.log('Main categories API response status:', mainCategoriesRes.status);
-          
-          if (mainCategoriesRes.ok) {
-            const mainCategoriesData = await mainCategoriesRes.json();
-            console.log('Main categories from API - raw response:', mainCategoriesData);
-            
-            if (Array.isArray(mainCategoriesData)) {
-              console.log('Setting main categories from API:', mainCategoriesData);
-              setMainCategories(mainCategoriesData);
-            } else {
-              console.log('API returned non-array data');
-              setMainCategories([]);
-            }
-          } else {
-            console.log('Main categories API failed with status:', mainCategoriesRes.status);
-            setMainCategories([]);
-          }
-        } catch (error) {
-          console.error('Main categories API error:', error);
-          setMainCategories([]);
-        }
-
-        try {
-          const categoriesRes = await fetch('http://localhost:8000/categories/item', {
-            credentials: 'include'
-          });
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json();
-            console.log('Categories API response:', categoriesData);
-            
-            // Process API data to transform it to the expected format
-            if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-              const transformedFromAPI = categoriesData.map(item => ({
-                grandchild_category_number: item.category_code,
-                grandchild_category_name: item.name,
-                child_category_name: item.subCategory?.name || 'Unknown Sub',
-                child_category_number: item.subCategory?.category_code || 'Unknown',
-                parent_category_number: item.subCategory?.mainCategory?.category_code || 'Unknown',
-                parent_category_name: item.subCategory?.mainCategory?.name || 'Unknown',
-                // For backwards compatibility
-                category_code: item.category_code,
-                name: item.name
-              }));
-              
-              console.log('Using transformed API data:', transformedFromAPI);
-              setCategories(transformedFromAPI);
-            } else {
-              console.log('API returned empty data');
-              setCategories([]);
-            }
-          } else {
-            console.log('Categories API failed');
-            setCategories([]);
-          }
-        } catch (error) {
-          console.log('Categories API error:', error);
-          setCategories([]);
-        }
-
-        try {
-          const usersRes = await fetch('http://localhost:8000/sltusers', {
-            credentials: 'include'
-          });
-          if (usersRes.ok) {
-            const usersData = await usersRes.json();
-            setUsers(usersData);
-          } else {
-            console.log('Users API failed');
-            setUsers([]);
-          }
-        } catch (error) {
-          console.log('Users API error:', error);
-          setUsers([]);
-        }
-
-        try {
-          const locationsRes = await fetch('http://localhost:8000/locations', {
-            credentials: 'include'
-          });
-          if (locationsRes.ok) {
-            const locationsData = await locationsRes.json();
-            setLocations(locationsData);
-          } else {
-            console.log('Locations API failed');
-            setLocations([]);
-          }
-        } catch (error) {
-          console.log('Locations API error:', error);
-          setLocations([]);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, [dispatch, user, currentAdmin]);
+    dispatch(fetchAllIncidentsRequest());
+    dispatch(fetchMainCategoriesRequest());
+    dispatch(fetchCategoryItemsRequest());
+    dispatch(fetchLocationsRequest());
+    dispatch(fetchAllUsersRequest());
+  }, [dispatch]);
 
   if (!user) {
     return <div>Error: User not found. Please login again.</div>;
@@ -171,51 +47,43 @@ const AdminMyTeamIncidentViewAll = () => {
   const adminTeam = currentAdmin.parent_category_name || 'Unknown Team';
 
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
-    console.log('Looking up main category for:', categoryItemCode);
-    
-    // First, try to find from the loaded categories (API data)
-    const categoryItem = categories.find(cat => cat.grandchild_category_number === categoryItemCode);
+   
+    const categoryItem = categoryItems.find(cat => cat.category_code === categoryItemCode);
     if (categoryItem) {
-      console.log('Found category item by code:', categoryItem);
-      return categoryItem.parent_category_name;
+      return categoryItem.subCategory?.mainCategory?.name || 'Unknown';
     }
-    
-    // If not found in API data, search by name
-    const categoryByName = categories.find(cat => 
-      cat.grandchild_category_name && 
-      cat.grandchild_category_name.toLowerCase() === categoryItemCode.toLowerCase()
+
+    const categoryByName = categoryItems.find(cat => 
+      cat.name && 
+      cat.name.toLowerCase() === categoryItemCode.toLowerCase()
     );
     if (categoryByName) {
-      console.log('Found category item by name:', categoryByName);
-      return categoryByName.parent_category_name;
+      return categoryByName.subCategory?.mainCategory?.name || 'Unknown';
     }
-    
-    // Check if the code itself is a main category
+  
     const mainCategory = mainCategories.find(mainCat => 
-      mainCat.category_code === categoryItemCode || mainCat.parent_category_number === categoryItemCode
+      mainCat.category_code === categoryItemCode || mainCat.name === categoryItemCode
     );
     if (mainCategory) {
-      console.log('Found in main categories:', mainCategory);
-      return mainCategory.name || mainCategory.parent_category_name;
+      return mainCategory.name;
     }
     
-    console.log('No category found for:', categoryItemCode);
     return 'Unknown';
   };
 
   const getCategoryName = (categoryNumber) => {
-    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
-    return category ? category.grandchild_category_name : categoryNumber;
+    const category = categoryItems.find(cat => cat.category_code === categoryNumber);
+    return category ? category.name : categoryNumber;
   };
 
   const getSubcategoryName = (categoryNumber) => {
-    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
-    return category ? category.child_category_name : 'Unknown';
+    const category = categoryItems.find(cat => cat.category_code === categoryNumber);
+    return category ? category.subCategory?.name || 'Unknown' : 'Unknown';
   };
 
   const getUserName = (serviceNumber) => {
-    const foundUser = users.find(user => user.service_number === serviceNumber);
-    return foundUser ? foundUser.user_name : serviceNumber;
+    const foundUser = users.find(user => user.service_number === serviceNumber || user.serviceNum === serviceNumber);
+    return foundUser ? foundUser.user_name || foundUser.display_name : serviceNumber;
   };
 
   const getLocationName = (locationCode) => {
@@ -223,54 +91,26 @@ const AdminMyTeamIncidentViewAll = () => {
     return location ? location.loc_name : locationCode;
   };
 
-  const incidentsToUse = incidents && incidents.length > 0 ? incidents : directIncidents;
   
-  console.log('=== DEBUGGING DATA FLOW ===');
-  console.log('Redux incidents:', incidents);
-  console.log('Direct incidents:', directIncidents);
-  console.log('Using incidents:', incidentsToUse);
-  console.log('Current admin:', currentAdmin);
-  console.log('Categories loaded:', categories.length);
-  console.log('Main categories loaded:', mainCategories.length);
-  console.log('Main categories data:', mainCategories);
-  console.log('Users loaded:', users.length);
-  console.log('Locations loaded:', locations.length);
-  
+  const incidentsToUse = incidents || [];
 
-  const processedIncidents = [];
-  
-  if (incidentsToUse && incidentsToUse.length > 0) {
-    incidentsToUse.forEach((dbIncident, index) => {
-      console.log(`Processing incident ${index}:`, dbIncident);
-      console.log(`Incident category:`, dbIncident.category);
-      
-     
-      const processedIncident = {
-        incident_number: dbIncident.incident_number,
-        informant: dbIncident.informant,
-        location: dbIncident.location,
-        handler: dbIncident.handler,
-        update_by: dbIncident.update_by,
-        category: dbIncident.category,
-        update_on: dbIncident.update_on,
-        status: dbIncident.status,
-        priority: dbIncident.priority,
-        description: dbIncident.description,
-        notify_infromant: dbIncident.notify_informant,
-        urgent_notification_to: dbIncident.urgent_notification_to,
-        Attachment: dbIncident.Attachment
-      };
-      
-      processedIncidents.push(processedIncident);
-    });
-  }
-  
-  console.log('Processed incidents:', processedIncidents);
-  
-
-  const transformedTeamIncidents = processedIncidents;
-
-  console.log('Final team incidents for table:', transformedTeamIncidents);
+  const transformedTeamIncidents = incidentsToUse.map((dbIncident) => {
+    return {
+      incident_number: dbIncident.incident_number,
+      informant: dbIncident.informant,
+      location: dbIncident.location,
+      handler: dbIncident.handler,
+      update_by: dbIncident.update_by,
+      category: dbIncident.category,
+      update_on: dbIncident.update_on,
+      status: dbIncident.status,
+      priority: dbIncident.priority,
+      description: dbIncident.description,
+      notify_informant: dbIncident.notify_informant,
+      urgent_notification_to: dbIncident.urgent_notification_to,
+      Attachment: dbIncident.Attachment
+    };
+  });
 
   const tableData = transformedTeamIncidents.map(incident => ({
     refNo: incident.incident_number,
@@ -279,23 +119,10 @@ const AdminMyTeamIncidentViewAll = () => {
     category: incident.category, 
     subcategory: incident.category, 
     mainCategory: getMainCategoryNameFromDatabase(incident.category), 
-    
     status: incident.status,
     location: incident.location, 
     rawCategory: incident.category,
   }));
-
-  console.log('Table data:', tableData);
-  console.log('Table data with main categories:', tableData.map(item => ({
-    refNo: item.refNo,
-    rawCategory: item.rawCategory,
-    mainCategory: item.mainCategory
-  })));
-  console.log('Available main categories for dropdown:', mainCategories.map(cat => cat.name || cat.parent_category_name));
-  console.log('Sample categories array:', categories.slice(0, 3));
-  console.log('Unique incident categories:', [...new Set(tableData.map(item => item.rawCategory))]);
-  console.log('Unique main categories from incidents:', [...new Set(tableData.map(item => item.mainCategory))]);
-  console.log('Category filter value:', categoryFilter);
 
   const filteredData = tableData.filter(item => {
     const matchesSearch = Object.values(item).some(val =>
@@ -303,59 +130,36 @@ const AdminMyTeamIncidentViewAll = () => {
     );
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
     
-    // Category filtering with improved logic
+   
     let matchesCategory = true;
     if (categoryFilter) {
       const itemMainCategory = item.mainCategory;
       matchesCategory = itemMainCategory === categoryFilter;
-      
-      console.log('Category filtering debug:', {
-        refNo: item.refNo,
-        rawCategory: item.rawCategory,
-        itemMainCategory,
-        categoryFilter,
-        matchesCategory
-      });
     }
     
     const finalMatch = matchesSearch && matchesStatus && matchesCategory;
     
-    if (categoryFilter) {
-      console.log('Final filtering result:', {
-        refNo: item.refNo,
-        matchesSearch,
-        matchesStatus,
-        matchesCategory,
-        finalMatch
-      });
-    }
-    
     return finalMatch;
   });
-
-  console.log('Filtered data:', filteredData);
-  console.log('Search term:', searchTerm);
-  console.log('Status filter:', statusFilter);
-  console.log('Category filter:', categoryFilter);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
-  console.log('Current rows for display:', currentRows);
-
   const handleRowClick = (refNo) => {
     const incident = transformedTeamIncidents.find(item => item.incident_number === refNo);
     if (incident) {
-      const informant = users.find(user => user.service_number === incident.informant);
+      const informant = users.find(user => 
+        user.service_number === incident.informant || user.serviceNum === incident.informant
+      );
       if (informant) {
         navigate('/admin/AdminUpdateIncident', {
           state: {
             formData: {
-              serviceNo: informant.service_number,
+              serviceNo: informant.service_number || informant.serviceNum,
               tpNumber: informant.tp_number,
-              name: informant.user_name,
+              name: informant.user_name || informant.display_name,
               designation: informant.designation,
               email: informant.email,
             },
@@ -372,33 +176,23 @@ const AdminMyTeamIncidentViewAll = () => {
   };
 
   const renderTableRows = () => {
-    console.log('=== RENDERING TABLE ROWS ===');
-    console.log('Current rows:', currentRows);
-    console.log('Current rows length:', currentRows.length);
-    
-    
-    if (currentRows.length === 0) {
-    
+    if (loading) {
       return (
-        <>
-          <tr>
-            <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-              DEBUG: No incidents found.<br/>
-              Total incidents: {transformedTeamIncidents.length}<br/>
-              Filtered: {filteredData.length}<br/>
-              Redux loading: {loading ? 'true' : 'false'}<br/>
-              Redux error: {error || 'none'}<br/>
-            </td>
-          </tr>
-          <tr style={{ backgroundColor: '#f0f0f0' }}>
-            <td className='team-refno'>TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className='team-status-text'>Open</td>
-          </tr>
-        </>
+        <tr>
+          <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+            Loading incidents...
+          </td>
+        </tr>
+      );
+    }
+        
+    if (currentRows.length === 0) {
+      return (
+        <tr>
+          <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+            {error ? `Error: ${error}` : 'No incidents found.'}
+          </td>
+        </tr>
       );
     }
     
@@ -409,10 +203,10 @@ const AdminMyTeamIncidentViewAll = () => {
         style={{ cursor: 'pointer' }}
       >
         <td className='team-refno'>{row.refNo}</td>
-        <td>{row.assignedTo}</td>
-        <td>{row.affectedUser}</td>
-        <td>{row.category}</td>
-        <td>{row.location}</td>
+        <td>{getUserName(row.assignedTo)}</td>
+        <td>{getUserName(row.affectedUser)}</td>
+        <td>{getCategoryName(row.category)}</td>
+        <td>{getLocationName(row.location)}</td>
         <td className='team-status-text'>{row.status}</td>
       </tr>
     ));
@@ -522,9 +316,9 @@ const AdminMyTeamIncidentViewAll = () => {
               className="AdminincidentViewAll-showSearchBar-Show-select2"
             >
               <option value="">All Categories</option>
-              {mainCategories.map(category => (
-                <option key={category.category_code || category.parent_category_number} value={category.name || category.parent_category_name}>
-                  {category.name || category.parent_category_name}
+              {mainCategories && mainCategories.map(category => (
+                <option key={category.category_code || category.id} value={category.name}>
+                  {category.name}
                 </option>
               ))}
             </select>
