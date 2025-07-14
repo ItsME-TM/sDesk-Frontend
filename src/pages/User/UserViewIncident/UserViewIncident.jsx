@@ -7,6 +7,7 @@ import {
   fetchAssignedByMeRequest,
   fetchCategoriesRequest,
 } from "../../../redux/incident/incidentSlice";
+import UserUpdateIncident from "../UserUpdateIncident/UserUpdateIncident";
 import "./UserViewIncident.css";
 
 const UserViewIncident = () => {
@@ -15,7 +16,7 @@ const UserViewIncident = () => {
 
   // Get data from Redux store
   const { user } = useSelector((state) => state.auth);
-  const { assignedByMe, loading, error, categories } = useSelector(
+  const { assignedByMe, loading, error, categories, incidentHistory } = useSelector(
     (state) => state.incident
   );
 
@@ -31,14 +32,14 @@ const UserViewIncident = () => {
   const [searchTerm, setSearchTerm] = useState(""); // Define searchTerm state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showUpdatePopup, setShowUpdatePopup] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState(null);
 
   // Fetch incidents and categories from the backend
   useEffect(() => {
     if (user && user.serviceNum) {
-      console.log(
-        `Dispatching fetchAssignedByMeRequest for serviceNum: ${user.serviceNum}`
-      );
-      dispatch(fetchAssignedByMeRequest({ informant: user.serviceNum }));
+      console.log(`Dispatching fetchAssignedByMeRequest for serviceNum: ${user.serviceNum}`);
+      dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
     }
     dispatch(fetchCategoriesRequest());
   }, [dispatch, user]);
@@ -94,9 +95,10 @@ const UserViewIncident = () => {
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentRows = filteredIncidents.slice(indexOfFirst, indexOfLast);
 
-  // Navigate to the update page with incident number
-  const handleRowClick = (incidentNumber) => {
-    navigate(`/user/UserUpdateIncident`, { state: { incidentNumber } });
+  // Popup open handler
+  const handleRefNoClick = (incident) => {
+    setSelectedIncident(incident);
+    setShowUpdatePopup(true);
   };
 
   // Render pagination buttons (assuming this function is correct from previous steps)
@@ -193,22 +195,32 @@ const UserViewIncident = () => {
             </thead>
             <tbody>
               {currentRows.length > 0 ? (
-                currentRows.map((incident) => (
-                  <tr
-                    key={incident.incident_number}
-                    onClick={() => handleRowClick(incident.incident_number)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td className="UserViewIncident-refno">
-                      {incident.incident_number}
-                    </td>
-                    <td>{incident.category}</td>
-                    <td className="UserViewIncident-status-text">
-                      {incident.status}
-                    </td>
-                    <td>{incident.priority}</td>
-                  </tr>
-                ))
+                currentRows.map((incident) => {
+                  // Find all history for this incident
+                  const historyForIncident = (incidentHistory || []).filter(
+                    h => h.incidentNumber === incident.incident_number
+                  );
+                  // Get latest status (last item, or fallback to incident.status)
+                  const latestStatus = historyForIncident.length > 0
+                    ? historyForIncident[historyForIncident.length - 1].status
+                    : incident.status;
+                  return (
+                    <tr
+                      key={incident.incident_number}
+                    >
+                      <td
+                        className="UserViewIncident-refno"
+                        style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline" }}
+                        onClick={() => handleRefNoClick(incident)}
+                      >
+                        {incident.incident_number}
+                      </td>
+                      <td>{incident.category}</td>
+                      <td className="UserViewIncident-status-text">{latestStatus}</td>
+                      <td>{incident.priority}</td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="4">No incidents found.</td>
@@ -242,6 +254,20 @@ const UserViewIncident = () => {
           </div>
         </div>
       </div>
+      {/* Popup/modal for UserUpdateIncident */}
+      {showUpdatePopup && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <button style={{ float: "right" }} onClick={() => setShowUpdatePopup(false)}>Close</button>
+            <UserUpdateIncident
+              incidentData={selectedIncident}
+              isPopup={true}
+              onClose={() => setShowUpdatePopup(false)}
+              loggedInUser={user}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

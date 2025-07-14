@@ -10,15 +10,21 @@ function* lookupUserSaga(action: any) {
   const maxRetries = 2;
   let retryCount = 0;
   
+  console.log('🚀 UserLookup Saga: Starting lookup saga for service number:', action.payload);
+  console.log('🚀 UserLookup Saga: Action object:', action);
+  
   while (retryCount <= maxRetries) {
     try {
       console.log(`UserLookup Saga: Attempt ${retryCount + 1}/${maxRetries + 1} for service number:`, action.payload);
       console.log('UserLookup Saga: Action type:', action.type);
+      console.log('UserLookup Saga: About to call userLookupService.lookupUserByServiceNum...');
       
       const response = yield call(userLookupService.lookupUserByServiceNum, action.payload);
       console.log('UserLookup Saga: ✅ API call successful:', response.status);
+      console.log('UserLookup Saga: ✅ Response object:', response);
       console.log('UserLookup Saga: ✅ User found:', response.data?.display_name || response.data?.serviceNum);
       
+      console.log('UserLookup Saga: About to dispatch success action with data:', response.data);
       yield put(lookupUserSuccess(response.data));
       console.log('UserLookup Saga: ✅ Success action dispatched');
       return; // Exit successfully
@@ -62,10 +68,10 @@ function* lookupUserSaga(action: any) {
         console.error('UserLookup Saga: 🌐 Network connection error');
       } else if (error.code === 'ECONNABORTED') {
         errorMessage = 'Request timeout. Please try again.';
-        console.error('UserLookup Saga: ⏱️ Request timeout error');
+        console.error('UserLookup Saga: ⏱ Request timeout error');
       } else if (error.response) {
         // Server responded with error status
-        console.log('UserLookup Saga: 🗄️ Server responded with status:', status);
+        console.log('UserLookup Saga: 🗄 Server responded with status:', status);
         
         if (status === 404) {
           errorMessage = `User not found with service number: ${action.payload}`;

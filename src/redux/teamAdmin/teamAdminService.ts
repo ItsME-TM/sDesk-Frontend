@@ -1,13 +1,12 @@
 
 import axios from "axios";
 import { TeamAdmin } from "./teamAdminTypes";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 // Fetch a team admin by service number
 export const fetchTeamAdminByServiceNumber = async (serviceNum: string) => {
   try {
-    return await axios.get(`${API_BASE}/admin/serviceNumber/${serviceNum}`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, `/admin/serviceNumber/${serviceNum}`), { withCredentials: true });
   } catch (error) {
     console.error(`Error fetching team admin by service number ${serviceNum}:`, error);
     throw error;
@@ -16,7 +15,7 @@ export const fetchTeamAdminByServiceNumber = async (serviceNum: string) => {
 
 export const fetchTeamAdmins = async () => {
   try {
-    return await axios.get(`${API_BASE}/admins`, { withCredentials: true });
+    return await axios.get(buildUrl(API_BASE, '/admins'), { withCredentials: true });
   } catch (error) {
     console.error("Error fetching team admins:", error);
     throw error;
@@ -27,7 +26,7 @@ export const createTeamAdmin = async (
   data: Partial<TeamAdmin> & { teamId: string }
 ) => {
   try {
-    return await axios.post(`${API_BASE}/admin/${data.teamId}`, data, {
+    return await axios.post(buildUrl(API_BASE, `/admin/${data.teamId}`), data, {
       withCredentials: true,
     });
   } catch (error) {
@@ -38,7 +37,7 @@ export const createTeamAdmin = async (
 
 export const updateTeamAdmin = async (id: string, data: TeamAdmin) => {
   try {
-    return await axios.put(`${API_BASE}/admin/${id}`, data, {
+    return await axios.put(buildUrl(API_BASE, `/admin/${id}`), data, {
       withCredentials: true,
     });
   } catch (error) {
@@ -49,7 +48,7 @@ export const updateTeamAdmin = async (id: string, data: TeamAdmin) => {
 
 export const deleteTeamAdmin = async (id: string) => {
   try {
-    return await axios.delete(`${API_BASE}/admin/${id}`, {
+    return await axios.delete(buildUrl(API_BASE, `/admin/${id}`), {
       withCredentials: true,
     });
   } catch (error) {

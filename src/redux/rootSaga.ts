@@ -6,6 +6,7 @@ import sltusersSaga from './sltusers/sltusersSaga';
 import categorySaga from './categories/categorySaga';
 import technicianSaga from './technicians/technicianSaga';
 import incidentSaga from './incident/incidentSaga';
+import userLookupSaga from './userLookup/userLookupSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -16,5 +17,6 @@ export default function* rootSaga() {
    categorySaga(),
    technicianSaga(),
    incidentSaga(),
+   userLookupSaga(),
   ]);
 }

@@ -80,3 +80,4 @@ export default function* sltusersSaga() {
   yield takeLatest(updateUserRoleRequest.type, updateUserRoleSaga);
   yield takeLatest(fetchAllUsersRequest.type, fetchAllUsersSaga);
 }
+

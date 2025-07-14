@@ -50,7 +50,7 @@ const sltusersSlice = createSlice({
       state.user = null;
       state.error = null;
     },
-    // Fetch all users
+   
     fetchAllUsersRequest(state) {
       state.loading = true;
       state.error = null;

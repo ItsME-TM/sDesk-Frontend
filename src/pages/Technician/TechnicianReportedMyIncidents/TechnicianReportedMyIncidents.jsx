@@ -14,6 +14,7 @@ const TechnicianReportedMyIncidents = () => {
   // Redux state
   const { assignedByMe, loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth); // Get logged-in user from auth slice
+  console.log('[TechnicianMyReported] user object:', user);
   
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +27,7 @@ const TechnicianReportedMyIncidents = () => {
   useEffect(() => {
     if (user && user.role === 'technician' && user.serviceNum) {
       console.log('[TechnicianMyReported] Fetching incidents for technician serviceNum:', user.serviceNum);
-      dispatch(fetchAssignedByMeRequest({ informant: user.serviceNum }));
+      dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
     } else {
       console.log('[TechnicianMyReported] User data not ready:', user);
     }
@@ -57,7 +58,7 @@ const TechnicianReportedMyIncidents = () => {
         <div className="TechnicianReportedMyIncidents-content2">
           <div className="error-container">
             <p>Error loading reported incidents: {error}</p>
-            <button onClick={() => dispatch(fetchAssignedByMeRequest({ informant: user.serviceNum }))}>
+            <button onClick={() => dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }))}>
               Retry
             </button>
           </div>
@@ -75,7 +76,7 @@ const TechnicianReportedMyIncidents = () => {
     category: item.category, // Category name from backend
     status: item.status,
     priority: item.priority,
-    informant: item.informant, // serviceNum of the reporter
+    informant: item.informant, // service_number of the reporter
   }));
 
   console.log('[TechnicianMyReported] tableData:', tableData);
@@ -102,7 +103,7 @@ const TechnicianReportedMyIncidents = () => {
           formData: {
             serviceNo: user.service_number,
             tpNumber: user.tp_number,
-            name: user.user_name,
+            name: user.user_name || user.name || user.email,
             designation: user.designation,
             email: user.email,
           },
@@ -176,6 +177,9 @@ const TechnicianReportedMyIncidents = () => {
 
   if (!user) {
     return <div>Loading user data...</div>;
+  }
+  if (!user.serviceNum) {
+    return <div>User data missing serviceNum. Please contact admin.</div>;
   }
   if (user.role !== 'technician') {
     return <div>Unauthorized: Only technicians can view this page.</div>;

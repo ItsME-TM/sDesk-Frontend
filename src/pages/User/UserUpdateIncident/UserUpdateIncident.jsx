@@ -6,16 +6,24 @@ import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedU
 import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
 import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
 
-const UserUpdateIncident = () => {
+// Accept loggedInUser as a prop
+const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const historyData = useSelector(state => state.incident.incidentHistory) || [];
+  const loadingHistory = useSelector(state => state.incident.loadingHistory);
+  const errorHistory = useSelector(state => state.incident.errorHistory);
+  // Set formData to loggedInUser if available, else fallback to blank
   const [formData, setFormData] = useState({
-    serviceNo: '',
+    serviceNo: loggedInUser?.serviceNum || '',
     tpNumber: '',
-    name: '',
-    designation: '',
-    email: '',
+    name: loggedInUser?.name || '',
+    designation: loggedInUser?.role || '',
+    email: loggedInUser?.email || '',
   });
 
   const [incidentDetails, setIncidentDetails] = useState({
@@ -30,22 +38,53 @@ const UserUpdateIncident = () => {
     comments: ''
   });
 
-  const [historyData, setHistoryData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+
   useEffect(() => {
-    if (location.state?.formData) {
-      setFormData(location.state.formData);
+    // Always set formData to loggedInUser if available (for popup)
+    if (loggedInUser) {
+      setFormData({
+        serviceNo: loggedInUser.serviceNum || '',
+        tpNumber: loggedInUser.tpNumber || '',
+        name: loggedInUser.name || '',
+        designation: loggedInUser.role || '',
+        email: loggedInUser.email || '',
+      });
+    } else if (location.state?.formData) {
+      setFormData({
+        serviceNo: location.state.formData.serviceNo || location.state.formData.serviceNum || '',
+        tpNumber: location.state.formData.tpNumber || '',
+        name: location.state.formData.name || '',
+        designation: location.state.formData.designation || location.state.formData.role || '',
+        email: location.state.formData.email || '',
+      });
     }
 
-    if (location.state?.incidentDetails) {
+    // Incident details
+    console.log('[UserUpdateIncident] incidentData:', incidentData);
+    if (incidentData) {
+      setIncidentDetails({
+        refNo: incidentData.incident_number || incidentData.refNo,
+        category: incidentData.category,
+        location: incidentData.location,
+        priority: incidentData.priority,
+        status: incidentData.status,
+        assignedTo: incidentData.handler || incidentData.assignedTo,
+        updateBy: incidentData.update_by || incidentData.updateBy,
+        updatedOn: incidentData.update_on || incidentData.updatedOn,
+        comments: incidentData.description || incidentData.comments,
+      });
+      // Fetch incident history using redux-saga
+      const refNo = String(incidentData.incident_number || incidentData.refNo);
+      dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
+      setIsLoading(false);
+    } else if (location.state?.incidentDetails) {
       const details = location.state.incidentDetails;
       const fullIncident = sDesk_t2_incidents_dataset.find(
         inc => inc.incident_number === details.refNo
       );
-
       if (fullIncident) {
-        // Map dataset fields to display fields
         setIncidentDetails({
           refNo: details.refNo,
           category: details.category,
@@ -57,8 +96,6 @@ const UserUpdateIncident = () => {
           updatedOn: fullIncident.update_on || new Date().toLocaleString(),
           comments: fullIncident.description || 'No comments'
         });
-
-        // Prepare history data if available
         if (fullIncident.history) {
           setHistoryData(fullIncident.history.map(item => ({
             assignedTo: getUserName(item.handler) || 'Unassigned',
@@ -68,7 +105,6 @@ const UserUpdateIncident = () => {
             comments: item.description || 'No comments'
           })));
         } else {
-          // If no history, use current incident as the only history entry
           setHistoryData([{
             assignedTo: getUserName(fullIncident.handler) || 'Unassigned',
             updatedBy: getUserName(fullIncident.update_by) || 'System',
@@ -86,7 +122,7 @@ const UserUpdateIncident = () => {
       }
     }
     setIsLoading(false);
-  }, [location.state]);
+  }, [incidentData, location.state, loggedInUser]);
 
   const getUserName = (serviceNumber) => {
     const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
@@ -97,12 +133,19 @@ const UserUpdateIncident = () => {
     navigate('/user/UserViewIncident');
   };
 
-  if (isLoading) {
+
+  if (isLoading || loadingHistory) {
     return <div className="loading-container">Loading...</div>;
+  }
+  if (errorHistory) {
+    return <div className="loading-container">Error: {errorHistory}</div>;
   }
 
   return (
-    <div className="UserUpdateIncident-main-content">
+    <div className={isPopup ? "UserUpdateIncident-modal-content" : "UserUpdateIncident-main-content"}>
+      {isPopup && (
+        <button style={{ float: "right" }} onClick={onClose}>Close</button>
+      )}
       <div className="UserUpdateIncident-direction-bar">
         <span className="UserUpdateIncident-svr-desk">Incidents</span>
         <IoIosArrowForward />
@@ -111,6 +154,7 @@ const UserUpdateIncident = () => {
 
       <div className="UserUpdateIncident-content2">
         <AffectedUserDetail formData={formData} />
+        {/* historyData now comes from redux */}
         <IncidentHistory
           refNo={incidentDetails.refNo}
           category={incidentDetails.category}
@@ -122,15 +166,17 @@ const UserUpdateIncident = () => {
           updatedOn={incidentDetails.updatedOn}
           comments={incidentDetails.comments}
           historyData={historyData}
+          users={sDesk_t2_users_dataset}
         />
-        
         <div className="UserUpdateIncident-button-container">
-          <button
-            className="UserUpdateIncident-details-back-btn"
-            onClick={handleBackClick}
-          >
-            Go Back
-          </button>
+          {!isPopup && (
+            <button
+              className="UserUpdateIncident-details-back-btn"
+              onClick={handleBackClick}
+            >
+              Go Back
+            </button>
+          )}
         </div>
       </div>
     </div>

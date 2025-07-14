@@ -8,6 +8,8 @@ const initialState: IncidentState = {
   teamIncidents: [],
   currentIncident: null,
   categories: [], // Add this line
+  incidentHistory: [], // Add incident history
+  currentTechnician: null, // Add current technician
   loading: false,
   error: null,
 };
@@ -105,6 +107,7 @@ const incidentSlice = createSlice({
     },
     getAssignedToMeSuccess(state, action) {
       state.loading = false;
+      console.log('[Reducer] getAssignedToMeSuccess: payload =', action.payload);
       state.assignedToMe = Array.isArray(action.payload)
         ? action.payload
         : action.payload?.data || [];
@@ -133,11 +136,37 @@ const incidentSlice = createSlice({
     },
     getTeamIncidentsSuccess(state, action) {
       state.loading = false;
-      state.teamIncidents = Array.isArray(action.payload)
-        ? action.payload
-        : action.payload?.data || [];
+      state.teamIncidents = action.payload;
     },
     getTeamIncidentsFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Get team incidents by service number
+    getTeamIncidentsByServiceNumRequest(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    getTeamIncidentsByServiceNumSuccess(state, action) {
+      state.loading = false;
+      state.teamIncidents = action.payload;
+    },
+    getTeamIncidentsByServiceNumFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch incident history
+    fetchIncidentHistoryRequest(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchIncidentHistorySuccess(state, action) {
+      state.loading = false;
+      state.incidentHistory = action.payload;
+    },
+    fetchIncidentHistoryFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
     },
@@ -177,6 +206,20 @@ const incidentSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+
+    // Fetch current technician data
+    fetchCurrentTechnicianRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchCurrentTechnicianSuccess(state, action) {
+      state.loading = false;
+      state.currentTechnician = action.payload;
+    },
+    fetchCurrentTechnicianFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -205,11 +248,20 @@ export const {
   getTeamIncidentsRequest,
   getTeamIncidentsSuccess,
   getTeamIncidentsFailure,
+  getTeamIncidentsByServiceNumRequest,
+  getTeamIncidentsByServiceNumSuccess,
+  getTeamIncidentsByServiceNumFailure,
+  fetchIncidentHistoryRequest,
+  fetchIncidentHistorySuccess,
+  fetchIncidentHistoryFailure,
   deleteIncidentRequest,
   deleteIncidentSuccess,
   deleteIncidentFailure,
   clearCurrentIncident,
   clearError,
+  fetchCurrentTechnicianRequest,
+  fetchCurrentTechnicianSuccess,
+  fetchCurrentTechnicianFailure,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage

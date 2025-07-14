@@ -313,7 +313,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                       }
                       onClick={closeSidebar}
                     >
-                      <FaList /> Reported My
+                      <FaList /> My Reported Incidents
                     </Link>
                   </li>
                 </>

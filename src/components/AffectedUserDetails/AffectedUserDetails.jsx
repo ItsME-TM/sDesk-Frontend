@@ -26,33 +26,40 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
     const dispatch = useDispatch();
     const { loading, user, error } = useSelector((state) => state.userLookup);
 
-    console.log('AffectedUserDetails: Component render - loading:', loading, 'user:', user, 'error:', error);
-
-    // Debounced lookup function
+    console.log('AffectedUserDetails: Component render - loading:', loading, 'user:', user, 'error:', error);    // Debounced lookup function
     const debouncedLookup = useDebounce((serviceNum) => {
-        console.log('AffectedUserDetails: Debounced lookup triggered for:', serviceNum);
+        console.log('🎯 AffectedUserDetails: Debounced lookup triggered for:', serviceNum);
+        console.log('🎯 AffectedUserDetails: About to dispatch lookupUserRequest...');
+        console.log('🎯 AffectedUserDetails: Current redux state before dispatch:', { loading, user, error });
+        
         dispatch(lookupUserRequest(serviceNum));
-    }, 500); // 500ms delay
-
-    // Handle service number change with lookup
+        
+        console.log('🎯 AffectedUserDetails: lookupUserRequest dispatched');
+    }, 500); // 500ms delay// Handle service number change with lookup
     const handleServiceNoChange = (e) => {
         const serviceNum = e.target.value;
         
-        console.log('AffectedUserDetails: Service number input changed:', serviceNum);
+        console.log('🔄 AffectedUserDetails: Service number input changed:', serviceNum);
+        console.log('🔄 AffectedUserDetails: Input event:', e);
+        console.log('🔄 AffectedUserDetails: Current loading state:', loading);
+        console.log('🔄 AffectedUserDetails: Current user state:', user);
+        console.log('🔄 AffectedUserDetails: Current error state:', error);
         
         // Update form data immediately for UI responsiveness
         handleInputChange(e);
         
         // Perform lookup if service number exists and has minimum length
         if (serviceNum && serviceNum.trim() !== '' && serviceNum.trim().length >= 3) {
-            console.log('AffectedUserDetails: Triggering debounced lookup for service number:', serviceNum.trim());
+            console.log('🚀 AffectedUserDetails: Triggering debounced lookup for service number:', serviceNum.trim());
+            console.log('🚀 AffectedUserDetails: About to call debouncedLookup...');
             debouncedLookup(serviceNum.trim());
         } else {
-            console.log('AffectedUserDetails: Clearing lookup results - service number too short or empty');
+            console.log('⚠ AffectedUserDetails: Clearing lookup results - service number too short or empty');
+            console.log('⚠ AffectedUserDetails: Service number length:', serviceNum?.trim()?.length || 0);
             // Clear previous lookup results if service number is too short
             dispatch(clearLookupUser());
         }
-    };    // Auto-fill form when user data is found
+    };// Auto-fill form when user data is found
     useEffect(() => {
         console.log('AffectedUserDetails: useEffect triggered - user changed:', user);
         if (user) {
@@ -75,6 +82,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
             <div className="AddInicident-content2-UserDetails-TitleBar">
                 Affected User Details
             </div>
+            
             <div className="AddInicident-content2-UserDetails-UserInfo">
                 <div className="AddInicident-content2-UserDetails-UserInfo-Cube1">
                     <div className="AddInicident-content2-UserDetails-UserInfo-Cube1-title">

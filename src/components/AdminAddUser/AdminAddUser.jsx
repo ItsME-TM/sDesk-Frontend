@@ -1,148 +1,109 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchMainCategoriesRequest } from '../../redux/categories/categorySlice';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
-import { fetchTeamAdminByServiceNumber } from '../../redux/teamAdmin/teamAdminService';
 import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
 
-
 const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) => {
-  // Store current admin's teamName in state
-  const [currentAdminTeamName, setCurrentAdminTeamName] = useState('');
-  // Store the current teamId from team_admins lookup
-  const [currentTeamId, setCurrentTeamId] = useState('');
   const dispatch = useDispatch();
 
-  // Categories for teams from Redux
-  const mainCategories = useSelector(state => state.categories.mainCategories || []);
+  const loggedInUser = useSelector(state => state.auth?.user);
 
-  // SLT user fetched by service number
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    email: '',
+    teamName: loggedInUser?.teamName || '', // take from logged user
+    role: 'technician',
+    tier: '1',
+    active: true,
+    categories: [
+      loggedInUser?.cat1,
+      loggedInUser?.cat2,
+      loggedInUser?.cat3,
+      loggedInUser?.cat4
+    ].filter(Boolean), // take from logged user
+  });
+
+  const [errors, setErrors] = useState({});
+
   const sltUser = useSelector(state => state.sltusers.user);
   const sltUserLoading = useSelector(state => state.sltusers.loading);
   const sltUserError = useSelector(state => state.sltusers.error);
 
-  // Use only loggedInUser from Redux auth slice
-  const loggedInUser = useSelector(state => state.auth?.user);
-  // Use serviceNum from loggedInUser for team lookup if available
-  const currentAdminServiceNumber = loggedInUser?.serviceNum || loggedInUser?.id || '';
+  // Define filteredSubCategories from loggedInUser's categories
+  const filteredSubCategories = [
+    loggedInUser?.cat1,
+    loggedInUser?.cat2,
+    loggedInUser?.cat3,
+    loggedInUser?.cat4
+  ].filter(Boolean).map(cat => ({ id: cat, name: cat }));
 
-  // On mount, set teamName directly from loggedInUser's serviceNum if available
-  useEffect(() => {
-    if (loggedInUser && (loggedInUser.serviceNum || loggedInUser.id)) {
-      fetchTeamAdminByServiceNumber(currentAdminServiceNumber)
-        .then(response => {
-          if (response && response.data && response.data.teamName) {
-            setCurrentAdminTeamName(response.data.teamName);
-            setFormData(prev => ({ ...prev, teamName: response.data.teamName }));
-          } else if (response && response.teamName) {
-            setCurrentAdminTeamName(response.teamName);
-            setFormData(prev => ({ ...prev, teamName: response.teamName }));
-          } else {
-            console.warn('Team admin found but no teamName in response');
-            setCurrentAdminTeamName('');
-            setFormData(prev => ({ ...prev, teamName: '' }));
-          }
-        })
-        .catch((err) => {
-          // Handle 404 gracefully - admin may not be in team_admins table yet
-          if (err.response && err.response.status === 404) {
-            console.warn(`Team admin not found for service number ${currentAdminServiceNumber}. This is normal if the user is not a team admin.`);
-          } else {
-            console.error('Error fetching team admin:', err);
-          }
-          setCurrentAdminTeamName('');
-          setFormData(prev => ({ ...prev, teamName: '' }));
-        });
+  // Handle SLT user fetch
+  const handleServiceNumBer = () => {
+    if (formData.id.trim()) {
+      dispatch(fetchUserByServiceNumberRequest(formData.id.trim()));
+    } else {
+      dispatch(clearUser());
     }
-  }, [loggedInUser, currentAdminServiceNumber]);
+  };
 
-  // Form state
-  const [formData, setFormData] = useState({
-    id: '',        // service number field
-    name: '',
-    email: '',
-    teamName: '',
-    role: 'technician',
-    tier: '1',
-    active: '',
-    categories: [],
-  });
-  const [errors, setErrors] = useState({});
-
-  // Load teams (categories)
-  useEffect(() => {
-    dispatch(fetchMainCategoriesRequest());
-  }, [dispatch]);
-
-  // If editing existing user, populate form
-  useEffect(() => {
-    if (isEdit && editUser) {
-      setFormData({
-        id: editUser.serviceNum || editUser.serviceNumber || editUser.id || '',
-        name: editUser.name || '',
-        email: editUser.email || '',
-        teamName: editUser.teamName || editUser.team || '',
-        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
-        tier: editUser.tier?.toString() || '1',
-        role: editUser.role || 'technician',
-        active: editUser.active !== undefined ? editUser.active : true,
-      });
-    }
-  }, [isEdit, editUser]);
-
-  // When sltUser is loaded by service number, auto-fill form name and email only (not team)
+  // When SLT user is fetched
   useEffect(() => {
     if (sltUser) {
       setFormData(prev => ({
         ...prev,
         name: sltUser.display_name || '',
         email: sltUser.email || '',
-        id: sltUser.serviceNum || '', // Use id field for service number in form
-        // teamName is NOT set here, only set from admin info
+        id: sltUser.serviceNum || '',
       }));
     }
-  }, [sltUser, currentAdminTeamName]);
+  }, [sltUser]);
 
-  // Clear form user if user is cleared in redux
   useEffect(() => {
     if (!sltUser) {
       setFormData(prev => ({ ...prev, name: '', email: '' }));
     }
   }, [sltUser]);
 
-  // Get current admin's teamName from TeamAdmin API
+  // If editing a user, populate only editable fields (teamName still comes from admin)
   useEffect(() => {
-    async function fetchAdminTeam() {
-      if (currentAdminServiceNumber) {
-        try {
-          const response = await fetchTeamAdminByServiceNumber(currentAdminServiceNumber);
-          if (response && response.data && response.data.teamName) {
-            setCurrentAdminTeamName(response.data.teamName);
-            setFormData(prev => ({ ...prev, teamName: response.data.teamName }));
-          } else if (response && response.teamName) {
-            setCurrentAdminTeamName(response.teamName);
-            setFormData(prev => ({ ...prev, teamName: response.teamName }));
-          }
-        } catch (err) {
-          // Handle 404 gracefully - admin may not be in team_admins table
-          if (err.response && err.response.status === 404) {
-            console.warn(`Team admin not found for service number ${currentAdminServiceNumber}`);
-          } else {
-            console.error('Error fetching team admin:', err);
-          }
-        }
-      }
+    if (isEdit && editUser) {
+      setFormData(prev => ({
+        ...prev,
+        id: editUser.serviceNum || editUser.serviceNumber || editUser.id || '',
+        name: editUser.name || '',
+        email: editUser.email || '',
+        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
+        tier: editUser.tier?.toString() || '1',
+        role: editUser.role || 'technician',
+        active: editUser.active !== undefined ? editUser.active : true,
+      }));
     }
-    fetchAdminTeam();
-  }, [currentAdminServiceNumber]);
-  const handleServiceNumBer = () => {
-    if (formData.id && formData.id.trim() !== '') {
-      dispatch(fetchUserByServiceNumberRequest(formData.id.trim()));
-    } else {
-      dispatch(clearUser());
+  }, [isEdit, editUser]);
+
+  // Reset formData to initial state (with teamName) when switching to add mode (not edit)
+  useEffect(() => {
+    if (!isEdit) {
+      setFormData({
+        id: '',
+        name: '',
+        email: '',
+        teamName: loggedInUser?.teamName || '',
+        role: 'technician',
+        tier: '1',
+        active: true,
+        categories: [],
+      });
     }
-  };
+  }, [isEdit, loggedInUser]);
+
+  // Always set teamName from admin/cookie when adding or editing
+  useEffect(() => {
+    if (loggedInUser && loggedInUser.teamName) {
+      setFormData(prev => ({ ...prev, teamName: loggedInUser.teamName }));
+    }
+  }, [loggedInUser]);
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -178,14 +139,13 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
     if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
-    // Always include only serviceNum (not id) in the payload for backend compatibility
+
     const payload = {
       serviceNum: formData.id,
       email: formData.email,
       name: formData.name,
-      team: formData.teamName, // if your backend expects teamId, map it here
-      // role is not needed for backend DTO, remove if not used elsewhere
-      tier: Number(formData.tier), // ensure number
+      team: formData.teamName,
+      tier: Number(formData.tier),
       active: formData.active,
       cat1: formData.categories[0] || '',
       cat2: formData.categories[1] || '',
@@ -195,40 +155,20 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
       rr: 1,
       designation: 'Technician',
       contactNumber: '0000000000',
-      teamLevel: 'Default', // TODO: set appropriately if needed
+      teamLevel: 'Default',
       teamLeader: formData.teamLeader ?? false,
       assignAfterSignOff: formData.assignAfterSignOff ?? false,
       permanentMember: formData.permanentMember ?? false,
       subrootUser: formData.subrootUser ?? false,
-      isEdit, // <-- add this line to indicate edit mode
+      isEdit,
     };
     onSubmit(payload);
   };
 
-
-  // Update teamId when teamName is auto-filled (from team_admins lookup)
-  useEffect(() => {
-    const teamMainCategory = mainCategories.find(cat => cat.name === formData.teamName);
-    if (teamMainCategory) {
-      setCurrentTeamId(teamMainCategory.id);
-    } else {
-      setCurrentTeamId('');
-    }
-  }, [formData.teamName, mainCategories]);
-
-  // Memoized subcategories for the selected team (main category) by teamId
-  const filteredSubCategories = useMemo(() => {
-    const team = mainCategories.find(cat => cat.id === currentTeamId);
-    return team && Array.isArray(team.subCategories) ? team.subCategories : [];
-  }, [mainCategories, currentTeamId]);
-
-  // Show user not found if service number entered, not loading, no user, and no error
   const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
-  // Handle team admin lookup errors gracefully
   useEffect(() => {
-    if (sltUserError && sltUserError.includes('not found')) {
-      // Show a warning for user not found in SLT Users table
+    if (sltUserError?.includes('not found')) {
       console.warn('SLT User not found for this service number. User can enter details manually.');
     }
   }, [sltUserError]);
@@ -238,9 +178,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
       <div className="AdminAddUser-content">
         <div className="AdminAddUser-header">
           <h2>{isEdit ? 'Edit User' : 'Add User'}</h2>
-          <button onClick={onClose}>
-            <IoIosClose size={30} />
-          </button>
+          <button onClick={onClose}><IoIosClose size={30} /></button>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="AdminAddUser-form-grid">
@@ -256,11 +194,12 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                   onBlur={handleServiceNumBer}
                   autoComplete="off"
                   required
+                  readOnly={isEdit}
                 />
                 {sltUserLoading && <span>Loading...</span>}
                 {sltUserError && <span className="error-message">{sltUserError}</span>}
                 {showUserNotFound && (
-                  <span className="error-message">User not found in SLT Users. Please enter details manually.</span>
+                  <span className="error-message">User not found in SLT Users. Please enter manually.</span>
                 )}
               </div>
               <div>
@@ -272,6 +211,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  readOnly={isEdit}
                 />
               </div>
               <div>
@@ -283,17 +223,16 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  readOnly={isEdit}
                 />
               </div>
               <div>
                 <label>Team:</label>
-                {errors.teamName && <span className="error-message">{errors.teamName}</span>}
                 <input
                   type="text"
                   name="teamName"
                   value={formData.teamName}
                   readOnly
-                  placeholder="Auto-filled from service number"
                   className="readonly-input"
                 />
               </div>
@@ -322,8 +261,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
               </div>
             </div>
             <div className="form-right">
-              <label>Categories (select up to 4):</label>
-              {errors.categories && <span className="error-message">{errors.categories}</span>}
+              <label>Categories :</label>
               <div className="checkbox-list">
                 {filteredSubCategories.map(item => (
                   <label key={item.id} className="checkbox-item">
@@ -332,10 +270,6 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                       value={item.id}
                       checked={formData.categories.includes(item.id)}
                       onChange={handleCategoryChange}
-                      disabled={
-                        !formData.categories.includes(item.id) &&
-                        formData.categories.length >= 4
-                      }
                     />
                     {item.name}
                   </label>

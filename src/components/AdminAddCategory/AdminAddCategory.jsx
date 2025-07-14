@@ -27,6 +27,7 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
     );
     const [errors, setErrors] = useState({});
     const [localSuccess, setLocalSuccess] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         dispatch(fetchMainCategoriesRequest());
@@ -51,52 +52,114 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
         }
     };
 
+    // UUID v4 regex (simple, not strict for all variants)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         const newErrors = {};
 
         if (!formData.name) newErrors.name = 'Name is required';
         if (categoryType !== 'parent' && !formData.parent) newErrors.parent = 'Parent Category is required';
         if (categoryType === 'grandchild' && !formData.sub) newErrors.sub = 'Sub Category is required';
 
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length > 0) {
-            return;
+        // UUID validation for parent and sub fields
+        if (categoryType === 'sub' || categoryType === 'grandchild') {
+            if (!formData.parent || !uuidRegex.test(formData.parent)) {
+                newErrors.parent = 'Parent Category is invalid (not a valid ID)';
+            }
+        }
+        if (categoryType === 'grandchild') {
+            if (!formData.sub || !uuidRegex.test(formData.sub)) {
+                newErrors.sub = 'Sub Category is invalid (not a valid ID)';
+            }
         }
 
+        setErrors(newErrors);
+
+        // Log payload for debugging
         if (!isEdit) {
             if (categoryType === 'parent') {
-                dispatch(createCategoryRequest({ name: formData.name }));
+                if (!formData.name || typeof formData.name !== 'string' || formData.name.trim() === '') {
+                    setErrors({ name: 'Name is required' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                const payload = { name: formData.name.trim() };
+                console.log('Dispatching createCategoryRequest payload:', payload);
+                dispatch(createCategoryRequest(payload));
+                setTimeout(() => setIsSubmitting(false), 1000);
                 return;
             } else if (categoryType === 'sub') {
                 const parentObj = mainCategories.find(cat => cat.id === formData.parent);
                 if (!parentObj) {
                     setErrors({ parent: 'Invalid parent category selected❌' });
+                    setIsSubmitting(false);
                     return;
                 }
-                dispatch({ type: 'categories/createSubCategoryRequest', payload: { name: formData.name, mainCategoryId: parentObj.id } });
+                if (!formData.name || typeof formData.name !== 'string' || formData.name.trim() === '') {
+                    setErrors({ name: 'Name is required' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!uuidRegex.test(parentObj.id)) {
+                    setErrors({ parent: 'Parent Category is not a valid UUID' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                const payload = { name: formData.name.trim(), mainCategoryId: parentObj.id };
+                console.log('Dispatching createSubCategoryRequest payload:', payload);
+                dispatch({ type: 'categories/createSubCategoryRequest', payload });
+                setTimeout(() => setIsSubmitting(false), 1000);
                 return;
             } else if (categoryType === 'grandchild') {
-                dispatch(createCategoryItemRequest({ name: formData.name, subCategoryId: formData.sub }));
+                if (!formData.sub || typeof formData.sub !== 'string' || formData.sub.trim() === '') {
+                    setErrors({ sub: 'Sub Category is required' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!formData.name || typeof formData.name !== 'string' || formData.name.trim() === '') {
+                    setErrors({ name: 'Name is required' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                if (!uuidRegex.test(formData.sub)) {
+                    setErrors({ sub: 'Sub Category is not a valid UUID' });
+                    setIsSubmitting(false);
+                    return;
+                }
+                // Only send trimmed name and subCategoryId as string
+                const payload = { name: formData.name.trim(), subCategoryId: String(formData.sub) };
+                console.log('Dispatching createCategoryItemRequest payload:', payload);
+                dispatch(createCategoryItemRequest(payload));
+                setTimeout(() => setIsSubmitting(false), 1000);
                 return;
             }
         } else {
             // Only allow editing for grandchild/category-item
             if (categoryType === 'grandchild' && editCategory?.id) {
-                dispatch(updateCategoryItemRequest({
+                const payload = {
                     id: editCategory.id,
                     name: formData.name,
                     subCategoryId: formData.sub
-                }));
+                };
+                console.log('Dispatching updateCategoryItemRequest payload:', payload);
+                dispatch(updateCategoryItemRequest(payload));
                 setLocalSuccess('Category item updated successfully!✅');
                 setTimeout(() => {
                     setLocalSuccess('');
                     onClose();
                 }, 1000);
+                setTimeout(() => setIsSubmitting(false), 1000);
                 return;
             }
             // Optionally handle other types if needed
+        }
+        if (Object.keys(newErrors).length > 0) {
+            setIsSubmitting(false);
+            return;
         }
     };
 
@@ -276,7 +339,7 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
                             </div>
                         )}
                         <div className="AdminAddCategory-content1-formContainer-form-submit">
-                            <button type="submit">{isEdit ? 'Save' : 'Add'}</button>
+                        <button type="submit" disabled={isSubmitting}>{isEdit ? 'Save' : 'Add'}</button>
                         </div>
                     </form>
                     {/* Show success message only if localSuccess is set */}
