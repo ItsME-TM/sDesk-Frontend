@@ -6,6 +6,7 @@ import './LocationDropdown.css';
 const LocationDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
     const [locations, setLocations] = useState([]);
+    const [groupedLocations, setGroupedLocations] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -18,6 +19,19 @@ const LocationDropdown = ({ onSelect, onClose }) => {
                 }
                 const data = await response.json();
                 setLocations(data);
+                
+                // Group locations by region and province
+                const grouped = data.reduce((acc, location) => {
+                    if (!acc[location.region]) {
+                        acc[location.region] = {};
+                    }
+                    if (!acc[location.region][location.province]) {
+                        acc[location.region][location.province] = [];
+                    }
+                    acc[location.region][location.province].push(location);
+                    return acc;
+                }, {});
+                setGroupedLocations(grouped);
             } catch (error) {
                 setError(error);
             } finally {
@@ -68,30 +82,51 @@ const LocationDropdown = ({ onSelect, onClose }) => {
                     </button>
                 </div>
                 <div className="AdminLocationTree-content-TreePopup-Body">
-                    {locations.map((mainLocation, index) => (
-                        <div key={index} className="AdminLocationTree-node">
+                    {Object.entries(groupedLocations).map(([region, provinces], regionIndex) => (
+                        <div key={region} className="AdminLocationTree-node">
                             <div
                                 className="AdminLocationTree-content-TreePopup-Body-Label"
-                                onClick={() => toggleExpand(`main-${index}`)}
+                                onClick={() => toggleExpand(`region-${region}`)}
                             >
-                                {expanded[`main-${index}`] ? (
+                                {expanded[`region-${region}`] ? (
                                     <IoMdArrowDropdown className="arrow-icon" />
                                 ) : (
                                     <IoMdArrowDropright className="arrow-icon" />
                                 )}
-                                {mainLocation.locationName}
+                                {region}
                             </div>
-                            {expanded[`main-${index}`] && (
+                            {expanded[`region-${region}`] && (
                                 <div className="AdminLocationTree-content-TreePopup-Body-SubNodes">
-                                    {/* Assuming locations don't have sub-levels like categories, just display them directly */}
-                                    <div key={mainLocation.id} className="AdminLocationTree-sublocation">
-                                        <div
-                                            className="AdminLocationTree-content-TreePopup-Body-SubNodes-Label AdminLocationTree-item"
-                                            onClick={() => handleSelect(mainLocation)}
-                                        >
-                                            {mainLocation.locationName}
+                                    {Object.entries(provinces).map(([province, locationsList], provinceIndex) => (
+                                        <div key={province} className="AdminLocationTree-node">
+                                            <div
+                                                className="AdminLocationTree-content-TreePopup-Body-Label"
+                                                onClick={() => toggleExpand(`province-${region}-${province}`)}
+                                                style={{ marginLeft: '20px' }}
+                                            >
+                                                {expanded[`province-${region}-${province}`] ? (
+                                                    <IoMdArrowDropdown className="arrow-icon" />
+                                                ) : (
+                                                    <IoMdArrowDropright className="arrow-icon" />
+                                                )}
+                                                {province}
+                                            </div>
+                                            {expanded[`province-${region}-${province}`] && (
+                                                <div className="AdminLocationTree-content-TreePopup-Body-SubNodes">
+                                                    {locationsList.map((location) => (
+                                                        <div
+                                                            key={location.id}
+                                                            className="AdminLocationTree-content-TreePopup-Body-SubNodes-Label AdminLocationTree-item"
+                                                            onClick={() => handleSelect(location)}
+                                                            style={{ marginLeft: '40px' }}
+                                                        >
+                                                            {location.locationName}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
                             )}
                         </div>
