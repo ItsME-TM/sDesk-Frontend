@@ -118,7 +118,7 @@ const AdminLocation = () => {
                     <td>{location.locationCode}</td>
                     <td>{location.locationName}</td>
                     <td>{location.region}</td>
-                    <td>{location.province}</td>{" "}
+                    <td>{location.province}</td>
                     <td className="AdminLocation-actions-cell">
                       <div className="AdminLocation-actions-container">
                         <button
