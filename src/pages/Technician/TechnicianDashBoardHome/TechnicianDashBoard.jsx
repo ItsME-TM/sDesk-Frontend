@@ -6,6 +6,7 @@ import FaultCategoryChart from '../TechnicianDashBoard/FaultCategoryChart';
 import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
 import './TechnicianDashboard.css'; 
 
+
 const TechnicianDashboard = () => {
   const [ticketStats, setTicketStats] = useState([
     {

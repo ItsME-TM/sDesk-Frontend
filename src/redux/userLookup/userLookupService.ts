@@ -6,7 +6,13 @@ export const lookupUserByServiceNum = async (serviceNum: string) => {
   try {
     console.log('🔍 UserLookup Service: Starting request for service number:', serviceNum);
     console.log('🔍 UserLookup Service: API URL:', `${API_BASE}/sltusers/serviceNum/${serviceNum}`);
-    console.log('🔍 UserLookup Service: Current cookies:', document.cookie);
+    if (import.meta.env.MODE !== 'production') {
+      const maskedCookies = document.cookie
+        .split('; ')
+        .map(cookie => cookie.split('=')[0]) // Log only cookie names
+        .join(', ');
+      console.log('🔍 UserLookup Service: Current cookies (names only):', maskedCookies);
+    }
 
     const config = {
       withCredentials: true,

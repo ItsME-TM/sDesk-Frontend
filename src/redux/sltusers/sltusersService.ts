@@ -5,7 +5,8 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 // Update user role by service number
 export const updateUserRoleById = async (serviceNum: string, role: string) => {
-  return axios.put(`${API_BASE}/sltusers/${serviceNum}/role`, { role }, { withCredentials: true });
+  // Use the correct backend endpoint: PUT /sltusers/:serviceNum
+  return axios.put(`${API_BASE}/sltusers/${serviceNum}`, { role }, { withCredentials: true });
 };
 
 export const fetchAllUsers = async () => {

@@ -135,17 +135,22 @@ function AdminUserList() {
   const confirmDelete = async () => {
     if (userToDelete) {
       try {
-        await updateUserRoleById(userToDelete.id, 'user');
-        console.log('Successfully updated SLT user role to user');
+        // Always use serviceNum or serviceNumber for SLT user role update
+        const sltServiceNum = userToDelete.serviceNum || userToDelete.serviceNumber;
+        if (sltServiceNum) {
+          await updateUserRoleById(sltServiceNum, 'user');
+          console.log('Successfully updated SLT user role to user');
+        } else {
+          console.warn('No serviceNum found for SLT user role update');
+        }
       } catch (err) {
         console.warn('Failed to update SLT user role to user:', err);
         // Continue with technician deletion even if role update fails
       }
-      
-      dispatch(deleteTechnicianRequest(userToDelete.serviceNum || userToDelete.id));
+      dispatch(deleteTechnicianRequest(userToDelete.serviceNum || userToDelete.serviceNumber || userToDelete.id));
       setIsDeletePopupOpen(false);
       setUserToDelete(null);
-      dispatch(fetchTechniciansRequest());
+     
     }
   };
 
