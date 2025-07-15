@@ -5,22 +5,22 @@ import { IoIosClose } from "react-icons/io";
 import Select from "react-select";
 
 const regionOptions = [
-  { value: "Metro", label: "Metro" },
+  { value: "METRO", label: "Metro" },
   { value: "R1", label: "R1" },
   { value: "R2", label: "R2" },
   { value: "R3", label: "R3" },
 ];
 
 const provinceOptions = [
-  { value: "Northern ", label: "Northern Province" },
+  { value: "Northern", label: "Northern Province" },
   { value: "North Central", label: "North Central Province" },
-  { value: "North Western ", label: "North Western Province" },
-  { value: "Central ", label: "Central Province" },
-  { value: "Eastern ", label: "Eastern Province" },
-  { value: "Western ", label: "Western Province" },
-  { value: "Sabaragamuwa ", label: "Sabaragamuwa Province" },
-  { value: "Uva ", label: "Uva Province" },
-  { value: "Southern ", label: "Southern Province" },
+  { value: "North Western", label: "North Western Province" },
+  { value: "Central", label: "Central Province" },
+  { value: "Eastern", label: "Eastern Province" },
+  { value: "Western", label: "Western Province" },
+  { value: "Sabaragamuwa", label: "Sabaragamuwa Province" },
+  { value: "Uva", label: "Uva Province" },
+  { value: "Southern", label: "Southern Province" },
 ];
 
 const AdminAddLocation = ({

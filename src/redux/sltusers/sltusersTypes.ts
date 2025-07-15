@@ -9,7 +9,8 @@ export interface SLTUser {
 
 export interface SLTUsersState {
   user: SLTUser | null;
-  allUsers: SLTUser[];
+  users: SLTUser[];
   loading: boolean;
   error: string | null;
 }
+

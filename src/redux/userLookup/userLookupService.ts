@@ -1,11 +1,10 @@
 import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 export const lookupUserByServiceNum = async (serviceNum: string) => {
   try {
     console.log('🔍 UserLookup Service: Starting request for service number:', serviceNum);
-    console.log('🔍 UserLookup Service: API URL:', `${API_BASE}/sltusers/serviceNum/${serviceNum}`);
+    console.log('🔍 UserLookup Service: API URL:', buildUrl(API_BASE, `/sltusers/serviceNum/${serviceNum}`));
     if (import.meta.env.MODE !== 'production') {
       const maskedCookies = document.cookie
         .split('; ')
@@ -26,7 +25,7 @@ export const lookupUserByServiceNum = async (serviceNum: string) => {
     console.log('🔍 UserLookup Service: Request config:', config);
     console.log('🔍 UserLookup Service: Making axios request...');
 
-    const response = await axios.get(`${API_BASE}/sltusers/serviceNum/${serviceNum}`, config);
+    const response = await axios.get(buildUrl(API_BASE, `/sltusers/serviceNum/${serviceNum}`), config);
 
     console.log('✅ UserLookup Service: Request successful');
     console.log('✅ UserLookup Service: Response status:', response.status);
