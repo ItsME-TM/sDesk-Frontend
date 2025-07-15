@@ -87,18 +87,19 @@ function* handleFetchLoggedUser() {
     yield put(fetchLoggedUserFailure(error.message || 'Failed to fetch logged user'));
   }
 }
-
 function* handleRefreshToken() {
   try {
-    const response = yield call(refreshToken);
+ const response = yield call(refreshToken);
+
+
     console.log('[Saga] Refresh token API response:', response);
-    if (response.data && response.data.success === false) {
-      yield put(refreshTokenFailure(response.data.message || 'Failed to refresh token'));
-    } else { 
-      yield put(refreshTokenSuccess(response.data.user));
-    }
-  } catch (error: any) {
-    yield put(refreshTokenFailure(error.message || 'Failed to refresh token'));
+
+    yield put(refreshTokenSuccess(response.data));
+
+    // ✅ Immediately fetch the logged user
+    yield put(fetchLoggedUserRequest());
+  } catch (error) {
+    yield put(refreshTokenFailure('Token refresh failed'));
   }
 }
 

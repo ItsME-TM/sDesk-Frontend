@@ -1,4 +1,3 @@
-// technicianTypes.js
 export interface Technician {
   id: number;
   user: any; // SLTUser, can be typed more strictly if needed
