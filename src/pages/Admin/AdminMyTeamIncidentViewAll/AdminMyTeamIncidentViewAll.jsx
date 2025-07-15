@@ -3,6 +3,9 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
+import { fetchCategoriesRequest, fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
 import { useNavigate } from 'react-router-dom';
 import './AdminMyTeamIncidentViewAll.css';
 
@@ -14,14 +17,12 @@ const AdminMyTeamIncidentViewAll = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [mainCategories, setMainCategories] = useState([]);
-
-  
+  // Get data from Redux store
   const { incidents, loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
+  const { list: mainCategories, categoryItems: categories } = useSelector((state) => state.categories);
+  const { locations } = useSelector((state) => state.location);
+  const { allUsers: users } = useSelector((state) => state.sltusers);
 
   console.log('Redux state - incidents:', incidents);
   console.log('Redux state - loading:', loading);
@@ -30,134 +31,15 @@ const AdminMyTeamIncidentViewAll = () => {
 
   const currentAdmin = user;
 
-  const [directIncidents, setDirectIncidents] = useState([]);
 
  
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        
-        try {
-          const incidentRes = await fetch('http://localhost:8000/incident/all-teams');
-          if (incidentRes.ok) {
-            const incidentData = await incidentRes.json();
-            console.log('Direct API call - incidents:', incidentData);
-            setDirectIncidents(incidentData);
-          }
-        } catch (error) {
-          console.error('Direct API call failed:', error);
-        }
-
-     
-        dispatch(fetchAllIncidentsRequest());
-
-       
-        try {
-          console.log('Fetching main categories from API...');
-          const mainCategoriesRes = await fetch('http://localhost:8000/categories/main', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          console.log('Main categories API response status:', mainCategoriesRes.status);
-          
-          if (mainCategoriesRes.ok) {
-            const mainCategoriesData = await mainCategoriesRes.json();
-            console.log('Main categories from API - raw response:', mainCategoriesData);
-            
-            if (Array.isArray(mainCategoriesData)) {
-              console.log('Setting main categories from API:', mainCategoriesData);
-              setMainCategories(mainCategoriesData);
-            } else {
-              console.log('API returned non-array data');
-              setMainCategories([]);
-            }
-          } else {
-            console.log('Main categories API failed with status:', mainCategoriesRes.status);
-            setMainCategories([]);
-          }
-        } catch (error) {
-          console.error('Main categories API error:', error);
-          setMainCategories([]);
-        }
-
-        try {
-          const categoriesRes = await fetch('http://localhost:8000/categories/item', {
-            credentials: 'include'
-          });
-          if (categoriesRes.ok) {
-            const categoriesData = await categoriesRes.json();
-            console.log('Categories API response:', categoriesData);
-            
-            // Process API data to transform it to the expected format
-            if (Array.isArray(categoriesData) && categoriesData.length > 0) {
-              const transformedFromAPI = categoriesData.map(item => ({
-                grandchild_category_number: item.category_code,
-                grandchild_category_name: item.name,
-                child_category_name: item.subCategory?.name || 'Unknown Sub',
-                child_category_number: item.subCategory?.category_code || 'Unknown',
-                parent_category_number: item.subCategory?.mainCategory?.category_code || 'Unknown',
-                parent_category_name: item.subCategory?.mainCategory?.name || 'Unknown',
-                // For backwards compatibility
-                category_code: item.category_code,
-                name: item.name
-              }));
-              
-              console.log('Using transformed API data:', transformedFromAPI);
-              setCategories(transformedFromAPI);
-            } else {
-              console.log('API returned empty data');
-              setCategories([]);
-            }
-          } else {
-            console.log('Categories API failed');
-            setCategories([]);
-          }
-        } catch (error) {
-          console.log('Categories API error:', error);
-          setCategories([]);
-        }
-
-        try {
-          const usersRes = await fetch('http://localhost:8000/sltusers', {
-            credentials: 'include'
-          });
-          if (usersRes.ok) {
-            const usersData = await usersRes.json();
-            setUsers(usersData);
-          } else {
-            console.log('Users API failed');
-            setUsers([]);
-          }
-        } catch (error) {
-          console.log('Users API error:', error);
-          setUsers([]);
-        }
-
-        try {
-          const locationsRes = await fetch('http://localhost:8000/locations', {
-            credentials: 'include'
-          });
-          if (locationsRes.ok) {
-            const locationsData = await locationsRes.json();
-            setLocations(locationsData);
-          } else {
-            console.log('Locations API failed');
-            setLocations([]);
-          }
-        } catch (error) {
-          console.log('Locations API error:', error);
-          setLocations([]);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
+    // Fetch all data using Redux actions
+    dispatch(fetchAllIncidentsRequest());
+    dispatch(fetchCategoriesRequest());
+    dispatch(fetchCategoryItemsRequest());
+    dispatch(fetchLocationsRequest());
+    dispatch(fetchAllUsersRequest());
   }, [dispatch, user, currentAdmin]);
 
   if (!user) {

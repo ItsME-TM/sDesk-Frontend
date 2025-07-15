@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
 import './LocationDropdown.css';
+import { fetchLocationsRequest } from '../../redux/location/locationSlice';
 
 const LocationDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
-    const [locations, setLocations] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+    
+    // Get data from Redux store
+    const { locations, loading: isLoading, error } = useSelector((state) => state.location);
 
     useEffect(() => {
-        const fetchLocations = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/locations');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                setLocations(data);
-            } catch (error) {
-                setError(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchLocations();
-    }, []);
+        // Fetch locations using Redux action
+        dispatch(fetchLocationsRequest());
+    }, [dispatch]);
 
     const toggleExpand = (key) => {
         setExpanded((prev) => ({
@@ -52,7 +41,7 @@ const LocationDropdown = ({ onSelect, onClose }) => {
     }
 
     if (error) {
-        return <div className="AdminLocationTree-content">Error: {error.message}</div>;
+        return <div className="AdminLocationTree-content">Error: {error}</div>;
     }
 
     return (

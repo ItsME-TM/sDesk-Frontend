@@ -1,32 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
 import './CategoryDropdown.css';
+import { fetchCategoriesRequest } from '../../redux/categories/categorySlice';
 
 const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
     const [expanded, setExpanded] = useState({});
-    const [mainCategories, setMainCategories] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const dispatch = useDispatch();
+    
+    // Get data from Redux store
+    const { list: mainCategories, loading: isLoading, error } = useSelector((state) => state.categories);
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/categories/main');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                setMainCategories(data);
-            } catch (error) {
-                setError(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCategories();
-    }, []);
+        // Fetch categories using Redux action
+        dispatch(fetchCategoriesRequest());
+    }, [dispatch]);
 
     const toggleExpand = (key) => {
         setExpanded((prev) => ({
@@ -45,7 +34,7 @@ const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
     }
 
     if (error) {
-        return <div className="AdminCategoryTree-content">Error: {error.message}</div>;
+        return <div className="AdminCategoryTree-content">Error: {error}</div>;
     }
 
     return (
