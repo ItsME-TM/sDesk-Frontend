@@ -35,12 +35,13 @@ import SuperAdminReportedMyIncidents from "./pages/SuperAdmin/SuperAdminReported
 import SuperAdminLayout from './pages/SuperAdmin/Layout/SuperAdminLayout.jsx';
 import ManageTeamAdmin from './pages/SuperAdmin/ManageTeamAdmin/ManageTeamAdmin.jsx';
 import SuperAdminAddIncident from './pages/SuperAdmin/SuperAdminAddIncident/SuperAdminAddIncident.jsx';
+import SocketTest from './components/SocketTest/SocketTest.jsx';
 
 function App(){
     return(
         <BrowserRouter>
             <Routes>
-
+                <Route path="/socket-test" element={<SocketTest />} />
                 <Route path="/" element={<Navigate to="/LogIn" replace />} />
                 <Route path="/LogIn" element={<LogIn />} />
                 <Route path="/auth/callback" element={<MicrosoftCallback />} />
