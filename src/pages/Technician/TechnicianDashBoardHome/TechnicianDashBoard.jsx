@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
-import { Bell, Asterisk, Pause, Truck, Mail, Flame } from 'lucide-react';
-import StatCard from '../TechnicianDashBoard/StatCard';
-import FaultCategoryChart from '../TechnicianDashBoard/FaultCategoryChart';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import './TechnicianDashboard.css'; 
-
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col } from "react-bootstrap";
+import { Bell, Asterisk, Pause, Truck, Mail, Flame } from "lucide-react";
+import StatCard from "../TechnicianDashBoard/StatCard";
+import FaultCategoryChart from "../TechnicianDashBoard/FaultCategoryChart";
+import { sDesk_t2_incidents_dataset } from "../../../data/sDesk_t2_incidents_dataset";
+import "./TechnicianDashBoard.css";
 
 const TechnicianDashboard = () => {
   const [ticketStats, setTicketStats] = useState([
@@ -14,43 +13,43 @@ const TechnicianDashboard = () => {
       count: 0,
       newCount: 0,
       color: "warning",
-      Icon: Bell
+      Icon: Bell,
     },
     {
       title: "Open",
       count: 0,
       newCount: 0,
       color: "primary",
-      Icon: Asterisk
+      Icon: Asterisk,
     },
     {
       title: "Hold",
       count: 0,
       newCount: 0,
       color: "info",
-      Icon: Pause
+      Icon: Pause,
     },
     {
       title: "Ongoing",
       count: 0,
       newCount: 0,
       color: "secondary",
-      Icon: Truck
+      Icon: Truck,
     },
     {
       title: "Closed(T)",
       count: 0,
       newCount: 0,
       color: "success",
-      Icon: Mail
+      Icon: Mail,
     },
     {
       title: "Critical",
       count: 0,
       newCount: 0,
       color: "danger",
-      Icon: Flame
-    }
+      Icon: Flame,
+    },
   ]);
 
   const faultCategoryData = [
@@ -59,7 +58,7 @@ const TechnicianDashboard = () => {
     { name: "Printers", value: 12, color: "#dc3545" },
     { name: "Finishers", value: 8, color: "#ffc107" },
     { name: "Scanners", value: 8, color: "#17a2b8" },
-    { name: "Software New Installation", value: 12, color: "#6f42c1" }
+    { name: "Software New Installation", value: 12, color: "#6f42c1" },
   ];
 
   useEffect(() => {
@@ -83,24 +82,24 @@ const TechnicianDashboard = () => {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
-      sDesk_t2_incidents_dataset.forEach(incident => {
+      sDesk_t2_incidents_dataset.forEach((incident) => {
         const updateDate = new Date(incident.update_on);
         const isNew = updateDate >= yesterday;
-        
-        switch(incident.status) {
-          case 'Open':
+
+        switch (incident.status) {
+          case "Open":
             openCount++;
             if (isNew) newOpenCount++;
             break;
-          case 'Hold':
+          case "Hold":
             holdCount++;
             if (isNew) newHoldCount++;
             break;
-          case 'In Progress':
+          case "In Progress":
             ongoingCount++;
             if (isNew) newOngoingCount++;
             break;
-          case 'Closed':
+          case "Closed":
             closedCount++;
             if (isNew) newClosedCount++;
             break;
@@ -108,8 +107,8 @@ const TechnicianDashboard = () => {
             unattendedCount++;
             if (isNew) newUnattendedCount++;
         }
-        
-        if (incident.priority === 'Critical') {
+
+        if (incident.priority === "Critical") {
           criticalCount++;
           if (isNew) newCriticalCount++;
         }
@@ -121,55 +120,55 @@ const TechnicianDashboard = () => {
           count: unattendedCount,
           newCount: newUnattendedCount,
           color: "warning",
-          Icon: Bell
+          Icon: Bell,
         },
         {
           title: "Open",
           count: openCount,
           newCount: newOpenCount,
           color: "primary",
-          Icon: Asterisk
+          Icon: Asterisk,
         },
         {
           title: "Hold",
           count: holdCount,
           newCount: newHoldCount,
           color: "info",
-          Icon: Pause
+          Icon: Pause,
         },
         {
           title: "Ongoing",
           count: ongoingCount,
           newCount: newOngoingCount,
           color: "secondary",
-          Icon: Truck
+          Icon: Truck,
         },
         {
           title: "Closed(T)",
           count: closedCount,
           newCount: newClosedCount,
           color: "success",
-          Icon: Mail
+          Icon: Mail,
         },
         {
           title: "Critical",
           count: criticalCount,
           newCount: newCriticalCount,
           color: "danger",
-          Icon: Flame
-        }
+          Icon: Flame,
+        },
       ]);
     };
 
     calculateStats();
-  }, []); 
+  }, []);
 
   return (
     <div className="dashboard-content p-4">
       <div className="bg-white border-bottom px-4 py-3 mb-4">
-         <div className="techniciandashboard-tickets-creator">
-            <span className="techniciandashboard-svr-desk">DashBoard</span>
-         </div>
+        <div className="techniciandashboard-tickets-creator">
+          <span className="techniciandashboard-svr-desk">DashBoard</span>
+        </div>
       </div>
 
       <Container fluid>
@@ -185,9 +184,7 @@ const TechnicianDashboard = () => {
           <Col lg={8}>
             <FaultCategoryChart data={faultCategoryData} />
           </Col>
-          <Col lg={4}>
-            {/* Additional widgets */}
-          </Col>
+          <Col lg={4}>{/* Additional widgets */}</Col>
         </Row>
       </Container>
     </div>

@@ -1,16 +1,15 @@
 import axios from "axios";
 import { Technician } from "./technicianTypes";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 export const fetchTechnicians = async () => {
-  return axios.get(`${API_BASE}/technicians`, { withCredentials: true });
+  return axios.get(buildUrl(API_BASE, '/technicians'), { withCredentials: true });
 };
 
 export const createTechnician = async (data: Partial<Technician>) => {
   console.log('[createTechnician] Data sent to API:', data, JSON.stringify(data), Object.entries(data).map(([k, v]) => `${k}: ${typeof v}`));
   try {
-    const response = await axios.post(`${API_BASE}/technician`, data, { withCredentials: true });
+    const response = await axios.post(buildUrl(API_BASE, '/technician'), data, { withCredentials: true });
     console.log('[createTechnician] API response:', response.data);
     return response;
   } catch (error) {
@@ -24,16 +23,16 @@ export const createTechnician = async (data: Partial<Technician>) => {
 };
 
 export const updateTechnician = async (serviceNum: string, data: Partial<Technician>) => {
-  return axios.put(`${API_BASE}/technician/${serviceNum}`, data, { withCredentials: true });
+  return axios.put(buildUrl(API_BASE, `/technician/${serviceNum}`), data, { withCredentials: true });
 };
 
 export const deleteTechnician = async (serviceNum: string) => {
-  return axios.delete(`${API_BASE}/technician/${serviceNum}`, { withCredentials: true });
+  return axios.delete(buildUrl(API_BASE, `/technician/${serviceNum}`), { withCredentials: true });
 };
 export const checkTechnicianStatus = async () => {
-  return axios.get(`${API_BASE}/technician/check-status`, { withCredentials: true });
+  return axios.get(buildUrl(API_BASE, '/technician/check-status'), { withCredentials: true });
 
 };
 export const fetchActiveTechnicians = async () => {
-  return axios.get(`${API_BASE}/technician/active`, { withCredentials: true });
+  return axios.get(buildUrl(API_BASE, '/technician/active'), { withCredentials: true });
 };
