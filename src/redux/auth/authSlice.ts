@@ -6,6 +6,8 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   isLoggedIn: boolean;
+  authInitialized: boolean; // Indicates if the auth state has been initialized
+  
 }
 
 const initialState: AuthState = {
@@ -13,6 +15,7 @@ const initialState: AuthState = {
   loading: false, 
   error: null,
   isLoggedIn: true,
+  authInitialized: false
 };
 
 const authSlice = createSlice({
@@ -51,32 +54,37 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    fetchLoggedUserSuccess(state, action: PayloadAction<User>) {
-      state.user = action.payload;
-      state.loading = false;
-    },
-    fetchLoggedUserFailure(state, action: PayloadAction<string>) {
-      console.log('[AuthSlice] fetchLoggedUserFailure:', action.payload);
-      state.loading = false;
-      state.error = action.payload;
-      state.user = null;
-      state.isLoggedIn = false;
-    },
+ fetchLoggedUserSuccess(state, action: PayloadAction<User>) {
+  console.log('[authSlice] ✅ user fetched:', action.payload); // <- Add this
+  state.user = action.payload;
+  state.loading = false;
+  state.authInitialized = true;
+  state.isLoggedIn = true;
+},
+
+fetchLoggedUserFailure: (state, action) => {
+  state.user = null;
+  state.loading = false;
+  state.isLoggedIn = false;
+  state.authInitialized = true; 
+},
     refreshTokenRequest(state) {
       state.loading = true;
       state.error = null;
     },
-    refreshTokenSuccess(state, action: PayloadAction<User>) {
-      state.user = action.payload;
-      state.loading = false;
-      state.isLoggedIn = true;
-    },
-    refreshTokenFailure(state, action: PayloadAction<string>) {
-      state.loading = false;
-      state.error = action.payload;
-      state.user = null;
-      state.isLoggedIn = false;
-    },
+  refreshTokenSuccess: (state, action) => {
+  state.user = action.payload;
+  state.loading = false;
+  state.isLoggedIn = true;
+  state.authInitialized = true; 
+},
+refreshTokenFailure: (state, action) => {
+  state.user = null;
+  state.loading = false;
+  state.isLoggedIn = false;
+  state.authInitialized = true; 
+
+},
     resetAuthState(state) {
       state.loading = false;
       state.error = null;
