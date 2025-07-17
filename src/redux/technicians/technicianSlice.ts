@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Technician } from "./technicianTypes";
-import * as technicianService from "./technicianService";
+
 
 const initialState = {
   technicians: [] as Technician[],
@@ -122,14 +122,9 @@ fetchActiveTechniciansSuccess,
   fetchActiveTechniciansFailure
 } = technicianSlice.actions;
 
-export const fetchTechnicians = () => async (dispatch: any) => {
-  dispatch(fetchTechniciansRequest());
-  try {
-    const response = await technicianService.fetchTechnicians();
-    dispatch(fetchTechniciansSuccess(response.data));
-  } catch (error: any) {
-    dispatch(fetchTechniciansFailure(error.message || "Failed to fetch technicians"));
-  }
-};
+//Selectors
+export const selectTechnicians = (state: any) => state.technician.technicians;
+export const selectTechniciansLoading = (state: any) => state.technician.loading;
+export const selectTechniciansError = (state: any) => state.technician.error;
 
 export default technicianSlice.reducer;
