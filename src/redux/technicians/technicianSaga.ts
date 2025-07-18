@@ -64,15 +64,14 @@ function* handleCheckTechnicianStatus() {
     yield put(checkTechnicianStatusSuccess(response.data));
   } catch (error) {
     yield put(checkTechnicianStatusFailure(error.message));
-    // Optionally, redirect to login if inactive:
-    // window.location.href = '/login'; // Optional redirect
+    
   }
 }
 function* handleFetchActiveTechnicians(): any {
   try {
     const response = yield call(technicianService.fetchActiveTechnicians);
     yield put(fetchActiveTechniciansSuccess(response.data));
-  } catch (error: any) {
+  } catch (error) {
     yield put(fetchActiveTechniciansFailure(error.message || 'Failed to fetch active technicians'));
   }
 }
