@@ -212,7 +212,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   {role === "superAdmin" && (
                     <li className="SideBar-sub-list">
                       <Link
-                        to="/superAdmin/AdminAllIncidents"
+                        to="/superAdmin/SuperAdminAllIncidents"
                         className={
                           location.pathname === "/superAdmin/AdminAllIncidents"
                             ? "active"
