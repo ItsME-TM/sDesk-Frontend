@@ -10,6 +10,11 @@ import {
   getTeamIncidentsByServiceNum,
   getIncidentHistory,
   getCurrentTechnician,
+  fetchMainCategories,
+  fetchCategoryItems,
+  fetchAllUsers,
+  fetchAllLocations,
+  fetchAdminTeamData,
 } from "./incidentService";
 import {
   fetchAllIncidentsRequest,
@@ -42,8 +47,22 @@ import {
   fetchCurrentTechnicianRequest,
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
+  fetchAdminTeamDataRequest,
+  fetchAdminTeamDataSuccess,
+  fetchAdminTeamDataFailure,
+  fetchMainCategoriesRequest,
+  fetchMainCategoriesSuccess,
+  fetchMainCategoriesFailure,
+  fetchCategoryItemsRequest,
+  fetchCategoryItemsSuccess,
+  fetchCategoryItemsFailure,
+  fetchAllUsersRequest,
+  fetchAllUsersSuccess,
+  fetchAllUsersFailure,
+  fetchAllLocationsRequest,
+  fetchAllLocationsSuccess,
+  fetchAllLocationsFailure,
 } from "./incidentSlice";
-// Removed duplicate imports and function definitions
 
 function* handleFetchAllIncidents() {
   try {
@@ -205,6 +224,76 @@ function* handleFetchCurrentTechnician(action) {
   }
 }
 
+function* handleFetchAdminTeamData() {
+  try {
+    const response = yield call(fetchAdminTeamData);
+    yield put(fetchAdminTeamDataSuccess(response));
+  } catch (error) {
+    console.error("Error fetching admin team data:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch admin team data";
+    yield put(fetchAdminTeamDataFailure(errorMessage));
+  }
+}
+
+function* handleFetchMainCategories() {
+  try {
+    const response = yield call(fetchMainCategories);
+    yield put(fetchMainCategoriesSuccess(response.data));
+  } catch (error) {
+    console.error("Error fetching main categories:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch main categories";
+    yield put(fetchMainCategoriesFailure(errorMessage));
+  }
+}
+
+function* handleFetchCategoryItems() {
+  try {
+    const response = yield call(fetchCategoryItems);
+    yield put(fetchCategoryItemsSuccess(response.data));
+  } catch (error) {
+    console.error("Error fetching category items:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch category items";
+    yield put(fetchCategoryItemsFailure(errorMessage));
+  }
+}
+
+function* handleFetchAllUsers() {
+  try {
+    const response = yield call(fetchAllUsers);
+    yield put(fetchAllUsersSuccess(response.data));
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch all users";
+    yield put(fetchAllUsersFailure(errorMessage));
+  }
+}
+
+function* handleFetchAllLocations() {
+  try {
+    const response = yield call(fetchAllLocations);
+    yield put(fetchAllLocationsSuccess(response.data));
+  } catch (error) {
+    console.error("Error fetching all locations:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch all locations";
+    yield put(fetchAllLocationsFailure(errorMessage));
+  }
+}
+
 export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
   yield takeLatest(createIncidentRequest.type, handleCreateIncident);
@@ -218,5 +307,10 @@ export default function* incidentSaga() {
   yield takeLatest(getTeamIncidentsByServiceNumRequest.type, handleGetTeamIncidentsByServiceNum);
   yield takeLatest(fetchIncidentHistoryRequest.type, handleFetchIncidentHistory);
   yield takeLatest(fetchCurrentTechnicianRequest.type, handleFetchCurrentTechnician);
+  yield takeLatest(fetchAdminTeamDataRequest.type, handleFetchAdminTeamData);
+  yield takeLatest(fetchMainCategoriesRequest.type, handleFetchMainCategories);
+  yield takeLatest(fetchCategoryItemsRequest.type, handleFetchCategoryItems);
+  yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
+  yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
 }
 
