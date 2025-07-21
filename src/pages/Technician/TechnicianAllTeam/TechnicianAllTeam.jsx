@@ -4,26 +4,29 @@ import { TiExportOutline } from 'react-icons/ti';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-    fetchAllIncidentsRequest, 
-    fetchCurrentTechnicianRequest 
+import {
+    fetchAllIncidentsRequest,
+    fetchCurrentTechnicianRequest,
+    fetchIncidentHistoryRequest,
 } from '../../../redux/incident/incidentSlice';
 import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
 import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
 import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
+import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import './TechnicianAllTeam.css';
 
 const TechnicianAllTeam = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    
+
     // Redux state
-    const { incidents, currentTechnician, loading, error } = useSelector((state) => state.incident);
+    const { incidents, currentTechnician, loading, error, incidentHistory } = useSelector((state) => state.incident);
     const { user } = useSelector((state) => state.auth);
     const { allUsers } = useSelector((state) => state.sltusers);
     const { locations } = useSelector((state) => state.location);
     const { categoryItems } = useSelector((state) => state.categories);
-    
+
     // Local state for UI
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
@@ -31,6 +34,8 @@ const TechnicianAllTeam = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [teamIncidents, setTeamIncidents] = useState([]);
+    const [selectedIncident, setSelectedIncident] = useState(null);
+    const [isPopupVisible, setIsPopupVisible] = useState(false);
 
     // Check if user is technician
     if (!user || user.role !== 'technician') {
@@ -80,31 +85,18 @@ const TechnicianAllTeam = () => {
     // Filter team incidents when incidents or technician data changes
     useEffect(() => {
         if (incidents && incidents.length > 0 && currentTechnician && categoryItems.length > 0) {
-            console.log('Filtering team incidents...');
-            console.log('Current technician team:', currentTechnician.team);
-            console.log('Total incidents:', incidents.length);
-            console.log('Categories:', categoryItems.length);
-
-            // Find categories that belong to the technician's team
             const teamCategories = categoryItems.filter(cat => {
-                // The category has subCategory.mainCategory relationship
                 const mainCategoryId = cat.subCategory?.mainCategory?.id;
                 const mainCategoryName = cat.subCategory?.mainCategory?.name;
-                
-                // Check if this category belongs to technician's team
                 return mainCategoryId === currentTechnician.team || mainCategoryName === currentTechnician.team;
             });
 
-            console.log('Team categories found:', teamCategories.length);
             const teamCategoryNames = teamCategories.map(cat => cat.name);
-            console.log('Team category names:', teamCategoryNames);
 
-            // Filter incidents that belong to team categories
-            const filteredIncidents = incidents.filter(incident => 
+            const filteredIncidents = incidents.filter(incident =>
                 teamCategoryNames.includes(incident.category)
             );
 
-            console.log('Filtered team incidents:', filteredIncidents.length);
             setTeamIncidents(filteredIncidents);
         }
     }, [incidents, currentTechnician, categoryItems]);
@@ -115,6 +107,7 @@ const TechnicianAllTeam = () => {
     };
 
     const getUserName = (serviceNumber) => {
+        if (!Array.isArray(allUsers)) return serviceNumber;
         const foundUser = allUsers.find(user => user.serviceNum === serviceNumber || user.service_number === serviceNumber);
         return foundUser ? (foundUser.display_name || foundUser.user_name || foundUser.name) : serviceNumber;
     };
@@ -153,30 +146,9 @@ const TechnicianAllTeam = () => {
     const handleRowClick = (refNo) => {
         const incident = teamIncidents.find(item => item.incident_number === refNo);
         if (incident) {
-            const informant = allUsers.find(user => 
-                user.serviceNum === incident.informant || 
-                user.service_number === incident.informant
-            );
-            if (informant) {
-                navigate('/technician/TechnicianMyReportedUpdate', {
-                    state: {
-                        formData: {
-                            serviceNo: informant.serviceNum || informant.service_number,
-                            tpNumber: informant.tp_number || informant.contactNumber || '',
-                            name: informant.display_name || informant.user_name || informant.name,
-                            designation: informant.designation || informant.role,
-                            email: informant.email,
-                        },
-                        incidentDetails: {
-                            refNo: incident.incident_number,
-                            category: getCategoryName(incident.category),
-                            location: getLocationName(incident.location),
-                            priority: incident.priority,
-                            status: incident.status,
-                        },
-                    },
-                });
-            }
+            setSelectedIncident(incident);
+            setIsPopupVisible(true);
+            dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
         }
     };
 
@@ -236,6 +208,66 @@ const TechnicianAllTeam = () => {
         return buttons;
     };
 
+    const renderPopup = () => {
+        if (!isPopupVisible || !selectedIncident) {
+            return null;
+        }
+
+        if (!Array.isArray(allUsers)) {
+            return (
+                <div style={{color: 'red', padding: '10px', marginBottom: '10px'}}>
+                    User data not loaded. Cannot show affected user details.
+                </div>
+            );
+        }
+
+        const informant = allUsers.find(user =>
+            user.serviceNum === selectedIncident.informant ||
+            user.service_number === selectedIncident.informant
+        );
+
+        const formData = {
+            serviceNo: (informant && (informant.serviceNum || informant.service_number)) || selectedIncident.informant || '',
+            tpNumber: informant?.tp_number || informant?.contactNumber || '',
+            name: informant?.display_name || informant?.user_name || informant?.name || '',
+            designation: informant?.designation || informant?.role || '',
+            email: informant?.email || '',
+        };
+
+        const incidentDetails = {
+            refNo: selectedIncident.incident_number,
+            category: getCategoryName(selectedIncident.category),
+            location: getLocationName(selectedIncident.location),
+            priority: selectedIncident.priority,
+            status: selectedIncident.status,
+        };
+
+        return (
+            <div className="popup-overlay">
+                <div className="popup-content">
+                    <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
+                    <div className="TechnicianMyReportedUpdate-tickets-creator">
+                        <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
+                        <IoIosArrowForward />
+                        <span className="TechnicianMyReportedUpdate-created-ticket">MyTeam All Incidents Update</span>
+                    </div>
+                    <div className="TechnicianMyReportedUpdate-content2">
+                        <AffectedUserDetail formData={formData} />
+                        <IncidentHistory
+                            refNo={incidentDetails.refNo}
+                            category={incidentDetails.category}
+                            location={incidentDetails.location}
+                            priority={incidentDetails.priority}
+                            status={incidentDetails.status}
+                            historyData={incidentHistory}
+                            users={allUsers}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     // Show loading state
     if (loading) {
         return (
@@ -280,7 +312,7 @@ const TechnicianAllTeam = () => {
                     }}>
                         <h3 style={{ color: '#d32f2f' }}>Error Loading Team Incidents</h3>
                         <p>{error}</p>
-                        <button 
+                        <button
                             onClick={() => dispatch(fetchAllIncidentsRequest())}
                             style={{
                                 padding: '8px 16px',
@@ -304,18 +336,9 @@ const TechnicianAllTeam = () => {
         name: cat.name
     })).filter((v, i, a) => a.findIndex(t => t.number === v.number) === i);
 
-    // Debug logging
-    console.log('🔍 TechnicianAllTeam Debug Info:');
-    console.log('  User:', user);
-    console.log('  Team Incidents:', teamIncidents);
-    console.log('  Loading:', loading);
-    console.log('  Error:', error);
-    console.log('  Categories:', categoryItems.length);
-    console.log('  Users:', allUsers.length);
-    console.log('  Locations:', locations.length);
-
     return (
         <div className="TechnicianAllTeam-main-content">
+            {renderPopup()}
             <div className="TechnicianAllTeam-tickets-creator">
                 <span className="TechnicianAllTeam-svr-desk">Incidents</span>
                 <IoIosArrowForward />
