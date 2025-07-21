@@ -5,7 +5,7 @@ import "./TechnicianInsident.css";
 import { IoIosArrowForward } from "react-icons/io";
 import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
 import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
-import AffectedUserDetails from "../../../components/AffectedUserDetails/AffectedUserDetails";
+import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedUserDetail";
 import { 
   getIncidentByNumberRequest, 
   fetchIncidentHistoryRequest 
@@ -365,10 +365,10 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
           <div className="technician-main-content col-12">
             <div className="row">
               <div className="col-12 mb-3">
-                <AffectedUserDetails
+                <AffectedUserDetail
                   formData={formData}
-                  setFormData={setFormData}
-                  handleInputChange={handleInputChange}
+                  setFormData= {setFormData}
+                  
                 />
               </div>
 
