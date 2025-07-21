@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset'; 
 import { IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { fetchAssignedToMeRequest } from '../../../redux/incident/incidentSlice';
-import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident'; // Import the TechnicianInsident component
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident';
 import './TechnicianMyAssignedIncidents.css';
-import './IncidentPopup.css'; // New CSS for the modal
+import './IncidentPopup.css';
 
 const TechnicianMyAssignedIncidents = () => {
     const navigate = useNavigate();
@@ -22,6 +22,9 @@ const TechnicianMyAssignedIncidents = () => {
     // Redux state
     const { assignedToMe, loading, error } = useSelector((state) => state.incident);
     const { user } = useSelector((state) => state.auth);
+    const { allUsers } = useSelector((state) => state.sltusers);
+    const { categoryItems } = useSelector((state) => state.categories);
+    const { locations } = useSelector((state) => state.location);
     
     // Debug logging
     console.log('[TechnicianMyAssignedIncidents] User state:', user);
@@ -119,36 +122,25 @@ const TechnicianMyAssignedIncidents = () => {
             
             console.log('[TechnicianMyAssignedIncidents] Dispatched fetchAssignedToMeRequest');
         }
+        dispatch(fetchAllUsersRequest());
+        dispatch(fetchCategoryItemsRequest());
+        dispatch(fetchLocationsRequest());
     }, [dispatch, assignedUser, currentUser]);
 
     const getCategoryName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                const item = subcategory.items.find(
-                    item => item.grandchild_category_number === categoryNumber
-                );
-                if (item) {
-                    return item.grandchild_category_name;
-                }
-            }
-        }
-        return categoryNumber;
+        const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+        return category ? category.grandchild_category_name : categoryNumber;
     };
 
     const getUserName = (serviceNumber) => {
-        const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-        return user ? user.user_name : serviceNumber;
+        const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+        return user ? (user.display_name || user.user_name || user.name) : serviceNumber;
     };
 
     const getLocationName = (locationNumber) => {
-        for (const district of sDesk_t2_location_dataset) {
-            for (const sublocation of district.sublocations) {
-                if (sublocation.loc_number === locationNumber) {
-                    return sublocation.loc_name;
-                }
-            }
-        }
-        return locationNumber;    };
+        const location = locations.find(loc => loc.loc_number === locationNumber || loc.id === locationNumber);
+        return location ? (location.name || location.loc_name) : locationNumber;
+    };
 
     // Loading and error states
     console.log('[TechnicianMyAssignedIncidents] Render - loading:', loading, 'error:', error, 'assignedToMe:', assignedToMe?.length || 0);
@@ -407,4 +399,3 @@ const TechnicianMyAssignedIncidents = () => {
 };
 
 export default TechnicianMyAssignedIncidents;
-
