@@ -54,6 +54,10 @@ export interface IncidentState {
   categories: Category[]; // Add this line
   incidentHistory: IncidentHistory[]; // Add incident history
   currentTechnician: any | null; // Add current technician
+  mainCategories: any[];
+  categoryItems: any[];
+  users: any[];
+  locations: any[];
   loading: boolean;
   error: string | null;
 }

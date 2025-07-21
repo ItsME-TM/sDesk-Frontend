@@ -43,6 +43,7 @@ import {
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
 } from "./incidentSlice";
+// Removed duplicate imports and function definitions
 
 function* handleFetchAllIncidents() {
   try {
