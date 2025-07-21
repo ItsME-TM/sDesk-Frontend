@@ -14,6 +14,7 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
     };
 
     const getUserName = (serviceNumber) => {
+        if (!Array.isArray(users)) return serviceNumber;
         const user = users.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
         return user ? user.display_name || user.user_name || user.name : serviceNumber;
     };
