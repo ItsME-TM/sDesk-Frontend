@@ -133,6 +133,7 @@ const TechnicianMyAssignedIncidents = () => {
     };
 
     const getUserName = (serviceNumber) => {
+        if (!Array.isArray(allUsers)) return serviceNumber;
         const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
         return user ? (user.display_name || user.user_name || user.name) : serviceNumber;
     };
