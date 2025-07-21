@@ -449,6 +449,15 @@ const SuperAdminAllIncident = () => {
                 isPopup={true} 
                 loggedInUser={user}
                 updateBy={user?.name || user?.user_name || user?.display_name || user?.email}
+                affectedUserDetails={(() => {
+                  const affectedUser = users?.find(u => u.service_number === selectedIncident?.informant || u.serviceNum === selectedIncident?.informant);
+                  return {
+                    serviceNo: selectedIncident?.informant,
+                    name: affectedUser?.display_name || affectedUser?.user_name || '',
+                    designation: affectedUser?.role || '',
+                    email: affectedUser?.email || '',
+                  };
+                })()}
               />
             </div>
           </div>

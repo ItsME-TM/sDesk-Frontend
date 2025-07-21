@@ -14,7 +14,7 @@ import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice"
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
 import { fetchUserByServiceNumberRequest, fetchAllUsersRequest } from "../../../redux/sltusers/sltusersSlice";
 
-const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
+const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserDetails }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -139,9 +139,9 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
       setFormData({
         serviceNo: incidentData.informant || "",
         tpNumber: undefined,
-        name: "", // Will be auto-filled by useEffect
-        designation: "", // Will be auto-filled by useEffect
-        email: "", // Will be auto-filled by useEffect
+        name: affectedUserDetails?.name || "",
+        designation: affectedUserDetails?.designation || "",
+        email: affectedUserDetails?.email || "", // Will be auto-filled by useEffect
       });
       // Fetch incident history
       dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
