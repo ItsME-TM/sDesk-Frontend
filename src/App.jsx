@@ -37,6 +37,7 @@ import ManageTeamAdmin from "./pages/SuperAdmin/ManageTeamAdmin/ManageTeamAdmin.
 import SuperAdminAddIncident from "./pages/SuperAdmin/SuperAdminAddIncident/SuperAdminAddIncident.jsx";
 import SocketTest from "./components/SocketTest/SocketTest.jsx";
 import SocketProvider from "./components/SocketProvider/SocketProvider.jsx";
+import SuperAdminAllIncident from "./pages/SuperAdmin/SuperAdminAllIncident/SuperAdminAllIncident.jsx";
 
 function App() {
   return (
@@ -90,7 +91,7 @@ function App() {
               <Route path="manageteamadmin" element={<ManageTeamAdmin />} />
               <Route path="AdminCategory" element={<AdminCategory />} />
               <Route path="AdminLocation" element={<AdminLocation />} />
-              <Route path="AdminAllIncidents" element={<AdminAllIncidents />} />
+              <Route path="SuperAdminAllIncidents" element={<SuperAdminAllIncident />} />
               <Route
                 path="SuperAdminAddIncident"
                 element={<SuperAdminAddIncident />}
