@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
-import { fetchCategoriesRequest, fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
-import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
-import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import {
+  fetchAllIncidentsRequest,
+  fetchAdminTeamDataRequest,
+  fetchMainCategoriesRequest,
+  fetchCategoryItemsRequest,
+  fetchAllUsersRequest,
+  fetchAllLocationsRequest,
+} from '../../../redux/incident/incidentSlice';
 import { useNavigate } from 'react-router-dom';
 import './AdminMyTeamIncidentViewAll.css';
 
 const AdminMyTeamIncidentViewAll = () => {
+  const [showIncidentPopup, setShowIncidentPopup] = useState(false);
+  const [selectedIncident, setSelectedIncident] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,29 +24,44 @@ const AdminMyTeamIncidentViewAll = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  // Get data from Redux store
-  const { incidents, loading, error } = useSelector((state) => state.incident);
+
+  const {
+    incidents,
+    mainCategories,
+    categoryItems,
+    users,
+    locations,
+    loading,
+    error,
+  } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
-  const { list: mainCategories, categoryItems: categories } = useSelector((state) => state.categories);
-  const { locations } = useSelector((state) => state.location);
-  const { allUsers: users } = useSelector((state) => state.sltusers);
 
   console.log('Redux state - incidents:', incidents);
+  console.log('Redux state - mainCategories:', mainCategories);
+  console.log('Redux state - categoryItems:', categoryItems);
+  console.log('Redux state - users:', users);
+  console.log('Redux state - locations:', locations);
   console.log('Redux state - loading:', loading);
   console.log('Redux state - error:', error);
   console.log('Redux state - user:', user);
 
   const currentAdmin = user;
 
+  // Remove the local state variables and direct API calls
+  // const [directIncidents, setDirectIncidents] = useState([]);
 
- 
   useEffect(() => {
-    // Fetch all data using Redux actions
-    dispatch(fetchAllIncidentsRequest());
-    dispatch(fetchCategoriesRequest());
-    dispatch(fetchCategoryItemsRequest());
-    dispatch(fetchLocationsRequest());
-    dispatch(fetchAllUsersRequest());
+    console.log('🚀 Component: Starting data fetch with Redux...');
+
+    // Use the combined action to fetch all data at once for better performance
+    dispatch(fetchAdminTeamDataRequest());
+
+    // Alternative: fetch data separately if you need more granular control
+    // dispatch(fetchAllIncidentsRequest());
+    // dispatch(fetchMainCategoriesRequest());
+    // dispatch(fetchCategoryItemsRequest());
+    // dispatch(fetchAllUsersRequest());
+    // dispatch(fetchAllLocationsRequest());
   }, [dispatch, user, currentAdmin]);
 
   if (!user) {
@@ -54,70 +76,95 @@ const AdminMyTeamIncidentViewAll = () => {
 
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
     console.log('Looking up main category for:', categoryItemCode);
-    
-    // First, try to find from the loaded categories (API data)
-    const categoryItem = categories.find(cat => cat.grandchild_category_number === categoryItemCode);
+
+    // Process categoryItems to transform them to the expected format if needed
+    const transformedCategories = categoryItems.map((item) => ({
+      grandchild_category_number: item.category_code,
+      grandchild_category_name: item.name,
+      child_category_name: item.subCategory?.name || "Unknown Sub",
+      child_category_number: item.subCategory?.category_code || "Unknown",
+      parent_category_number:
+        item.subCategory?.mainCategory?.category_code || "Unknown",
+      parent_category_name: item.subCategory?.mainCategory?.name || "Unknown",
+      // For backwards compatibility
+      category_code: item.category_code,
+      name: item.name,
+    }));
+
+    // First, try to find from the loaded categories (Redux data)
+    const categoryItem = transformedCategories.find(
+      (cat) => cat.grandchild_category_number === categoryItemCode
+    );
     if (categoryItem) {
       console.log('Found category item by code:', categoryItem);
       return categoryItem.parent_category_name;
     }
-    
+
     // If not found in API data, search by name
-    const categoryByName = categories.find(cat => 
-      cat.grandchild_category_name && 
-      cat.grandchild_category_name.toLowerCase() === categoryItemCode.toLowerCase()
+    const categoryByName = transformedCategories.find(
+      (cat) =>
+        cat.grandchild_category_name &&
+        cat.grandchild_category_name.toLowerCase() ===
+          categoryItemCode.toLowerCase()
     );
     if (categoryByName) {
       console.log('Found category item by name:', categoryByName);
       return categoryByName.parent_category_name;
     }
-    
+
     // Check if the code itself is a main category
-    const mainCategory = mainCategories.find(mainCat => 
-      mainCat.category_code === categoryItemCode || mainCat.parent_category_number === categoryItemCode
+    const mainCategory = mainCategories.find(
+      (mainCat) =>
+        mainCat.category_code === categoryItemCode ||
+        mainCat.parent_category_number === categoryItemCode
     );
     if (mainCategory) {
       console.log('Found in main categories:', mainCategory);
       return mainCategory.name || mainCategory.parent_category_name;
     }
-    
+
     console.log('No category found for:', categoryItemCode);
     return 'Unknown';
   };
 
   const getCategoryName = (categoryNumber) => {
-    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
-    return category ? category.grandchild_category_name : categoryNumber;
+    const category = categoryItems.find(
+      (cat) => cat.category_code === categoryNumber
+    );
+    return category ? category.name : categoryNumber;
   };
 
   const getSubcategoryName = (categoryNumber) => {
-    const category = categories.find(cat => cat.grandchild_category_number === categoryNumber);
-    return category ? category.child_category_name : 'Unknown';
+    const category = categoryItems.find(
+      (cat) => cat.category_code === categoryNumber
+    );
+    return category ? category.subCategory?.name || "Unknown" : "Unknown";
   };
 
   const getUserName = (serviceNumber) => {
-    const foundUser = users.find(user => user.service_number === serviceNumber);
+    const foundUser = users.find(
+      (user) => user.service_number === serviceNumber
+    );
     return foundUser ? foundUser.user_name : serviceNumber;
   };
 
   const getLocationName = (locationCode) => {
-    const location = locations.find(loc => loc.loc_number === locationCode);
+    const location = locations.find((loc) => loc.loc_number === locationCode);
     return location ? location.loc_name : locationCode;
   };
 
-  const incidentsToUse = incidents && incidents.length > 0 ? incidents : directIncidents;
-  
+  // Use incidents from Redux store directly
+  const incidentsToUse = incidents || [];
+
   console.log('=== DEBUGGING DATA FLOW ===');
   console.log('Redux incidents:', incidents);
-  console.log('Direct incidents:', directIncidents);
   console.log('Using incidents:', incidentsToUse);
   console.log('Current admin:', currentAdmin);
-  console.log('Categories loaded:', categories.length);
-  console.log('Main categories loaded:', mainCategories.length);
+  console.log('Categories loaded:', categoryItems?.length || 0);
+  console.log('Main categories loaded:', mainCategories?.length || 0);
   console.log('Main categories data:', mainCategories);
-  console.log('Users loaded:', users.length);
-  console.log('Locations loaded:', locations.length);
-  
+  console.log('Users loaded:', users?.length || 0);
+  console.log('Locations loaded:', locations?.length || 0);
 
   const processedIncidents = [];
   
@@ -174,7 +221,7 @@ const AdminMyTeamIncidentViewAll = () => {
     mainCategory: item.mainCategory
   })));
   console.log('Available main categories for dropdown:', mainCategories.map(cat => cat.name || cat.parent_category_name));
-  console.log('Sample categories array:', categories.slice(0, 3));
+  console.log('Sample categories array:', categoryItems.slice(0, 3));
   console.log('Unique incident categories:', [...new Set(tableData.map(item => item.rawCategory))]);
   console.log('Unique main categories from incidents:', [...new Set(tableData.map(item => item.mainCategory))]);
   console.log('Category filter value:', categoryFilter);
@@ -230,26 +277,8 @@ const AdminMyTeamIncidentViewAll = () => {
   const handleRowClick = (refNo) => {
     const incident = transformedTeamIncidents.find(item => item.incident_number === refNo);
     if (incident) {
-      const informant = users.find(user => user.service_number === incident.informant);
-      if (informant) {
-        navigate('/admin/AdminUpdateIncident', {
-          state: {
-            formData: {
-              serviceNo: informant.service_number,
-              tpNumber: informant.tp_number,
-              name: informant.user_name,
-              designation: informant.designation,
-              email: informant.email,
-            },
-            incidentDetails: {
-              refNo: incident.incident_number,
-              category: getCategoryName(incident.category),
-              location: getLocationName(incident.location),
-              priority: incident.priority,
-            },
-          },
-        });
-      }
+      setSelectedIncident(incident);
+      setShowIncidentPopup(true);
     }
   };
 
@@ -290,7 +319,18 @@ const AdminMyTeamIncidentViewAll = () => {
         onClick={() => handleRowClick(row.refNo)}
         style={{ cursor: 'pointer' }}
       >
-        <td className='team-refno'>{row.refNo}</td>
+        <td className='team-refno'>
+          <a
+            href="#"
+            className="refno-link"
+            onClick={e => {
+              e.preventDefault();
+              handleRowClick(row.refNo);
+            }}
+          >
+            {row.refNo}
+          </a>
+        </td>
         <td>{row.assignedTo}</td>
         <td>{row.affectedUser}</td>
         <td>{row.category}</td>
@@ -459,6 +499,19 @@ const AdminMyTeamIncidentViewAll = () => {
             </button>
           </div>
         </div>
+        {showIncidentPopup && selectedIncident && (
+          <div className="incident-popup-overlay">
+            <div className="incident-popup-content">
+              <button className="incident-popup-close-btn" onClick={() => setShowIncidentPopup(false)}>X</button>
+              <TechnicianInsident 
+                incidentData={selectedIncident} 
+                isPopup={true} 
+                loggedInUser={user}
+                updateBy={user?.name || user?.user_name || user?.userName ||user?.display_name || user?.email}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
