@@ -147,11 +147,104 @@ const SocketProvider = ({ children }) => {
       }
     };
 
+    // General incident update events (everyone receives these - NO POPUP, only Redux update)
+    const handleIncidentUpdated = (data) => {
+      console.log("🔄 [Socket] Incident updated (general):", data.incident);
+
+      // Dispatch different Redux actions based on user role
+      if (user.role === "admin" || user.role === "superAdmin") {
+        dispatch(fetchAllIncidentsRequest());
+        console.log(
+          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      } else if (user.role === "user") {
+        dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedByMeRequest for user:",
+          user.serviceNum
+        );
+      } else if (user.role === "technician" || user.role === "teamLeader") {
+        dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedToMeRequest for",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      } else {
+        // Default fallback for any unrecognized roles - treat as user
+        dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedByMeRequest for unknown role",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      }
+    };
+
+    // Targeted incident update notification (only for assigned handler - SHOW POPUP)
+    const handleIncidentUpdatedAssigned = (data) => {
+      console.log(
+        "🔄 [Socket] Incident updated - assigned to you:",
+        data.incident
+      );
+
+      // Show popup for assigned handler
+      addAlert({
+        type: "incident_updated",
+        title: "Incident Updated!",
+        message:
+          data.message ||
+          `Incident ${data.incident.incident_number} has been updated. Please check the latest details.`,
+        incidentNumber: data.incident.incident_number,
+      });
+
+      // Also update Redux state for assigned handler based on their role
+      if (user.role === "admin" || user.role === "superAdmin") {
+        dispatch(fetchAllIncidentsRequest());
+        console.log(
+          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for updated assigned",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      } else if (user.role === "user") {
+        dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedByMeRequest for updated assigned user:",
+          user.serviceNum
+        );
+      } else if (user.role === "technician" || user.role === "teamLeader") {
+        dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedToMeRequest for updated assigned",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      } else {
+        // Default fallback for any unrecognized roles
+        dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
+        console.log(
+          "🔄 [Socket] Dispatched getAssignedByMeRequest for updated assigned unknown role",
+          user.role,
+          ":",
+          user.serviceNum
+        );
+      }
+    };
+
     // Set up event listeners
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
     socket.on("incident_created", handleIncidentCreated);
     socket.on("incident_assigned_technician", handleIncidentAssignedTechnician);
+    socket.on("incident_updated", handleIncidentUpdated);
+    socket.on("incident_updated_assigned", handleIncidentUpdatedAssigned);
 
     // Cleanup
     return () => {
@@ -162,6 +255,8 @@ const SocketProvider = ({ children }) => {
         "incident_assigned_technician",
         handleIncidentAssignedTechnician
       );
+      socket.off("incident_updated", handleIncidentUpdated);
+      socket.off("incident_updated_assigned", handleIncidentUpdatedAssigned);
     };
   }, [user, dispatch]);
 
