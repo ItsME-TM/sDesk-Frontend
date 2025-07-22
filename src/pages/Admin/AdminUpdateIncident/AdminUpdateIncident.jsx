@@ -5,14 +5,26 @@ import { IoIosArrowForward } from 'react-icons/io';
 import UpdateStatus from '../../../components/UpdateStatus/UpdateStatus';
 import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  getIncidentByNumberRequest,
+  fetchIncidentHistoryRequest,
+  updateIncidentRequest,
+} from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
 
 const AdminUpdateIncident = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { currentIncident, incidentHistory, loading, error } = useSelector((state) => state.incident);
+  const { allUsers } = useSelector((state) => state.sltusers);
+  const { categoryItems } = useSelector((state) => state.categories);
+  const { locations } = useSelector((state) => state.location);
+
   const [formData, setFormData] = useState({
     serviceNo: '',
     tpNumber: '',
@@ -33,9 +45,6 @@ const AdminUpdateIncident = () => {
     comments: ''
   });
 
-  const [incident, setIncident] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [historyData, setHistoryData] = useState([]);
   const [updateStatusData, setUpdateStatusData] = useState({
     updatedBy: '',
     category: '',
@@ -47,137 +56,82 @@ const AdminUpdateIncident = () => {
   });
 
   const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
+    const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+    return user ? (user.display_name || user.user_name || user.name) : serviceNumber;
+  };
+
+  const getCategoryName = (categoryNumber) => {
+    const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+    return category ? category.grandchild_category_name : categoryNumber;
+  };
+
+  const getLocationName = (locationNumber) => {
+    const loc = locations.find(item => item.loc_number === locationNumber || item.id === locationNumber);
+    return loc ? (loc.loc_name || loc.name) : locationNumber;
   };
 
   useEffect(() => {
+    dispatch(fetchAllUsersRequest());
+    dispatch(fetchCategoryItemsRequest());
+    dispatch(fetchLocationsRequest());
+
+    if (location.state?.incidentDetails?.refNo) {
+      const refNo = location.state.incidentDetails.refNo;
+      dispatch(getIncidentByNumberRequest({ incident_number: refNo }));
+      dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
+    }
+
     if (location.state?.formData) {
       setFormData(location.state.formData);
     }
+  }, [location.state, dispatch]);
 
-    if (location.state?.incidentDetails) {
-      const details = location.state.incidentDetails;
-      const fullIncident = sDesk_t2_incidents_dataset.find(
-        inc => inc.incident_number === details.refNo
-      );
-
-      if (fullIncident) {
-        // Map dataset fields to display fields
-        setIncidentDetails({
-          refNo: details.refNo,
-          category: details.category,
-          location: details.location,
-          priority: fullIncident.priority || details.priority,
-          status: fullIncident.status || 'Open',
-          assignedTo: getUserName(fullIncident.handler) || 'Unassigned',
-          updateBy: getUserName(fullIncident.update_by) || 'System',
-          updatedOn: fullIncident.update_on || new Date().toLocaleString(),
-          comments: fullIncident.description || 'No comments'
-        });
-
-        // Set the full incident data
-        setIncident({
-          ...fullIncident,
-          update_by: fullIncident.update_by || '123',
-          status: fullIncident.status || 'Open',
-        });
-
-        // Prepare history data if available
-        if (fullIncident.history) {
-          setHistoryData(fullIncident.history.map(item => ({
-            assignedTo: getUserName(item.handler) || 'Unassigned',
-            updatedBy: getUserName(item.update_by) || 'System',
-            updatedOn: item.update_on || new Date().toLocaleString(),
-            status: item.status || 'Pending',
-            comments: item.description || 'No comments'
-          })));
-        } else {
-          // If no history, use current incident as the only history entry
-          setHistoryData([{
-            assignedTo: getUserName(fullIncident.handler) || 'Unassigned',
-            updatedBy: getUserName(fullIncident.update_by) || 'System',
-            updatedOn: fullIncident.update_on || new Date().toLocaleString(),
-            status: fullIncident.status || 'Pending',
-            comments: fullIncident.description || 'No comments'
-          }]);
-        }
-      } else {
-        setIncidentDetails({
-          ...details,
-          assignedTo: getUserName(details.assignedTo) || details.assignedTo,
-          updateBy: getUserName(details.updateBy) || details.updateBy,
-          status: 'Open'
-        });
-        setIncident({
-          incident_number: details.refNo,
-          category: details.category,
-          location: details.location,
-          priority: details.priority,
-          update_by: '123',
-          status: 'Open',
-          description: '',
-          urgent_notification_to: '',
-        });
-      }
+  useEffect(() => {
+    if (currentIncident && allUsers.length > 0 && categoryItems.length > 0 && locations.length > 0) {
+      setIncidentDetails({
+        refNo: currentIncident.incident_number,
+        category: getCategoryName(currentIncident.category),
+        location: getLocationName(currentIncident.location),
+        priority: currentIncident.priority,
+        status: currentIncident.status,
+        assignedTo: getUserName(currentIncident.handler),
+        updateBy: getUserName(currentIncident.update_by),
+        updatedOn: currentIncident.update_on || new Date().toLocaleString(),
+        comments: currentIncident.description || 'No comments'
+      });
     }
-    setIsLoading(false);
-  }, [location.state]);
+  }, [currentIncident, allUsers, categoryItems, locations]);
 
   const handleUpdateStatusChange = (data) => {
     setUpdateStatusData(data);
   };
 
   const handleUpdateClick = () => {
-    const currentDate = new Date().toLocaleString();
+    if (!currentIncident) return;
 
-    const newHistoryEntry = {
-      assignedTo: getUserName(updateStatusData.transferTo) || 'Not Assigned',
-      updatedBy: getUserName(updateStatusData.updatedBy) || updateStatusData.updatedBy,
-      updatedOn: currentDate,
-      status: updateStatusData.status || 'Open',
-      comments: updateStatusData.description || 'No comments'
+    const updatedIncidentData = {
+      ...currentIncident,
+      category: updateStatusData.category || currentIncident.category,
+      location: updateStatusData.location || currentIncident.location,
+      priority: updateStatusData.priority || currentIncident.priority,
+      status: updateStatusData.status || currentIncident.status,
+      handler: updateStatusData.transferTo || currentIncident.handler,
+      update_by: updateStatusData.updatedBy || currentIncident.update_by,
+      description: updateStatusData.description || currentIncident.description,
     };
-
-    const updatedHistory = [...historyData, newHistoryEntry];
-    setHistoryData(updatedHistory);
-
-    // Update incident details with new values
-    setIncidentDetails(prev => ({
-      ...prev,
-      category: updateStatusData.category || prev.category,
-      location: updateStatusData.location || prev.location,
-      priority: updateStatusData.priority || prev.priority,
-      status: updateStatusData.status || prev.status,
-      assignedTo: getUserName(updateStatusData.transferTo) || prev.assignedTo,
-      updateBy: getUserName(updateStatusData.updatedBy) || prev.updateBy,
-      updatedOn: currentDate,
-      comments: updateStatusData.description || prev.comments
-    }));
-
-    // Update the incident object
-    if (incident) {
-      setIncident(prev => ({
-        ...prev,
-        category: updateStatusData.category || prev.category,
-        location: updateStatusData.location || prev.location,
-        priority: updateStatusData.priority || prev.priority,
-        status: updateStatusData.status || prev.status,
-        handler: updateStatusData.transferTo || prev.handler,
-        update_by: updateStatusData.updatedBy || prev.update_by,
-        update_on: currentDate,
-        description: updateStatusData.description || prev.description,
-        history: updatedHistory
-      }));
-    }
+    dispatch(updateIncidentRequest(updatedIncidentData));
   };
 
   const handleBackClick = () => {
     navigate('/admin/AdminAllIncidents');
   };
 
-  if (isLoading) {
+  if (loading) {
     return <div className="loading-container">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error-container">Error: {error}</div>;
   }
 
   return (
@@ -200,16 +154,17 @@ const AdminUpdateIncident = () => {
           updateBy={incidentDetails.updateBy}
           updatedOn={incidentDetails.updatedOn}
           comments={incidentDetails.comments}
-          historyData={historyData}
+          historyData={incidentHistory}
+          users={allUsers}
         />
         
-        {incident && (
+        {currentIncident && (
           <UpdateStatus
             incidentData={incidentDetails}
-            incident={incident}
-            usersDataset={sDesk_t2_users_dataset}
-            categoryDataset={sDesk_t2_category_dataset}
-            locationDataset={sDesk_t2_location_dataset}
+            incident={currentIncident}
+            usersDataset={allUsers}
+            categoryDataset={categoryItems}
+            locationDataset={locations}
             onStatusChange={handleUpdateStatusChange}
           />
         )}

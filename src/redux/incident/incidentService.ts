@@ -110,3 +110,72 @@ export const getCurrentTechnician = async (serviceNum: string) => {
     throw error;
   }
 };
+// Fetch main categories
+export const fetchMainCategories = async () => {
+  try {
+    return await axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true });
+  } catch (error) {
+    console.error("Error fetching main categories:", error);
+    throw error;
+  }
+};
+
+// Fetch category items
+export const fetchCategoryItems = async () => {
+  try {
+    return await axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true });
+  } catch (error) {
+    console.error("Error fetching category items:", error);
+    throw error;
+  }
+};
+
+// Fetch all users
+export const fetchAllUsers = async () => {
+  try {
+    return await axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true });
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    throw error;
+  }
+};
+
+// Fetch all locations
+export const fetchAllLocations = async () => {
+  try {
+    return await axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true });
+  } catch (error) {
+    console.error("Error fetching all locations:", error);
+    throw error;
+  }
+};
+
+// Fetch admin team data (combined)
+export const fetchAdminTeamData = async () => {
+  try {
+    const [
+      incidentsResponse,
+      mainCategoriesResponse,
+      categoryItemsResponse,
+      usersResponse,
+      locationsResponse
+    ] = await Promise.all([
+      axios.get(buildUrl(API_BASE, "/incident/all-teams"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true })
+    ]);
+
+    return {
+      incidents: incidentsResponse.data,
+      mainCategories: mainCategoriesResponse.data,
+      categoryItems: categoryItemsResponse.data,
+      users: usersResponse.data,
+      locations: locationsResponse.data
+    };
+  } catch (error) {
+    console.error("Error fetching admin team data:", error);
+    throw error;
+  }
+};

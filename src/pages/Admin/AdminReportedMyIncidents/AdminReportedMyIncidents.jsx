@@ -4,7 +4,10 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
-import { fetchAssignedByMeRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAssignedByMeRequest, fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
+import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import './AdminReportedMyIncidents.css';
 
 const AdminReportedMyIncidents = () => {
@@ -12,8 +15,9 @@ const AdminReportedMyIncidents = () => {
   const dispatch = useDispatch();
   
   // Redux state
-  const { assignedByMe, loading, error } = useSelector((state) => state.incident);
+  const { assignedByMe, loading, error, incidentHistory } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth); // Get logged-in user from auth slice
+  const { allUsers } = useSelector((state) => state.sltusers);
   
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,19 +25,15 @@ const AdminReportedMyIncidents = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  // Fetch incidents reported by the logged-in admin
+  // Fetch incidents reported by the logged-in technician and all users
   useEffect(() => {
-    console.log('[AdminReportedMyIncidents] useEffect triggered - user:', user);
-    console.log('[AdminReportedMyIncidents] User role:', user?.role);
-    console.log('[AdminReportedMyIncidents] User serviceNum:', user?.serviceNum);
-    
-    if (user && user.role === 'admin' && user.serviceNum) {
-      console.log('[AdminReportedMyIncidents] Fetching incidents for admin serviceNum:', user.serviceNum);
-      dispatch(fetchAssignedByMeRequest({ informant: user.serviceNum }));
-    } else {
-      console.log('[AdminReportedMyIncidents] Not fetching - missing user data or not admin role');
+    if (user && user.role === 'admin' && user.serviceNumber) {
+      dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNumber }));
     }
+    dispatch(fetchAllUsersRequest());
   }, [dispatch, user]);
   
   if (loading) {
@@ -61,7 +61,7 @@ const AdminReportedMyIncidents = () => {
         <div className="AdminReportedMyIncidents-content2">
           <div className="error-container">
             <p>Error loading reported incidents: {error}</p>
-            <button onClick={() => dispatch(fetchAssignedByMeRequest({ informant: user.serviceNum }))}>
+            <button onClick={() => dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNumber }))}>
               Retry
             </button>
           </div>
@@ -70,13 +70,12 @@ const AdminReportedMyIncidents = () => {
     );
   }
 
-  // Table data for admin's reported incidents
-  const tableData = assignedByMe.map(item => ({
+  const tableData = (assignedByMe || []).map(item => ({
     refNo: item.incident_number,
     category: item.category, // Category name from backend
     status: item.status,
     priority: item.priority,
-    informant: item.informant, // serviceNum of the reporter
+    informant: item.informant, // service_number of the reporter
   }));
 
   const filteredData = tableData.filter(item => {
@@ -93,38 +92,12 @@ const AdminReportedMyIncidents = () => {
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
-  // Debug logging
-  console.log('[AdminReportedMyIncidents] Component render state:');
-  console.log('- assignedByMe length:', assignedByMe?.length || 0);
-  console.log('- assignedByMe data:', assignedByMe);
-  console.log('- tableData length:', tableData?.length || 0);
-  console.log('- filteredData length:', filteredData?.length || 0);
-  console.log('- currentRows length:', currentRows?.length || 0);
-  console.log('- user serviceNum:', user?.serviceNum);
-  console.log('- loading:', loading);
-  console.log('- error:', error);
-
   const handleRowClick = (refNo) => {
     const incident = assignedByMe.find(item => item.incident_number === refNo);
-    if (incident && user) {
-      navigate('/admin/AdminMyReportedUpdate', {
-        state: {
-          formData: {
-            serviceNo: user.service_number,
-            tpNumber: user.tp_number,
-            name: user.user_name,
-            designation: user.designation,
-            email: user.email,
-          },
-          incidentDetails: {
-            refNo: incident.incident_number,
-            category: incident.category,
-            location: incident.location,
-            priority: incident.priority,
-            status: incident.status,
-          },
-        },
-      });
+    if (incident) {
+        setSelectedIncident(incident);
+        setIsPopupVisible(true);
+        dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
     }
   };
 
@@ -182,10 +155,61 @@ const AdminReportedMyIncidents = () => {
     return buttons;
   };
 
+  const renderPopup = () => {
+    if (!isPopupVisible || !selectedIncident) {
+        return null;
+    }
+
+    const formData = {
+        serviceNo: user.serviceNumber,
+        tpNumber: user.tp_number || user.tpNumber || '',
+        name: user.userName,
+        designation: user.designation || user.role || '',
+        email: user.email,
+    };
+
+    const incidentDetails = {
+        refNo: selectedIncident.incident_number,
+        category: selectedIncident.category,
+        location: selectedIncident.location,
+        priority: selectedIncident.priority,
+        status: selectedIncident.status,
+    };
+
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
+                <div className="AdminMyReportedUpdate-tickets-creator">
+                    <span className="AdminMyReportedUpdate-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="AdminMyReportedUpdate-created-ticket">Reported My Update</span>
+                </div>
+                <div className="AdminMyReportedUpdate-content2">
+                    <AffectedUserDetail formData={formData} />
+                    <IncidentHistory
+                        refNo={incidentDetails.refNo}
+                        category={incidentDetails.category}
+                        location={incidentDetails.location}
+                        priority={incidentDetails.priority}
+                        status={incidentDetails.status}
+                        historyData={incidentHistory}
+                        users={allUsers}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
   const uniqueCategories = [...new Set(tableData.map(item => item.category))];
 
   if (!user) {
     return <div>Loading user data...</div>;
+  }
+  if (!user.serviceNumber) {
+    return <div>User data missing serviceNumber. Please contact admin.</div>;
   }
   if (user.role !== 'admin') {
     return <div>Unauthorized: Only admins can view this page.</div>;
@@ -193,6 +217,7 @@ const AdminReportedMyIncidents = () => {
 
   return (
     <div className="AdminReportedMyIncidents-main-content">
+        {renderPopup()}
       <div className="AdminReportedMyIncidents-tickets-creator">
         <span className="AdminReportedMyIncidents-svr-desk">Incidents</span>
         <IoIosArrowForward />
@@ -203,7 +228,7 @@ const AdminReportedMyIncidents = () => {
         <div className="AdminReportedMyIncidents-TitleBar">
           <div className="AdminReportedMyIncidents-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-             My Incidents - {user.name || user.email}
+            My Incidents - {user.userName}
           </div>
           <div className="AdminReportedMyIncidents-TitleBar-buttons">
             <button className="AdminReportedMyIncidents-TitleBar-buttons-ExportData">

@@ -5,7 +5,7 @@ import "./TechnicianInsident.css";
 import { IoIosArrowForward } from "react-icons/io";
 import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
 import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
-import AffectedUserDetails from "../../../components/AffectedUserDetails/AffectedUserDetails";
+import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedUserDetail";
 import { 
   getIncidentByNumberRequest, 
   fetchIncidentHistoryRequest 
@@ -14,7 +14,7 @@ import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice"
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
 import { fetchUserByServiceNumberRequest, fetchAllUsersRequest } from "../../../redux/sltusers/sltusersSlice";
 
-const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
+const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserDetails }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -58,12 +58,12 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
     }
 
     // Wait for users to be loaded before attempting auto-fill
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       return;
     }
 
     // Find user by serviceNum or service_number from slt_users table
-    const user = usersState.allUsers?.find(
+    const user = usersState.users?.find(
       (u) => String(u.serviceNum || u.service_number) === String(serviceNo)
     );
     
@@ -84,7 +84,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
         email: '',
       }));
     }
-  }, [formData.serviceNo, usersState.allUsers]);
+  }, [formData.serviceNo, usersState.users]);
 
   const [incidentDetails, setIncidentDetails] = useState({
     refNo: "",
@@ -114,7 +114,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       dispatch(fetchAllUsersRequest());
     }
   }, [dispatch, usersState.allUsers]);
@@ -139,9 +139,9 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
       setFormData({
         serviceNo: incidentData.informant || "",
         tpNumber: undefined,
-        name: "", // Will be auto-filled by useEffect
-        designation: "", // Will be auto-filled by useEffect
-        email: "", // Will be auto-filled by useEffect
+        name: affectedUserDetails?.name || "",
+        designation: affectedUserDetails?.designation || "",
+        email: affectedUserDetails?.email || "", // Will be auto-filled by useEffect
       });
       // Fetch incident history
       dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
@@ -365,10 +365,10 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
           <div className="technician-main-content col-12">
             <div className="row">
               <div className="col-12 mb-3">
-                <AffectedUserDetails
+                <AffectedUserDetail
                   formData={formData}
-                  setFormData={setFormData}
-                  handleInputChange={handleInputChange}
+                  setFormData= {setFormData}
+                  
                 />
               </div>
 
@@ -384,7 +384,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
                   updatedOn={incidentDetailsWithNames.updatedOn}
                   comments={incidentDetailsWithNames.comments}
                   historyData={historyDataWithNames}
-                  users={usersState.allUsers || []}
+                  users={usersState.users || []}
                 />
               </div>
               {currentIncident && (
@@ -403,7 +403,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
                     }}
                     incident={currentIncident}
                     onStatusChange={handleUpdateStatusChange}
-                    usersDataset={usersState.allUsers || []}
+                    usersDataset={usersState.users || []}
                     categoryDataset={categoryState.categoryItems || []}
                     locationDataset={locationState.list || []}
                     loggedInUser={loggedInUser}
