@@ -58,12 +58,12 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
     }
 
     // Wait for users to be loaded before attempting auto-fill
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       return;
     }
 
     // Find user by serviceNum or service_number from slt_users table
-    const user = usersState.allUsers?.find(
+    const user = usersState.users?.find(
       (u) => String(u.serviceNum || u.service_number) === String(serviceNo)
     );
     
@@ -84,7 +84,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
         email: '',
       }));
     }
-  }, [formData.serviceNo, usersState.allUsers]);
+  }, [formData.serviceNo, usersState.users]);
 
   const [incidentDetails, setIncidentDetails] = useState({
     refNo: "",
@@ -114,7 +114,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       dispatch(fetchAllUsersRequest());
     }
   }, [dispatch, usersState.allUsers]);
@@ -384,7 +384,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
                   updatedOn={incidentDetailsWithNames.updatedOn}
                   comments={incidentDetailsWithNames.comments}
                   historyData={historyDataWithNames}
-                  users={usersState.allUsers || []}
+                  users={usersState.users || []}
                 />
               </div>
               {currentIncident && (
@@ -403,7 +403,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
                     }}
                     incident={currentIncident}
                     onStatusChange={handleUpdateStatusChange}
-                    usersDataset={usersState.allUsers || []}
+                    usersDataset={usersState.users || []}
                     categoryDataset={categoryState.categoryItems || []}
                     locationDataset={locationState.list || []}
                     loggedInUser={loggedInUser}
