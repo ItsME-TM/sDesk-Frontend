@@ -209,64 +209,70 @@ const TechnicianAllTeam = () => {
     };
 
     const renderPopup = () => {
-        if (!isPopupVisible || !selectedIncident) {
-            return null;
-        }
+    if (!isPopupVisible || !selectedIncident) {
+        return null;
+    }
 
-        if (!Array.isArray(allUsers)) {
-            return (
-                <div style={{color: 'red', padding: '10px', marginBottom: '10px'}}>
-                    User data not loaded. Cannot show affected user details.
-                </div>
-            );
-        }
-
-        const informant = allUsers.find(user =>
-            user.serviceNum === selectedIncident.informant ||
-            user.service_number === selectedIncident.informant
+    // Find affected user (informant)
+    let informantUser = null;
+    if (Array.isArray(allUsers)) {
+        informantUser = allUsers.find(
+            u => String(u.serviceNum).trim() === String(selectedIncident.informant).trim() ||
+                 String(u.service_number).trim() === String(selectedIncident.informant).trim()
         );
+    }
 
+    // Prepare affected user details
         const formData = {
-            serviceNo: (informant && (informant.serviceNum || informant.service_number)) || selectedIncident.informant || '',
-            tpNumber: informant?.tp_number || informant?.contactNumber || '',
-            name: informant?.display_name || informant?.user_name || informant?.name || '',
-            designation: informant?.designation || informant?.role || '',
-            email: informant?.email || '',
-        };
+        serviceNo: user.serviceNum,
+        tpNumber: user.tp_number || user.tpNumber || '',
+        name: user.user_name || user.name || user.email,
+        designation: user.designation || user.role || '',
+        email: user.email,
+    };
 
-        const incidentDetails = {
-            refNo: selectedIncident.incident_number,
-            category: getCategoryName(selectedIncident.category),
-            location: getLocationName(selectedIncident.location),
-            priority: selectedIncident.priority,
-            status: selectedIncident.status,
-        };
+    // Prepare incident details (TechnicianMyReportedUpdate style)
+    const incidentDetails = {
+        refNo: selectedIncident.incident_number,
+        category: getCategoryName(selectedIncident.category),
+        location: getLocationName(selectedIncident.location),
+        priority: selectedIncident.priority,
+        status: selectedIncident.status,
+        assignedTo: getUserName(selectedIncident.handler),
+        updateBy: getUserName(selectedIncident.update_by),
+        updatedOn: selectedIncident.update_on,
+        comments: selectedIncident.description,
+    };
 
-        return (
-            <div className="popup-overlay">
-                <div className="popup-content">
-                    <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
-                    <div className="TechnicianMyReportedUpdate-tickets-creator">
-                        <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
-                        <IoIosArrowForward />
-                        <span className="TechnicianMyReportedUpdate-created-ticket">MyTeam All Incidents Update</span>
-                    </div>
-                    <div className="TechnicianMyReportedUpdate-content2">
-                        <AffectedUserDetail formData={formData} />
-                        <IncidentHistory
-                            refNo={incidentDetails.refNo}
-                            category={incidentDetails.category}
-                            location={incidentDetails.location}
-                            priority={incidentDetails.priority}
-                            status={incidentDetails.status}
-                            historyData={incidentHistory}
-                            users={allUsers}
-                        />
-                    </div>
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
+                <div className="TechnicianMyReportedUpdate-tickets-creator">
+                    <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianMyReportedUpdate-created-ticket">Reported My Update</span>
+                </div>
+                <div className="TechnicianMyReportedUpdate-content2">
+                    <AffectedUserDetail formData={formData} />
+                    <IncidentHistory
+                        refNo={incidentDetails.refNo}
+                        category={incidentDetails.category}
+                        location={incidentDetails.location}
+                        priority={incidentDetails.priority}
+                        status={incidentDetails.status}
+                        assignedTo={incidentDetails.assignedTo}
+                        updateBy={incidentDetails.updateBy}
+                        updatedOn={incidentDetails.updatedOn}
+                        comments={incidentDetails.comments}
+                        historyData={incidentHistory}
+                        users={allUsers}
+                    />
                 </div>
             </div>
-        );
-    };
+        </div>
+    );
+}
 
     // Show loading state
     if (loading) {
@@ -447,3 +453,4 @@ const TechnicianAllTeam = () => {
 };
 
 export default TechnicianAllTeam;
+
