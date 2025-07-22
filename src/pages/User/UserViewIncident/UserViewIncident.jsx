@@ -210,7 +210,7 @@ const UserViewIncident = () => {
                     >
                       <td
                         className="UserViewIncident-refno"
-                        style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline" }}
+                        style={{ cursor: "pointer", color: "black", textDecoration: "none" }}
                         onClick={() => handleRefNoClick(incident)}
                       >
                         {incident.incident_number}
@@ -258,7 +258,6 @@ const UserViewIncident = () => {
       {showUpdatePopup && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <button style={{ float: "right" }} onClick={() => setShowUpdatePopup(false)}>Close</button>
             <UserUpdateIncident
               incidentData={selectedIncident}
               isPopup={true}
