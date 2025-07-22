@@ -38,6 +38,7 @@ import SuperAdminAddIncident from "./pages/SuperAdmin/SuperAdminAddIncident/Supe
 import SocketTest from "./components/SocketTest/SocketTest.jsx";
 import SocketProvider from "./components/SocketProvider/SocketProvider.jsx";
 import SuperAdminAllIncident from "./pages/SuperAdmin/SuperAdminAllIncident/SuperAdminAllIncident.jsx";
+import AdminReportedMyIncidents from "./pages/Admin/AdminReportedMyIncidents/AdminReportedMyIncidents.jsx";
 
 function App() {
   return (
@@ -57,27 +58,16 @@ function App() {
               <Route path="kpi-helpdesk" element={<KPIHelpdesk />} />
               <Route path="LoggingTimeLine" element={<LoggingTimeLine />} />
               <Route path="AdminUserList" element={<AdminUserList />} />
-              <Route
-                path="AdminUserDashBoard"
-                element={<AdminUserDashBoard />}
-              />
+              <Route path="AdminUserDashBoard" element={<AdminUserDashBoard />} />
               <Route path="AdminAddIncident" element={<AdminAddIncident />} />
               <Route path="AdminViewIncident" element={<AdminViewIncident />} />
               <Route path="AdminCategory" element={<AdminCategory />} />
               <Route path="AdminLocation" element={<AdminLocation />} />
-              <Route
-                path="AdminMyTeamIncidentViewAll"
-                element={<AdminMyTeamIncidentViewAll />}
-              />
+              <Route path="AdminMyTeamIncidentViewAll"element={<AdminMyTeamIncidentViewAll />} />
               <Route path="AdminAllIncidents" element={<AdminAllIncidents />} />
-              <Route
-                path="AdminMyAssignedIncidents"
-                element={<AdminMyAssignedIncidents />}
-              />
-              <Route
-                path="/admin/AdminUpdateIncident"
-                element={<AdminUpdateIncident />}
-              />
+              <Route path="AdminMyAssignedIncidents" element={<AdminMyAssignedIncidents />}/>
+              <Route path="/admin/AdminUpdateIncident"  element={<AdminUpdateIncident />}/>
+                <Route path="AdminMyReportedIncidents" element={<AdminReportedMyIncidents />} />
             </Route>
           </Route>
 
@@ -92,26 +82,11 @@ function App() {
               <Route path="AdminCategory" element={<AdminCategory />} />
               <Route path="AdminLocation" element={<AdminLocation />} />
               <Route path="SuperAdminAllIncidents" element={<SuperAdminAllIncident />} />
-              <Route
-                path="SuperAdminAddIncident"
-                element={<SuperAdminAddIncident />}
-              />
-              <Route
-                path="AdminMyTeamIncidentViewAll"
-                element={<AdminMyTeamIncidentViewAll />}
-              />
-              <Route
-                path="AdminMyAssignedIncidents"
-                element={<AdminMyAssignedIncidents />}
-              />
-              <Route
-                path="SuperAdminMyReportedIncidents"
-                element={<SuperAdminReportedMyIncidents />}
-              />
-              <Route
-                path="SuperAdminAddIncident"
-                element={<SuperAdminAddIncident />}
-              />
+              <Route path="SuperAdminAddIncident"element={<SuperAdminAddIncident />}/>
+              <Route path="AdminMyTeamIncidentViewAll"element={<AdminMyTeamIncidentViewAll />} />
+              <Route path="AdminMyAssignedIncidents"element={<AdminMyAssignedIncidents />}/>
+              <Route path="SuperAdminMyReportedIncidents" element={<SuperAdminReportedMyIncidents />}/>
+              <Route path="SuperAdminAddIncident"element={<SuperAdminAddIncident />} />
             </Route>
           </Route>
 
@@ -119,31 +94,13 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/technician" element={<TechnicianLayout />}>
               <Route index element={<TechnicianDashBoard />} />
-              <Route
-                path="TechnicianIncident"
-                element={<TechnicianInsident />}
-              />
+              <Route path="TechnicianIncident" element={<TechnicianInsident />}/>
               <Route path="TechnicianAllTeam" element={<TechnicianAllTeam />} />
-              <Route
-                path="TechnicianDashBoard"
-                element={<TechnicianDashBoard />}
-              />{" "}
-              <Route
-                path="TechnicianAddIncident"
-                element={<TechnicianAddIncident />}
-              />
-              <Route
-                path="TechnicianMyAssignedInsidents"
-                element={<TechnicianMyAssignedIncidents />}
-              />
-              <Route
-                path="TechnicianReportedMyIncidents"
-                element={<TechnicianReportedMyIncidents />}
-              />
-              <Route
-                path="TechnicianMyReportedUpdate"
-                element={<TechnicianMyReportedUpdate />}
-              />
+              <Route path="TechnicianDashBoard"element={<TechnicianDashBoard />} />{" "}
+              <Route path="TechnicianAddIncident"element={<TechnicianAddIncident />}/>
+              <Route path="TechnicianMyAssignedInsidents"element={<TechnicianMyAssignedIncidents />}/>
+              <Route path="TechnicianReportedMyIncidents"element={<TechnicianReportedMyIncidents />} />
+              <Route  path="TechnicianMyReportedUpdate" element={<TechnicianMyReportedUpdate />}/>
             </Route>
           </Route>
           {/* User routes with layout, protected */}
@@ -152,18 +109,9 @@ function App() {
               <Route index element={<UserViewIncident />} />
               <Route path="UserViewIncident" element={<UserViewIncident />} />
               <Route path="UserAddIncident" element={<UserAddIncident />} />
-              <Route
-                path="UserMyAssignedIncidents"
-                element={<UserMyAssignedIncidents />}
-              />
-              <Route
-                path="UserMyTeamIncidentViewAll"
-                element={<UserMyTeamIncidentViewAll />}
-              />
-              <Route
-                path="/user/UserUpdateIncident"
-                element={<UserUpdateIncident />}
-              />
+              <Route path="UserMyAssignedIncidents" element={<UserMyAssignedIncidents />}/>
+              <Route path="UserMyTeamIncidentViewAll" element={<UserMyTeamIncidentViewAll />} />
+              <Route path="/user/UserUpdateIncident" element={<UserUpdateIncident />} />
             </Route>{" "}
           </Route>
         </Routes>
