@@ -22,7 +22,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
   // Set formData to loggedInUser if available, else fallback to blank
   const [formData, setFormData] = useState({
     serviceNo: (loggedInUser?.serviceNum || incidentData?.informant || ''),
-    tpNumber: '',
+    tpNumber: loggedInUser?.contactNumber || '',
     name: loggedInUser?.name || '',
     designation: loggedInUser?.role || '',
     email: loggedInUser?.email || '',
@@ -54,7 +54,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
     if (loggedInUser) {
       setFormData({
         serviceNo: loggedInUser.serviceNum || incidentData?.informant || '',
-        tpNumber: loggedInUser.tpNumber || '',
+        tpNumber: loggedInUser.contactNumber || '',
         name: loggedInUser.name || '',
         designation: loggedInUser.role || '',
         email: loggedInUser.email || '',
