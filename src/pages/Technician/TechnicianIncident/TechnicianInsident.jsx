@@ -53,6 +53,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
         name: '',
         designation: '',
         email: '',
+        tpNumber: '',
       }));
       return;
     }
@@ -74,6 +75,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
         name: user.display_name || user.user_name || '',
         designation: user.role || '',
         email: user.email || '',
+        tpNumber: user.contactNumber || '', // Auto-fill TP Number with contactNumber from backend
       }));
     } else {
       // Clear fields if user not found
@@ -82,6 +84,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
         name: '',
         designation: '',
         email: '',
+        tpNumber: '',
       }));
     }
   }, [formData.serviceNo, usersState.users]);
@@ -102,7 +105,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
   const [isLoading, setIsLoading] = useState(false); // Start with false
   const [error, setError] = useState(null);
   const [updateStatusData, setUpdateStatusData] = useState({
-    updatedBy: "",
+    updatedBy: loggedInUser?.userName ||loggedInUser?.name ,
     category: "",
     location: "",
     transferTo: "",

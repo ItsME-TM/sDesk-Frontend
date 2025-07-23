@@ -507,7 +507,7 @@ const AdminMyTeamIncidentViewAll = () => {
                 incidentData={selectedIncident} 
                 isPopup={true} 
                 loggedInUser={user}
-                updateBy={user?.name || user?.user_name || user?.userName ||user?.display_name || user?.email}
+                updateBy={user?.userName}
               />
             </div>
           </div>

@@ -70,6 +70,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
                     name: user.display_name || '',
                     email: user.email || '',
                     designation: user.role || '', // Auto-fill designation with user role
+                    tpNumber: user.contactNumber || '', // Auto-fill TP Number with contactNumber from backend
                 };
                 console.log('AffectedUserDetails: New form data:', newData);
                 return newData;
