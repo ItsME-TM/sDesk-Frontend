@@ -5,6 +5,7 @@ export interface LookupUser {
   serviceNum: string;
   display_name: string;
   email: string;
+  contactNumber?: string;
   role: 'user' | 'admin' | 'technician' | 'teamLeader' | 'superAdmin';
   createdAt?: string;
   updatedAt?: string;

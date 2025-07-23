@@ -285,7 +285,7 @@ const TechnicianAllTeam = () => {
       formData = {
         serviceNo:
           informantUser.serviceNum || informantUser.service_number || "",
-        tpNumber: informantUser.tp_number || informantUser.tpNumber || "",
+        tpNumber: informantUser.tp_number || informantUser.tpNumber || informantUser.contactNumber || "",
         name:
           informantUser.display_name ||
           informantUser.user_name ||
@@ -309,7 +309,7 @@ const TechnicianAllTeam = () => {
       }
       formData = {
         serviceNo: selectedIncident.informant,
-        tpNumber: fallbackUser?.tp_number || fallbackUser?.tpNumber || "",
+        tpNumber: fallbackUser?.tp_number || fallbackUser?.tpNumber || fallbackUser?.contactNumber || "",
         name:
           fallbackUser?.display_name ||
           fallbackUser?.user_name ||
