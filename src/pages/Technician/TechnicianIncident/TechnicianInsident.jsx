@@ -102,7 +102,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser, affectedUserD
   const [isLoading, setIsLoading] = useState(false); // Start with false
   const [error, setError] = useState(null);
   const [updateStatusData, setUpdateStatusData] = useState({
-    updatedBy: "",
+    updatedBy: loggedInUser?.userName ||loggedInUser?.name ,
     category: "",
     location: "",
     transferTo: "",

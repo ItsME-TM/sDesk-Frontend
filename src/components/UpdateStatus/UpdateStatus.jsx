@@ -98,8 +98,8 @@ const UpdateStatus = ({
 
   useEffect(() => {
     // Always set Update By to the currently logged-in user's name
-    if (loggedInUser && loggedInUser.name) {
-      setUpdatedBy(loggedInUser.name);
+    if (loggedInUser && loggedInUser.userName || loggedInUser.name) {
+      setUpdatedBy(loggedInUser.userName || loggedInUser.name);
     } else {
       setUpdatedBy('');
     }
