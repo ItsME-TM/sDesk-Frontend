@@ -362,271 +362,215 @@ const ManageTeamAdmin = () => {
   return (
     <div className="superadmin-container">
       <div className="superadmin-header-row">
-        <h2>Team Admin List</h2>
+        <h2>Team Admin Management</h2>
         <button className="add-user-btn" onClick={handleAddClick}>
-          Add Admin
+          + Add Admin
         </button>
       </div>
-      {loading && <p>Loading...</p>}
-      {error && <p className="error">{error}</p>}
+
+      {loading && <p className="loading-message">Loading team admins...</p>}
+      {error && <p className="error-message">{error}</p>}
       {(submitError || sltusersError) && (
-        <div
-          className="error"
-          style={{
-            color: "red",
-            fontWeight: "bold",
-            margin: "16px 0",
-          }}
-        >
+        <div className="error-message">
           {submitError}
           {sltusersError && <div>{sltusersError}</div>}
         </div>
       )}
-      {teamAdmins.length === 0 && !loading && !error && (
-        <div
-          style={{
-            color: "orange",
-            fontWeight: "bold",
-            margin: "16px 0",
-          }}
-        >
-          No admins found
-        </div>
+      
+      {!loading && !error && teamAdmins.length === 0 && (
+        <div className="info-message">No admins found.</div>
       )}
-      <table className="teamadmin-table">
-        <thead>
-          <tr>
-            <th>Service Number</th>
-            <th>Full Name</th>
-            <th>Contact</th>
-            <th>Designation</th>
-            <th>Email</th>
-            <th>Team Name</th>
-            <th>Options</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(Array.isArray(teamAdmins) ? teamAdmins : []).map((admin) => (
-            <tr key={admin.id}>
-              <td>{admin.serviceNumber}</td>
-              <td>{admin.userName}</td>
-              <td>{admin.contactNumber}</td>
-              <td>{admin.designation}</td>
-              <td>{admin.email}</td>
-              <td>{admin.teamName}</td>
-              <td>
-                <button
-                  className="edit-btn"
-                  title="Edit this admin"
-                  onClick={() => handleEditClick(admin)}
-                  style={{ marginRight: 8 }}
-                >
-                  <span role="img" aria-label="Edit">
-                    ✏️
-                  </span>
-                </button>
-                <button
-                  className="delete-btn"
-                  title="Delete this admin"
-                  onClick={() => handleDeleteClick(admin)}
-                  style={{
-                    color: "#fff",
-                    background: "#dc3545",
-                    border: "none",
-                    borderRadius: 4,
-                    padding: "4px 12px",
-                    cursor: "pointer",
-                  }}
-                >
-                  <span role="img" aria-label="Delete">
-                    🗑️
-                  </span>
-                </button>
-              </td>
+
+      <div className="table-responsive">
+        <table className="teamadmin-table">
+          <thead>
+            <tr>
+              <th>Service No.</th>
+              <th>Full Name</th>
+              <th>Contact</th>
+              <th>Designation</th>
+              <th>Email</th>
+              <th>Team Name</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(Array.isArray(teamAdmins) ? teamAdmins : []).map((admin) => (
+              <tr key={admin.id}>
+                <td>{admin.serviceNumber}</td>
+                <td>{admin.userName}</td>
+                <td>{admin.contactNumber}</td>
+                <td>{admin.designation}</td>
+                <td>{admin.email}</td>
+                <td>{admin.teamName}</td>
+                <td>
+                  <button
+                    className="edit-btn"
+                    title="Edit this admin"
+                    onClick={() => handleEditClick(admin)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="delete-btn"
+                    title="Delete this admin"
+                    onClick={() => handleDeleteClick(admin)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {showModal && (
         <div className="modal-overlay">
-          <div
-            className="modal-content teamadmin-form-container"
-            style={{ width: "540px" }}
-          >
+          <div className="modal-content teamadmin-form-container">
             <div className="modal-header">
-              <h3>{editMode ? "Edit Team Admin" : "Add Team Admin"}</h3>
-              <button
-                className="close-btn"
-                onClick={() => {
-                  setShowModal(false);
-                  setEditMode(false);
-                  setEditId(null);
-                }}
-              >
-                ×
+              <h3>{editMode ? "Edit Team Admin" : "Add New Team Admin"}</h3>
+              <button className="close-btn" onClick={() => setShowModal(false)}>
+                &times;
               </button>
             </div>
             <form className="add-user-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Service Number:</label>
+                  <label>Service Number</label>
                   <input
                     name="serviceNumber"
                     value={form.serviceNumber}
                     onChange={handleServiceNumberChange}
                     required
+                    disabled={editMode}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Full Name:</label>
+                  <label>Full Name</label>
                   <input name="userName" value={form.userName} readOnly />
                 </div>
-              </div>{" "}
+              </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Contact Number:</label>
+                  <label>Contact Number</label>
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
                     onChange={handleChange}
-                    placeholder="Enter contact number"
+                   
                   />
                 </div>
                 <div className="form-group">
-                  <label>Designation:</label>
+                  <label>Designation</label>
                   <input name="designation" value={form.designation} readOnly />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Email:</label>
-                  <input
-                    name="email"
-                    value={form.email}
-                    type="email"
-                    readOnly
-                  />
+                  <label>Email</label>
+                  <input name="email" value={form.email} type="email" readOnly />
                 </div>
                 <div className="form-group">
-                  <label>Team ID:</label>
-                  <input name="teamId" value={form.teamId} readOnly />
-                </div>
-                <div className="form-group">
-                  <label>Team Name:</label>
+                  <label>Team Name</label>
                   <select
                     name="teamName"
                     value={form.teamName}
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select Team</option>
+                    <option value="">Select a Team</option>
                     {mainCategories.map((cat) => {
                       const isTaken = teamsWithAdmin.includes(cat.name);
-                      // If editing, allow current teamName
                       const isCurrentEdit = editMode && form.teamName === cat.name;
                       return (
                         <option
                           key={cat.id}
                           value={cat.name}
                           disabled={isTaken && !isCurrentEdit}
-                          style={isTaken && !isCurrentEdit ? { color: '#aaa', background: '#f5f5f5' } : {}}
+                          className={isTaken && !isCurrentEdit ? "option-disabled" : ""}
                         >
                           {cat.name}
-                          {isTaken && !isCurrentEdit ? ' (Admin exists)' : ''}
+                          {isTaken && !isCurrentEdit ? " (Assigned)" : ""}
                         </option>
                       );
                     })}
                   </select>
-                  {categoriesLoading && <div style={{ fontSize: "0.9em", color: "#888" }}>Loading teams...</div>}
-                  {categoriesError && <div className="error">{categoriesError}</div>}
+                  {categoriesLoading && <div className="loading-text">Loading teams...</div>}
+                  {categoriesError && <div className="error-text">{categoriesError}</div>}
                 </div>
-              <div className="form-row">
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label>Categories (select up to 4):</label>
-                  {subCategoriesLoading && (
-                    <div style={{ color: '#888', fontSize: '0.95em', margin: '6px 0' }}>Loading categories...</div>
-                  )}
-                  {subCategoriesError && (
-                    <div className="error" style={{ color: 'red', fontSize: '0.95em', margin: '6px 0' }}>{subCategoriesError}</div>
-                  )}
-                  {!subCategoriesLoading && !subCategoriesError && availableCategories.length === 0 && (
-                    <div style={{ color: '#888', fontSize: '0.95em', margin: '6px 0' }}>No categories found for this team.</div>
-                  )}
-                  <div className="category-checkbox-group-row">
-                    {Array.isArray(availableCategories) && availableCategories.map((sub) => (
-                      <label
-                        key={sub.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          fontWeight: 400,
-                          marginRight: 18,
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          value={sub.name}
-                          checked={selectedCategories.includes(sub.name)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              if (selectedCategories.length < MAX_CATEGORIES) {
-                                setSelectedCategories([
-                                  ...selectedCategories,
-                                  sub.name,
-                                ]);
+              </div>
+              <div className="form-group">
+                <label>Accessible Categories (select up to 4)</label>
+                {subCategoriesLoading && <div className="loading-text">Loading categories...</div>}
+                {subCategoriesError && <div className="error-text">{subCategoriesError}</div>}
+                {!subCategoriesLoading && !subCategoriesError && availableCategories.length === 0 && (
+                  <div className="info-text">No categories found for this team.</div>
+                )}
+                <div className="category-checkbox-group-row">
+                    {Array.isArray(availableCategories) &&
+                      availableCategories.map((sub) => (
+                        <label key={sub.id} className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            value={sub.name}
+                            checked={selectedCategories.includes(sub.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                if (
+                                  selectedCategories.length < MAX_CATEGORIES
+                                ) {
+                                  setSelectedCategories([
+                                    ...selectedCategories,
+                                    sub.name,
+                                  ]);
+                                }
+                              } else {
+                                setSelectedCategories(
+                                  selectedCategories.filter(
+                                    (c) => c !== sub.name
+                                  )
+                                );
                               }
-                            } else {
-                              setSelectedCategories(
-                                selectedCategories.filter((c) => c !== sub.name)
-                              );
+                            }}
+                            disabled={
+                              !selectedCategories.includes(sub.name) &&
+                              selectedCategories.length >= MAX_CATEGORIES
                             }
-                          }}
-                          disabled={
-                            !selectedCategories.includes(sub.name) &&
-                            selectedCategories.length >= MAX_CATEGORIES
-                          }
-                        />
-                        {sub.name}
-                      </label>
-                    ))}
+                          />
+                          <span className="checkbox-custom"></span>
+                          <span>{sub.name}</span>
+                        </label>
+                      ))}
                   </div>
-                  <div
-                    style={{ fontSize: "0.92em", color: "#888", marginTop: 2 }}
-                  >
-                    {selectedCategories.length}/{MAX_CATEGORIES} selected
-                  </div>
+                <div className="selection-count">
+                  {selectedCategories.length}/{MAX_CATEGORIES} selected
                 </div>
               </div>
-              </div>
-              {submitError && <div className="error">{submitError}</div>}
-              {submitSuccess && (
-                <div style={{ color: "green", marginBottom: 8 }}>
-                  Admin added!
-                </div>
-              )}
-              <div className="form-row" style={{ justifyContent: "flex-end" }}>
-                <button type="submit" className="add-btn">
-                  {editMode ? "Update" : "Add"}
+              {submitError && <div className="error-message form-error">{submitError}</div>}
+              {submitSuccess && <div className="success-message form-success">Admin added!</div>}
+              <div className="form-actions">
+                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-submit">
+                  {editMode ? "Update Admin" : "Add Admin"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-      {/* --- Confirmation & Info Message Popups --- */}
+
       {showConfirm && (
         <div className="sa-modal-overlay">
           <div className="sa-modal-confirm">
-            <div className="sa-modal-title">Confirmation</div>
-            <div className="sa-modal-message">{confirmMessage}</div>
+            <h4 className="sa-modal-title">Confirm Action</h4>
+            <p className="sa-modal-message">{confirmMessage}</p>
             <div className="sa-modal-actions">
               <button
                 className="sa-btn sa-btn-cancel"
-                onClick={() => {
-                  setShowConfirm(false);
-                  setConfirmAction(null);
-                }}
+                onClick={() => setShowConfirm(false)}
               >
                 Cancel
               </button>
@@ -634,6 +578,7 @@ const ManageTeamAdmin = () => {
                 className="sa-btn sa-btn-confirm"
                 onClick={() => {
                   if (confirmAction) confirmAction();
+                  setShowConfirm(false);
                 }}
               >
                 Confirm
@@ -642,11 +587,12 @@ const ManageTeamAdmin = () => {
           </div>
         </div>
       )}
+
       {infoMessage && (
-        <div className="sa-modal-overlay">
+        <div className="sa-modal-overlay-info">
           <div className="sa-modal-info">
             <span className="sa-modal-info-icon">✔️</span>
-            <span>{infoMessage}</span>
+            <p>{infoMessage}</p>
           </div>
         </div>
       )}
