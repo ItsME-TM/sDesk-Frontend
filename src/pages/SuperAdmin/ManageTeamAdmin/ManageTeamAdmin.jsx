@@ -348,6 +348,11 @@ const ManageTeamAdmin = () => {
     setShowConfirm(true);
     setConfirmAction(() => () => {
       dispatch(deleteTeamAdminRequest({ teamId: admin.teamId, id: admin.id }));
+      // Change role in slt_users table from admin to user
+      dispatch({
+        type: 'sltusers/updateUserRoleRequest',
+        payload: { serviceNum: admin.serviceNumber, role: "user" }
+      });
       setInfoMessage("Admin deleted successfully!");
       setShowConfirm(false);
       setTimeout(() => setInfoMessage(""), 2000);
