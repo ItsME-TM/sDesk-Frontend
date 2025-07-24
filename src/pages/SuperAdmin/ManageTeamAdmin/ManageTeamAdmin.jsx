@@ -107,7 +107,7 @@ const ManageTeamAdmin = () => {
           userName: user.display_name || "",
           designation: "admin",
           email: user.email || "",
-          contactNumber: user.tp_number || "",
+          contactNumber: user.contactNumber || "",
         }));
         setSubmitError("");
       } else {
