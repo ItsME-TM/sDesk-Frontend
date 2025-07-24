@@ -10,7 +10,6 @@ export interface Incident {
   priority: IncidentPriority;
   description?: string;
   notify_informant?: boolean;
-  urgent_notification_to: string;
   Attachment?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -61,4 +60,3 @@ export interface IncidentState {
   loading: boolean;
   error: string | null;
 }
-
