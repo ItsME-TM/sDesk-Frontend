@@ -268,19 +268,6 @@ const AdminReportedMyIncidents = () => {
                     <option value="Closed">Closed</option>
                   </select>
                 </div>
-                <div className="d-flex align-items-center mb-2 mb-sm-0">
-                  Category:
-                  <select
-                    onChange={e => setCategoryFilter(e.target.value)}
-                    value={categoryFilter}
-                    className="AdminReportedMyIncidents-showSearchBar-Show-select2 ms-2"
-                  >
-                    <option value="">All Categories</option>
-                    {uniqueCategories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
               </div>
             </div>
             <div className="col-md-5 col-lg-4 p-0 d-flex justify-content-md-end justify-content-start mt-2 mt-md-0">

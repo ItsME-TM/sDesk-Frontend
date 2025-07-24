@@ -118,11 +118,17 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
               )}
               <li>
                 <Link
-                  to={role === "superAdmin" ? "/superAdmin/manageteamadmin" : `/${role}/AdminUserList`}
+                  to={
+                    role === "superAdmin"
+                      ? "/superAdmin/manageteamadmin"
+                      : `/${role}/AdminUserList`
+                  }
                   className={
-                    (role === "superAdmin"
-                      ? location.pathname === "/superAdmin/manageteamadmin"
-                      : location.pathname === `/${role}/AdminUserList`)
+                    (
+                      role === "superAdmin"
+                        ? location.pathname === "/superAdmin/manageteamadmin"
+                        : location.pathname === `/${role}/AdminUserList`
+                    )
                       ? "active"
                       : ""
                   }
@@ -143,7 +149,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                       }
                       onClick={closeSidebar}
                     >
-                    <BiCategory />  Category
+                      <BiCategory /> Category
                     </Link>
                   </li>
                   <li>
@@ -156,7 +162,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                       }
                       onClick={closeSidebar}
                     >
-                     <FaLocationDot /> Location
+                      <FaLocationDot /> Location
                     </Link>
                   </li>
                 </>
@@ -178,7 +184,9 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
               </Link>
             </li>
           )}
-          {(role === "admin" || role === "technician" || role === "superAdmin") && (
+          {(role === "admin" ||
+            role === "technician" ||
+            role === "superAdmin") && (
             <>
               <li className="SideBar-dropdown-header">
                 <Link
@@ -186,16 +194,16 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                     role === "admin"
                       ? "/admin/AdminAllIncidents"
                       : role === "technician"
-                        ? "/technician/TechnicianAllTeam"
-                        : "/superAdmin/AdminAllIncidents"
+                      ? "/technician/TechnicianAllTeam"
+                      : "/superAdmin/AdminAllIncidents"
                   }
                   className={
                     location.pathname ===
                     (role === "admin"
                       ? "/admin/AdminAllIncidents"
                       : role === "technician"
-                        ? "/technician/TechnicianAllTeam"
-                        : "/superAdmin/AdminAllIncidents")
+                      ? "/technician/TechnicianAllTeam"
+                      : "/superAdmin/AdminAllIncidents")
                       ? "active"
                       : ""
                   }
@@ -230,16 +238,16 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                         role === "admin"
                           ? "/admin/AdminAddIncident"
                           : role === "technician"
-                            ? "/technician/TechnicianAddIncident"
-                            : "/superAdmin/SuperAdminAddIncident"
+                          ? "/technician/TechnicianAddIncident"
+                          : "/superAdmin/SuperAdminAddIncident"
                       }
                       className={
                         location.pathname ===
                         (role === "admin"
                           ? "/admin/AdminAddIncident"
                           : role === "technician"
-                            ? "/technician/TechnicianAddIncident"
-                            : "/superAdmin/SuperAdminAddIncident")
+                          ? "/technician/TechnicianAddIncident"
+                          : "/superAdmin/SuperAdminAddIncident")
                           ? "active"
                           : ""
                       }
@@ -270,6 +278,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Team - All Incidents
                         </Link>
                       </li>
+                      {/*
                       <li className="SideBar-sub-list">
                         <Link
                           to={
@@ -290,6 +299,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Assigned Incidents
                         </Link>
                       </li>
+                      */}
                     </>
                   )}
                   <li className="SideBar-sub-list">
@@ -298,16 +308,16 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                         role === "admin"
                           ? "/admin/AdminMyReportedIncidents"
                           : role === "technician"
-                            ? "/technician/TechnicianReportedMyIncidents"
-                            : "/superAdmin/SuperAdminMyReportedIncidents"
+                          ? "/technician/TechnicianReportedMyIncidents"
+                          : "/superAdmin/SuperAdminMyReportedIncidents"
                       }
                       className={
                         location.pathname ===
                         (role === "admin"
                           ? "/admin/AdminMyReportedIncidents"
                           : role === "technician"
-                            ? "/technician/TechnicianReportedMyIncidents"
-                            : "/superAdmin/SuperAdminMyReportedIncidents")
+                          ? "/technician/TechnicianReportedMyIncidents"
+                          : "/superAdmin/SuperAdminMyReportedIncidents")
                           ? "active"
                           : ""
                       }
