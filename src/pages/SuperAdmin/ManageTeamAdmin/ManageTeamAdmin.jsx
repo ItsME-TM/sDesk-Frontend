@@ -62,6 +62,10 @@ const ManageTeamAdmin = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+  // Find teams that already have an admin
+  const teamsWithAdmin = Array.isArray(teamAdmins)
+    ? teamAdmins.map(admin => admin.teamName)
+    : [];
 
   useEffect(() => {
     dispatch(fetchTeamAdminsRequest());
@@ -281,6 +285,11 @@ const ManageTeamAdmin = () => {
       teamId: form.teamId,
       teamName: form.teamName,
     };
+    // Prevent adding admin to a team that already has one (unless editing that admin)
+    if (!isEdit && teamsWithAdmin.includes(form.teamName)) {
+      setSubmitError("An admin already exists for this team. Please select another team.");
+      return;
+    }
     const errors = validateForm(payload, selectedCategories);
     if (Object.keys(errors).length > 0) {
       setSubmitError(Object.values(errors).join(" | "));
@@ -506,14 +515,22 @@ const ManageTeamAdmin = () => {
                     required
                   >
                     <option value="">Select Team</option>
-                    {mainCategories.map((cat) => (
-                      <option
-                        key={cat.id}
-                        value={cat.name}
-                      >
-                        {cat.name}
-                      </option>
-                    ))}
+                    {mainCategories.map((cat) => {
+                      const isTaken = teamsWithAdmin.includes(cat.name);
+                      // If editing, allow current teamName
+                      const isCurrentEdit = editMode && form.teamName === cat.name;
+                      return (
+                        <option
+                          key={cat.id}
+                          value={cat.name}
+                          disabled={isTaken && !isCurrentEdit}
+                          style={isTaken && !isCurrentEdit ? { color: '#aaa', background: '#f5f5f5' } : {}}
+                        >
+                          {cat.name}
+                          {isTaken && !isCurrentEdit ? ' (Admin exists)' : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                   {categoriesLoading && <div style={{ fontSize: "0.9em", color: "#888" }}>Loading teams...</div>}
                   {categoriesError && <div className="error">{categoriesError}</div>}
