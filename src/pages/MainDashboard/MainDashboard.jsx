@@ -15,9 +15,6 @@ function MainDashboard() {
     const userType = user?.userType || user?.role || user?.type || 'Unknown';
     const userParentCategory = 'PAC001';
 
-    // Console log to verify user role detection
-    console.log('Detected userType:', userType, 'Full user object:', user);
-
     useEffect(() => {
         dispatch(fetchMainCategoriesRequest());
         // If user is Technician, fetch only incidents assigned to him
