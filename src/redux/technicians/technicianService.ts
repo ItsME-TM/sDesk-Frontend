@@ -77,4 +77,14 @@ export const fetchActiveTechnicians = async () => {
   console.error (`Error fetching active technicians:`, error);
   throw error;
  }};
-  
+
+// NEW: Force logout technician (admin only)
+export const forceLogoutTechnician = async (serviceNum: string) => {
+  try {
+    return await axios.put(`${API_BASE}/technician/${serviceNum}/force-logout`, {}, { withCredentials: true });
+  } catch (error) {
+    console.error(`Error force logging out technician ${serviceNum}:`, error);
+    throw error;
+  }
+};
+   
