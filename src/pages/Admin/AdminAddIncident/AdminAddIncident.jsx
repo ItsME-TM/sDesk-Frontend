@@ -17,11 +17,13 @@ const AdminAddIncident = () => {
   const { user } = useSelector((state) => state.auth);
 
   // Get admin user data
-  const userData = [{
-    service_number: user?.serviceNum || 'ADMIN001', // Use logged-in user's serviceNum or fallback
-    user_name: user?.name || 'Admin User',
-    email: user?.email || 'admin@company.com'
-  }];
+  const userData = [
+    {
+      service_number: user?.serviceNum || "ADMIN001", // Use logged-in user's serviceNum or fallback
+      user_name: user?.name || "Admin User",
+      email: user?.email || "admin@company.com",
+    },
+  ];
 
   const [formData, setFormData] = useState({
     serviceNo: "",
@@ -134,23 +136,25 @@ const AdminAddIncident = () => {
     // Generate unique incident number
     const incidentNumber = `INC-${Date.now()}`;
 
-        const incidentData = {
-          incident_number: incidentNumber,
-          informant: formData.serviceNo, // Affected User's service number
-          location: formData.location.name, // Use location name, not number
-          handler: formData.serviceNo, // Affected User's service number as handler
-          update_by: formData.serviceNo, // Affected User's service number
-          category: formData.category.name, // Use category name, not number
-          update_on: new Date().toISOString().split("T")[0], // Date format: YYYY-MM-DD
-          status: "Open", // Must be 'Open', 'In Progress', 'Hold', or 'Closed'
-          priority: formData.priority, // Must be 'Medium', 'High', or 'Critical'
-          description: formData.description || "",
-          notify_informant: true,
-          urgent_notification_to: formData.email || userData[0].email || "admin@company.com",
-          Attachment: selectedFile ? selectedFile.name : null,
-        };
+    const incidentData = {
+      incident_number: incidentNumber,
+      informant: formData.serviceNo, // Affected User's service number
+      location: formData.location.name, // Use location name, not number
+      handler: formData.serviceNo, // Affected User's service number as handler
+      update_by: formData.serviceNo, // Affected User's service number
+      category: formData.category.name, // Use category name, not number
+      update_on: new Date().toISOString().split("T")[0], // Date format: YYYY-MM-DD
+      status: "Open", // Must be 'Open', 'In Progress', 'Hold', or 'Closed'
+      priority: formData.priority, // Must be 'Medium', 'High', or 'Critical'
+      description: formData.description || "",
+      notify_informant: true,
+      Attachment: selectedFile ? selectedFile.name : null,
+    };
 
-    console.log("[AdminAddIncident] Creating incident with data:", incidentData);
+    console.log(
+      "[AdminAddIncident] Creating incident with data:",
+      incidentData
+    );
     console.log("[AdminAddIncident] Logged-in user:", user);
 
     // Validate data before sending

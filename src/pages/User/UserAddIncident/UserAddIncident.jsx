@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import './UserAddIncident.css';
-import AffectedUserDetails from '../../../components/AffectedUserDetails/AffectedUserDetails';
-import IncidentDetails from '../../../components/IncidentDetails/IncidentDetails';
-import CategoryDropdown from '../../../components/CategoryDropdown/CategoryDropDown';
-import LocationDropdown from '../../../components/LocationDropdown/LocationDropdown';
-import { IoIosArrowForward } from 'react-icons/io';
-import { createIncidentRequest, clearError } from '../../../redux/incident/incidentSlice';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import "./UserAddIncident.css";
+import AffectedUserDetails from "../../../components/AffectedUserDetails/AffectedUserDetails";
+import IncidentDetails from "../../../components/IncidentDetails/IncidentDetails";
+import CategoryDropdown from "../../../components/CategoryDropdown/CategoryDropDown";
+import LocationDropdown from "../../../components/LocationDropdown/LocationDropdown";
+import { IoIosArrowForward } from "react-icons/io";
+import {
+  createIncidentRequest,
+  clearError,
+} from "../../../redux/incident/incidentSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
@@ -37,20 +40,26 @@ const UserAddIncident = () => {
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
-      if (categoryPopupRef.current && !categoryPopupRef.current.contains(e.target)) {
+      if (
+        categoryPopupRef.current &&
+        !categoryPopupRef.current.contains(e.target)
+      ) {
         setIsCategoryPopupOpen(false);
       }
-      if (locationPopupRef.current && !locationPopupRef.current.contains(e.target)) {
+      if (
+        locationPopupRef.current &&
+        !locationPopupRef.current.contains(e.target)
+      ) {
         setIsLocationPopupOpen(false);
       }
     };
 
     if (isCategoryPopupOpen || isLocationPopupOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
+      document.addEventListener("mousedown", handleOutsideClick);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [isCategoryPopupOpen, isLocationPopupOpen]);
 
@@ -70,12 +79,12 @@ const UserAddIncident = () => {
   };
 
   const handleClearCategory = () => {
-    setFormData({ ...formData, category: { name: '', number: '' } });
+    setFormData({ ...formData, category: { name: "", number: "" } });
     setIsCategoryPopupOpen(false);
   };
 
   const handleClearLocation = () => {
-    setFormData({ ...formData, location: { name: '', number: '' } });
+    setFormData({ ...formData, location: { name: "", number: "" } });
     setIsLocationPopupOpen(false);
   };
 
@@ -86,7 +95,7 @@ const UserAddIncident = () => {
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
-    document.getElementById('file-upload').value = '';
+    document.getElementById("file-upload").value = "";
   };
 
   const handleSubmit = (e) => {
@@ -135,7 +144,6 @@ const UserAddIncident = () => {
       priority: formData.priority,
       description: formData.description,
       notify_informant: true,
-      urgent_notification_to: user.email || "user@company.com",
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
@@ -209,12 +217,11 @@ const UserAddIncident = () => {
 
       <div className="UserAddIncident-form">
         <AffectedUserDetails
-        
           formData={formData}
           setFormData={setFormData}
           handleInputChange={handleInputChange}
         />
-             <br/>
+        <br />
         <IncidentDetails
           formData={formData}
           selectedFile={selectedFile}
@@ -228,10 +235,13 @@ const UserAddIncident = () => {
           setIsLocationPopupOpen={setIsLocationPopupOpen}
           setFormData={setFormData}
         />
-         <br/>
-         <br/>
+        <br />
+        <br />
         <div className="UserAddIncident-submit-button-container">
-          <button className="UserAddIncident-submit-button" onClick={handleSubmit}>
+          <button
+            className="UserAddIncident-submit-button"
+            onClick={handleSubmit}
+          >
             Submit
           </button>
         </div>
@@ -259,4 +269,3 @@ const UserAddIncident = () => {
 };
 
 export default UserAddIncident;
-
