@@ -39,7 +39,7 @@ const TechnicianInsident = ({
   // Local state
   const [formData, setFormData] = useState({
     serviceNo: "",
-    tpNumber: undefined,
+    tpNumber: "",
     name: "",
     designation: "",
     email: "",
