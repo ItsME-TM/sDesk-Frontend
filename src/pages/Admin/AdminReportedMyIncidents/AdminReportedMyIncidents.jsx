@@ -162,7 +162,7 @@ const AdminReportedMyIncidents = () => {
 
     const formData = {
         serviceNo: user.serviceNumber,
-        tpNumber: user.tp_number || user.tpNumber || '',
+        tpNumber: user.tp_number || user.tpNumber || user.contactNumber || '',
         name: user.userName,
         designation: user.designation || user.role || '',
         email: user.email,
