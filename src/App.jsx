@@ -39,6 +39,7 @@ import SocketTest from "./components/SocketTest/SocketTest.jsx";
 import SocketProvider from "./components/SocketProvider/SocketProvider.jsx";
 import SuperAdminAllIncident from "./pages/SuperAdmin/SuperAdminAllIncident/SuperAdminAllIncident.jsx";
 import AdminReportedMyIncidents from "./pages/Admin/AdminReportedMyIncidents/AdminReportedMyIncidents.jsx";
+import MainDashboard from "./pages/MainDashboard/MainDashboard.jsx";
 
 function App() {
   return (
@@ -53,8 +54,8 @@ function App() {
           {/* Admin routes with layout */}
           <Route element={<PrivateRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashBoard />} />
-              <Route path="AdminDashBoard" element={<AdminDashBoard />} />
+              <Route index element={<MainDashboard />} />
+              <Route path="AdminDashBoard" element={<MainDashboard />} />
               <Route path="kpi-helpdesk" element={<KPIHelpdesk />} />
               <Route path="LoggingTimeLine" element={<LoggingTimeLine />} />
               <Route path="AdminUserList" element={<AdminUserList />} />
@@ -73,8 +74,8 @@ function App() {
 
           <Route element={<PrivateRoute />}>
             <Route path="/superAdmin" element={<SuperAdminLayout />}>
-              <Route index element={<AdminDashBoard />} />
-              <Route path="AdminDashBoard" element={<AdminDashBoard />} />
+              <Route index element={<MainDashboard />} />
+              <Route path="AdminDashBoard" element={<MainDashboard />} />
               <Route path="kpi-helpdesk" element={<KPIHelpdesk />} />
               <Route path="LoggingTimeLine" element={<LoggingTimeLine />} />
               <Route path="AdminUserList" element={<AdminUserList />} />
@@ -93,10 +94,10 @@ function App() {
           {/* Technician routes with layout, protected */}
           <Route element={<PrivateRoute />}>
             <Route path="/technician" element={<TechnicianLayout />}>
-              <Route index element={<TechnicianDashBoard />} />
+              <Route index element={<MainDashboard />} />
               <Route path="TechnicianIncident" element={<TechnicianInsident />}/>
               <Route path="TechnicianAllTeam" element={<TechnicianAllTeam />} />
-              <Route path="TechnicianDashBoard"element={<TechnicianDashBoard />} />{" "}
+              <Route path="TechnicianDashBoard"element={<MainDashboard />} />{" "}
               <Route path="TechnicianAddIncident"element={<TechnicianAddIncident />}/>
               <Route path="TechnicianMyAssignedInsidents"element={<TechnicianMyAssignedIncidents />}/>
               <Route path="TechnicianReportedMyIncidents"element={<TechnicianReportedMyIncidents />} />
