@@ -14,9 +14,6 @@ const axiosInstance = axios.create({
 
 export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
     const url = `/auth/login`;
-    console.log('🔍 Making request to:', `${API_BASE}${url}`);
-    console.log('🔍 API_BASE:', API_BASE);
-    console.log('🔍 Request data:', { code, state, redirect_uri });
     
     try {
         const response = await axiosInstance.post(url, {
@@ -43,7 +40,6 @@ export const logout = async () => {
 };
 
 export const fetchLoggedUser = async () => {
-    console.log('[AuthService] Hit the fetchLoggedUser API');
     try {
         return await axiosInstance.get(`/auth/logged-user`);
     } catch (error) {
@@ -53,7 +49,6 @@ export const fetchLoggedUser = async () => {
 };
 
 export const refreshToken = async () => {
-    console.log('[AuthService] Hit the refreshToken API');
     try {
         return await axiosInstance.post(`/auth/refresh-token`, {});
     } catch (error) {

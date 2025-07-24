@@ -21,10 +21,8 @@ import {
 } from './authSlice';
 
 function* handleLoginWithMicrosoft(action: any) {
-  console.log('[Saga] handleLoginWithMicrosoft called with:', action);
   try {
     const response = yield call(loginWithMicrosoft, action.payload);
-    console.log('[Saga] Microsoft login API response:', response);
     const { user } = response.data;
     if (user) {
       yield put(loginWithMicrosoftSuccess(user));
@@ -49,7 +47,6 @@ function* handleLogout() {
 function* handleFetchLoggedUser() {
   try {
     const response = yield call(fetchLoggedUser);
-    console.log('[Saga] Fetch logged user API response:', response);
     if (response.data && response.data.success === false) {
       // If token is invalid/expired, try to refresh
       if (
@@ -61,7 +58,6 @@ function* handleFetchLoggedUser() {
         // Try to refresh token
         try {
           const refreshResponse = yield call(refreshToken);
-          console.log('[Saga] Refresh token API response:', refreshResponse);
           if (refreshResponse.data && refreshResponse.data.success === false) {
             yield put(fetchLoggedUserFailure(refreshResponse.data.message || 'Failed to refresh token'));
           } else {
@@ -80,7 +76,6 @@ function* handleFetchLoggedUser() {
         yield put(fetchLoggedUserFailure(response.data.message || 'Failed to fetch logged user'));
       }
     } else {
-      console.log('[Saga] Fetched logged user:', response.data.user);
       yield put(fetchLoggedUserSuccess(response.data.user));
     }
   } catch (error: any) {
@@ -90,9 +85,6 @@ function* handleFetchLoggedUser() {
 function* handleRefreshToken() {
   try {
  const response = yield call(refreshToken);
-
-
-    console.log('[Saga] Refresh token API response:', response);
 
     yield put(refreshTokenSuccess(response.data));
 
