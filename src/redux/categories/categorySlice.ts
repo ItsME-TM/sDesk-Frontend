@@ -1,7 +1,11 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MainCategory, MainCategoryState ,SubCategory,SubCategoryState } from './categoryTypes';
-import type { CategoryItem } from './categoryTypes'; // Add this line or adjust the import if CategoryItem is defined elsewhere
-
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  MainCategory,
+  MainCategoryState,
+  SubCategory,
+  SubCategoryState,
+} from "./categoryTypes";
+import type { CategoryItem } from "./categoryTypes";
 interface CategoryState extends MainCategoryState {
   subCategories: SubCategory[];
   mainCategories: MainCategory[];
@@ -39,10 +43,9 @@ const initialState: CategoryState = {
   createCategoryItemError: null,
   createCategoryItemSuccess: false,
 };
-    // (Removed from here - will be added inside reducers below)
 
 const categorySlice = createSlice({
-  name: 'categories', // Changed from 'mainCategory' to 'categories'
+  name: "categories",
   initialState,
   reducers: {
     // Main categories
@@ -60,7 +63,10 @@ const categorySlice = createSlice({
     },
 
     // Subcategory creation
-    createSubCategoryRequest(state, _action: PayloadAction<{ name: string; mainCategoryId: string }>) {
+    createSubCategoryRequest(
+      state,
+      _action: PayloadAction<{ name: string; mainCategoryId: string }>
+    ) {
       state.createSubCategoryLoading = true;
       state.createSubCategoryError = null;
       state.createSubCategorySuccess = false;
@@ -90,7 +96,6 @@ const categorySlice = createSlice({
       state.error = action.payload;
     },
 
-    // Subcategories (generic)
     fetchSubCategoriesRequest(state) {
       state.subCategoriesLoading = true;
       state.subCategoriesError = null;
@@ -122,20 +127,29 @@ const categorySlice = createSlice({
     },
 
     // Fetch subcategories by main category
-    fetchSubCategoriesByMainCategoryIdRequest(state, _action: PayloadAction<string>) {
+    fetchSubCategoriesByMainCategoryIdRequest(
+      state,
+      _action: PayloadAction<string>
+    ) {
       state.subCategoriesLoading = true;
       state.subCategoriesError = null;
     },
-    fetchSubCategoriesByMainCategoryIdSuccess(state, action: PayloadAction<SubCategory[]>) {
+    fetchSubCategoriesByMainCategoryIdSuccess(
+      state,
+      action: PayloadAction<SubCategory[]>
+    ) {
       state.subCategoriesLoading = false;
       state.subCategories = action.payload;
     },
-    fetchSubCategoriesByMainCategoryIdFailure(state, action: PayloadAction<string>) {
+    fetchSubCategoriesByMainCategoryIdFailure(
+      state,
+      action: PayloadAction<string>
+    ) {
       state.subCategoriesLoading = false;
       state.subCategoriesError = action.payload;
     },
 
-    // Category item (grandchild) creation
+    // Category item  creation
     createCategoryItemRequest(state, _action) {
       state.createCategoryItemLoading = true;
       state.createCategoryItemError = null;
@@ -144,7 +158,6 @@ const categorySlice = createSlice({
     createCategoryItemSuccess(state, action) {
       state.createCategoryItemLoading = false;
       state.createCategoryItemSuccess = true;
-      // Optionally push to a categoryItems list if you have one
     },
     createCategoryItemFailure(state, action) {
       state.createCategoryItemLoading = false;
@@ -152,7 +165,7 @@ const categorySlice = createSlice({
       state.createCategoryItemSuccess = false;
     },
 
-    // Fetch all category items (grandchildren)
+    // Fetch all category items
     fetchCategoryItemsRequest(state) {
       state.loading = true;
       state.error = null;
@@ -173,7 +186,9 @@ const categorySlice = createSlice({
     },
     deleteCategoryItemSuccess(state, action: PayloadAction<string>) {
       state.loading = false;
-      state.categoryItems = state.categoryItems.filter((item: any) => item.id !== action.payload);
+      state.categoryItems = state.categoryItems.filter(
+        (item: any) => item.id !== action.payload
+      );
     },
     deleteCategoryItemFailure(state, action: PayloadAction<string>) {
       state.loading = false;
@@ -181,15 +196,21 @@ const categorySlice = createSlice({
     },
 
     // Update category item
-    updateCategoryItemRequest(state, _action: PayloadAction<{ id: string; name: string; subCategoryId: string }>) {
+    updateCategoryItemRequest(
+      state,
+      _action: PayloadAction<{
+        id: string;
+        name: string;
+        subCategoryId: string;
+      }>
+    ) {
       state.loading = true;
       state.error = null;
     },
     updateCategoryItemSuccess(state, action: PayloadAction<any>) {
       state.loading = false;
-      // Update the item in categoryItems
       const updated = action.payload;
-      state.categoryItems = state.categoryItems.map(item =>
+      state.categoryItems = state.categoryItems.map((item) =>
         item.id === updated.id ? { ...item, ...updated } : item
       );
     },

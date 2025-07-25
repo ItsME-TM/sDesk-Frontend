@@ -150,6 +150,19 @@ export const fetchAllLocations = async () => {
   }
 };
 
+export const fetchDashboardStats = async (userParentCategory?: string) => {
+  try {
+    const params = userParentCategory ? { userParentCategory } : {};
+    return await axios.get(`${API_BASE}/incident/dashboard-stats`, { 
+      params,
+      withCredentials: true 
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    throw error;
+  }
+};
+
 // Fetch admin team data (combined)
 export const fetchAdminTeamData = async () => {
   try {

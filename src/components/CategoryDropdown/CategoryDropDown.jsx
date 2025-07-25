@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
-import './CategoryDropdown.css';
+import './CategoryDropDown.css';
 import { fetchCategoriesRequest } from '../../redux/categories/categorySlice';
 
 const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {

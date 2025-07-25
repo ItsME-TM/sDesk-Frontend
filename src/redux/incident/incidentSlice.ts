@@ -10,6 +10,11 @@ const initialState: IncidentState = {
   categories: [], // Add this line
   incidentHistory: [], // Add incident history
   currentTechnician: null, // Add current technician
+  dashboardStats: {
+    statusCounts: {},
+    priorityCounts: {},
+    todayStats: {},
+  },
   mainCategories: [],
   categoryItems: [],
   users: [],
@@ -22,6 +27,18 @@ const incidentSlice = createSlice({
   name: "incident",
   initialState,
   reducers: {
+    fetchDashboardStatsRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchDashboardStatsSuccess(state, action) {
+      state.loading = false;
+      state.dashboardStats = action.payload;
+    },
+    fetchDashboardStatsFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
     // Categories
     fetchCategoriesRequest(state) {
       state.loading = true;
@@ -111,7 +128,10 @@ const incidentSlice = createSlice({
     },
     getAssignedToMeSuccess(state, action) {
       state.loading = false;
-      console.log('[Reducer] getAssignedToMeSuccess: payload =', action.payload);
+      console.log(
+        "[Reducer] getAssignedToMeSuccess: payload =",
+        action.payload
+      );
       state.assignedToMe = Array.isArray(action.payload)
         ? action.payload
         : action.payload?.data || [];
@@ -232,7 +252,8 @@ const incidentSlice = createSlice({
     },
     fetchAdminTeamDataSuccess(state, action) {
       state.loading = false;
-      const { incidents, mainCategories, categoryItems, users, locations } = action.payload;
+      const { incidents, mainCategories, categoryItems, users, locations } =
+        action.payload;
       state.incidents = incidents || [];
       state.mainCategories = mainCategories || [];
       state.categoryItems = categoryItems || [];
@@ -303,6 +324,9 @@ const incidentSlice = createSlice({
 });
 
 export const {
+  fetchDashboardStatsRequest,
+  fetchDashboardStatsSuccess,
+  fetchDashboardStatsFailure,
   fetchCategoriesRequest,
   fetchCategoriesSuccess,
   fetchCategoriesFailure,

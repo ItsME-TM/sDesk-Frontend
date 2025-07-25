@@ -129,7 +129,7 @@ const UserViewIncident = () => {
   return (
     <div className="UserViewIncident-main-content">
       <div className="UserViewIncident-direction-bar">
-        Incidents {">"} My Incidents
+        Incidents
       </div>
       <div className="UserViewIncident-content2">
         <div className="UserViewIncident-TitleBar">
@@ -157,19 +157,6 @@ const UserViewIncident = () => {
               <option value="Hold">Hold</option>
               <option value="In Progress">In Progress</option>
               <option value="Closed">Closed</option>
-            </select>
-            Category:
-            <select
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              value={categoryFilter}
-              className="UserViewIncident-showSearchBar-Show-select2"
-            >
-              <option value="all">All Categories</option>
-              {(categories || []).map((cat) => (
-                <option key={cat.id} value={cat.name}>
-                  {cat.name}
-                </option>
-              ))}
             </select>
           </div>
           <div className="UserViewIncident-showSearchBar-SearchBar">

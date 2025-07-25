@@ -4,26 +4,23 @@ import socket from "../../utils/socket";
 function SocketTest() {
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState([]);
-
   useEffect(() => {
     // Connection events
     socket.on("connect", () => {
-      console.log("✅ Connected to server:", socket.id);
       setConnected(true);
     });
 
     socket.on("disconnect", () => {
-      console.log("❌ Disconnected from server");
       setConnected(false);
-    }); // Test response handler
+    });
+
+    // Test response handler
     socket.on("test_response", (data) => {
-      console.log("📨 Received from server:", data);
       setMessages((prev) => [...prev, data.message]);
     });
 
     // Listen for incident creation events
     socket.on("incident_created", (data) => {
-      console.log("🆕 New incident created:", data.incident);
       setMessages((prev) => [
         ...prev,
         `🆕 Incident ${data.incident.incident_number} created!`,

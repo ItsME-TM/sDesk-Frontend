@@ -15,8 +15,12 @@ import {
   fetchAllUsers,
   fetchAllLocations,
   fetchAdminTeamData,
+  fetchDashboardStats,
 } from "./incidentService";
 import {
+  fetchDashboardStatsRequest,
+  fetchDashboardStatsSuccess,
+  fetchDashboardStatsFailure,
   fetchAllIncidentsRequest,
   fetchAllIncidentsSuccess,
   fetchAllIncidentsFailure,
@@ -293,6 +297,20 @@ function* handleFetchAllLocations() {
     yield put(fetchAllLocationsFailure(errorMessage));
   }
 }
+function* handleFetchDashboardStats(action) {
+  try {
+    const response = yield call(fetchDashboardStats, action.payload?.userParentCategory);
+    yield put(fetchDashboardStatsSuccess(response.data));
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(fetchDashboardStatsFailure(errorMessage));
+  }
+}
+
 
 export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
@@ -312,5 +330,5 @@ export default function* incidentSaga() {
   yield takeLatest(fetchCategoryItemsRequest.type, handleFetchCategoryItems);
   yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
+  yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
 }
-

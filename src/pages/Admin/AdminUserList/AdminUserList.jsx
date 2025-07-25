@@ -4,6 +4,7 @@ import { FaHouseUser, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
 import { IoIosAddCircleOutline } from 'react-icons/io';
 import { TiExportOutline } from 'react-icons/ti';
 import { useSelector, useDispatch } from 'react-redux';
+import socket from '../../../utils/socket.js';
 
 import {
   fetchTechniciansRequest,
@@ -11,6 +12,8 @@ import {
   createTechnicianRequest,
   deleteTechnicianRequest,
   updateTechnicianRequest,
+  forceLogoutTechnicianRequest,
+  updateTechnicianOnlineStatus,
 } from '../../../redux/technicians/technicianSlice';
 
 import { fetchSubCategoriesRequest } from '../../../redux/categories/categorySlice';
@@ -32,6 +35,7 @@ function AdminUserList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
 
   useEffect(() => {
     console.log('Selection changed:', selectShowOption);
@@ -43,6 +47,55 @@ function AdminUserList() {
     } else {
       dispatch(fetchTechniciansRequest());
     }
+  }, [dispatch, selectShowOption]);
+
+  // NEW: Socket event listeners for real-time technician status
+  useEffect(() => {
+    const handleTechnicianOnline = (data) => {
+      console.log('[AdminUserList] Technician came online:', data);
+      setOnlineTechnicians(prev => new Set([...prev, data.serviceNum]));
+      dispatch(updateTechnicianOnlineStatus({ serviceNum: data.serviceNum, isOnline: true }));
+      // Refresh the list if showing active technicians
+      if (selectShowOption === 'Active') {
+        dispatch(fetchActiveTechniciansRequest());
+      }
+    };
+
+    const handleTechnicianOffline = (data) => {
+      console.log('[AdminUserList] Technician went offline:', data);
+      setOnlineTechnicians(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(data.serviceNum);
+        return newSet;
+      });
+      dispatch(updateTechnicianOnlineStatus({ serviceNum: data.serviceNum, isOnline: false }));
+      // Refresh the list if showing active technicians
+      if (selectShowOption === 'Active') {
+        dispatch(fetchActiveTechniciansRequest());
+      }
+    };
+
+    const handleTechnicianForceLoggedOut = (data) => {
+      console.log('[AdminUserList] Technician was force logged out:', data);
+      setOnlineTechnicians(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(data.serviceNum);
+        return newSet;
+      });
+      dispatch(updateTechnicianOnlineStatus({ serviceNum: data.serviceNum, isOnline: false }));
+    };
+
+    // Register socket event listeners
+    socket.on('technician_online', handleTechnicianOnline);
+    socket.on('technician_offline', handleTechnicianOffline);
+    socket.on('technician_force_logged_out', handleTechnicianForceLoggedOut);
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('technician_online', handleTechnicianOnline);
+      socket.off('technician_offline', handleTechnicianOffline);
+      socket.off('technician_force_logged_out', handleTechnicianForceLoggedOut);
+    };
   }, [dispatch, selectShowOption]);
 
   const getTeamName = (teamId) => {
@@ -67,10 +120,11 @@ function AdminUserList() {
         cat3: getSubCategoryName(user.cat3),
         cat4: getSubCategoryName(user.cat4),
         active: user.active ? 'True' : 'False',
+        isOnline: onlineTechnicians.has(user.serviceNumber || user.serviceNum),
         level: user.level || '',
         id: user.id,
       })),
-    [technicians, mainCategories, subCategories]
+    [technicians, mainCategories, subCategories, onlineTechnicians]
   );
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
@@ -93,7 +147,6 @@ function AdminUserList() {
         console.log('Successfully updated SLT user role');
       } catch (err) {
         console.warn('Failed to update SLT user role:', err);
-        // Continue with technician update even if role update fails
       }
       
       const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
@@ -117,6 +170,11 @@ function AdminUserList() {
           id: editUser.id,
         })
       );
+
+      // NEW: If technician is being deactivated and is currently online, force logout
+      if (updatedFields.active === false && onlineTechnicians.has(editUser.serviceNum)) {
+        dispatch(forceLogoutTechnicianRequest({ serviceNum: editUser.serviceNum, socket }));
+      }
     }
     setIsEditUserOpen(false);
     setEditUser(null);
@@ -135,28 +193,35 @@ function AdminUserList() {
   const confirmDelete = async () => {
     if (userToDelete) {
       try {
-        // Always use serviceNum or serviceNumber for SLT user role update
         const sltServiceNum = userToDelete.serviceNum || userToDelete.serviceNumber;
         if (sltServiceNum) {
           await updateUserRoleById(sltServiceNum, 'user');
           console.log('Successfully updated SLT user role to user');
-        } else {
-          console.warn('No serviceNum found for SLT user role update');
         }
       } catch (err) {
         console.warn('Failed to update SLT user role to user:', err);
-        // Continue with technician deletion even if role update fails
       }
       dispatch(deleteTechnicianRequest(userToDelete.serviceNum || userToDelete.serviceNumber || userToDelete.id));
       setIsDeletePopupOpen(false);
       setUserToDelete(null);
-     
     }
   };
 
   const cancelDelete = () => {
     setIsDeletePopupOpen(false);
     setUserToDelete(null);
+  };
+
+  // NEW: Handle force logout technician
+  const handleForceLogout = (serviceNum) => {
+    const user = technicians.find(
+      (u) => u.serviceNumber === serviceNum || u.serviceNum === serviceNum
+    );
+    if (user && user.active) {
+      if (window.confirm(`Are you sure you want to force logout ${user.name}?`)) {
+        dispatch(forceLogoutTechnicianRequest({ serviceNum, socket }));
+      }
+    }
   };
 
   const handleAddUser = () => setIsAddUserOpen(true);
@@ -209,7 +274,7 @@ function AdminUserList() {
                 <th>Team</th>
                 <th>Active</th>
                 <th>Level</th>
-                <th>Option</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -239,6 +304,15 @@ function AdminUserList() {
                         <button className="AdminUserList-table-delete-btn" onClick={() => handleDelete(user.serviceNum)}>
                           <FaTrash />
                         </button>
+                        {user.isOnline && (
+                          <button 
+                            className="AdminUserList-table-logout-btn" 
+                            onClick={() => handleForceLogout(user.serviceNum)}
+                            title="Force Logout"
+                          >
+                            Logout
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -259,14 +333,12 @@ function AdminUserList() {
           onClose={() => setIsAddUserOpen(false)}
           onSubmit={async (newUser) => {
             if (!newUser.isEdit) {
-              // Try to update SLT user role first
               if (newUser.serviceNum) {
                 try {
                   await updateUserRoleById(newUser.serviceNum, 'technician');
                   console.log('Successfully updated SLT user role to technician');
                 } catch (err) {
-                  console.warn('Failed to update SLT user role (this may be normal if user does not exist in SLT Users table):', err);
-                  // Continue with technician creation even if role update fails
+                  console.warn('Failed to update SLT user role:', err);
                 }
               }
 

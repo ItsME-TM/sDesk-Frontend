@@ -44,6 +44,19 @@ export interface IncidentHistory {
   location?: string;
 }
 
+export interface DashboardStats {
+  statusCounts: {
+    [key: string]: number;
+  };
+  priorityCounts: {
+    [key: string]: number;
+  };
+  todayStats: {
+    [key: string]: number;
+  };
+}
+
+
 export interface IncidentState {
   incidents: Incident[];
   assignedToMe: Incident[];
@@ -53,6 +66,7 @@ export interface IncidentState {
   categories: Category[]; // Add this line
   incidentHistory: IncidentHistory[]; // Add incident history
   currentTechnician: any | null; // Add current technician
+  dashboardStats: DashboardStats;
   mainCategories: any[];
   categoryItems: any[];
   users: any[];
