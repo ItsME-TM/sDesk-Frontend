@@ -190,13 +190,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
             <>
               <li className="SideBar-dropdown-header">
                 <Link
-                  to={
-                    role === "admin"
-                      ? "/admin/AdminAllIncidents"
-                      : role === "technician"
-                      ? "/technician/TechnicianAllTeam"
-                      : "/superAdmin/AdminAllIncidents"
-                  }
+                 
                   className={
                     location.pathname ===
                     (role === "admin"
@@ -278,7 +272,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Team - All Incidents
                         </Link>
                       </li>
-                      {/*
+                      {
                       <li className="SideBar-sub-list">
                         {role === "technician" && (
                           <Link
@@ -294,7 +288,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           </Link>
                         )}
                       </li>
-                      */}
+                      }
                     </>
                   )}
                   <li className="SideBar-sub-list">
