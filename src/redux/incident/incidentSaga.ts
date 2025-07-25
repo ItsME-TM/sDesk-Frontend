@@ -332,4 +332,3 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
 }
-
