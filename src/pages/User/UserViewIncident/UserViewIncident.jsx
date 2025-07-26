@@ -135,7 +135,7 @@ const UserViewIncident = () => {
         <div className="UserViewIncident-TitleBar">
           <div className="UserViewIncident-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-            My Incidents - {user.name || user.email} (Reported by me)
+            My Incidents - {user.name || user.email} 
           </div>
           <div className="UserViewIncident-TitleBar-buttons">
             <button className="UserViewIncident-TitleBar-buttons-ExportData">
