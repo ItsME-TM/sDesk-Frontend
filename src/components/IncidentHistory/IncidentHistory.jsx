@@ -3,6 +3,14 @@ import './IncidentHistory.css';
 import { CiLink } from "react-icons/ci";
 import { useSelector } from 'react-redux';
 
+// Helper function to format date as 'YYYY-MM-DD HH:mm:ss'
+const formatDateTime = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
 const IncidentHistory = ({ refNo, category, location, priority, historyData, users }) => {
     const { locations } = useSelector((state) => state.location);
 
@@ -42,7 +50,7 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                     <tr key={index}>
                                         <td className="assigned-column">{getUserName(entry.assignedTo)}</td>
                                         <td className="updated-by-column">{getUserName(entry.updatedBy)}</td>
-                                        <td className="updated-on-column">{entry.updatedOn}</td>
+                                        <td className="updated-on-column">{formatDateTime(entry.updatedOn)}</td>
                                         <td className="status-column">{entry.status}</td>
                                         <td className="comments-column">{entry.comments}</td>
                                     </tr>
