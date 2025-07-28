@@ -20,9 +20,6 @@ const UserViewIncident = () => {
     (state) => state.incident
   );
 
-  // Debugging logs
-  console.log("User from Redux:", user);
-  console.log("Assigned by me from Redux:", assignedByMe);
 
   // State for filters and pagination
   const [filteredIncidents, setFilteredIncidents] = useState([]);
@@ -38,7 +35,6 @@ const UserViewIncident = () => {
   // Fetch incidents and categories from the backend
   useEffect(() => {
     if (user && user.serviceNum) {
-      console.log(`Dispatching fetchAssignedByMeRequest for serviceNum: ${user.serviceNum}`);
       dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
     }
     dispatch(fetchCategoriesRequest());
@@ -47,8 +43,6 @@ const UserViewIncident = () => {
   useEffect(() => {
     // Ensure assignedByMe is not null/undefined before filtering
     const incidentsToFilter = assignedByMe || [];
-    console.log("Incidents to filter:", incidentsToFilter);
-
     const filtered = incidentsToFilter.filter((incident) => {
       const statusMatch =
         statusFilter === "all" || incident.status === statusFilter;

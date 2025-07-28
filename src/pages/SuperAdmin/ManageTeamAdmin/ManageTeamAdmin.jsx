@@ -316,7 +316,6 @@ const ManageTeamAdmin = () => {
           .map(r => r.reason?.message || r.reason || 'Unknown error');
         if (errors.length > 0) {
           setSubmitError("Failed to add admin and/or update user role: " + errors.join(' | '));
-          console.error("Failed to add admin and/or update user role:", errors);
         } else {
           setInfoMessage("Admin added successfully!");
           setSubmitSuccess(true);
@@ -330,7 +329,6 @@ const ManageTeamAdmin = () => {
         }
       } catch (err) {
         setSubmitError("Failed to add admin and/or update user role: " + (err?.message || err));
-        console.error("Failed to add admin and/or update user role:", err);
       }
     }
   };
@@ -338,10 +336,6 @@ const ManageTeamAdmin = () => {
   const handleDeleteClick = (admin) => {
     if (!admin || !admin.teamId || !admin.id) {
       alert("Cannot delete: Missing admin data!");
-      console.error(
-        "Delete failed: admin.teamId or admin.id is undefined",
-        admin
-      );
       return;
     }
     setConfirmMessage("Are you sure you want to delete this admin?");

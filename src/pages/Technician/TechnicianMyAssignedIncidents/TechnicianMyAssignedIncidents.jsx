@@ -26,12 +26,6 @@ const TechnicianMyAssignedIncidents = () => {
     const { categoryItems } = useSelector((state) => state.categories);
     const { locations } = useSelector((state) => state.location);
     
-    // Debug logging
-    console.log('[TechnicianMyAssignedIncidents] User state:', user);
-    console.log('[TechnicianMyAssignedIncidents] User role:', user?.role);
-    console.log('[TechnicianMyAssignedIncidents] assignedToMe data:', assignedToMe);
-    console.log('[TechnicianMyAssignedIncidents] loading:', loading);
-    console.log('[TechnicianMyAssignedIncidents] error:', error);
     
     // Real authentication check - no mock users
     if (!user) {
@@ -112,15 +106,7 @@ const TechnicianMyAssignedIncidents = () => {
     // Fetch assigned incidents on component mount
     useEffect(() => {
         if (assignedUser && currentUser) {
-            console.log('[TechnicianMyAssignedIncidents] Fetching incidents for user:', assignedUser);
-            console.log('[TechnicianMyAssignedIncidents] Current assignedToMe state:', assignedToMe);
-            console.log('[TechnicianMyAssignedIncidents] Current loading state:', loading);
-            console.log('[TechnicianMyAssignedIncidents] Current error state:', error);
-            
-            // FIX: Use serviceNum as the key for Redux action
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
-            
-            console.log('[TechnicianMyAssignedIncidents] Dispatched fetchAssignedToMeRequest');
         }
         dispatch(fetchAllUsersRequest());
         dispatch(fetchCategoryItemsRequest());
@@ -143,8 +129,7 @@ const TechnicianMyAssignedIncidents = () => {
         return location ? (location.name || location.loc_name) : locationNumber;
     };
 
-    // Loading and error states
-    console.log('[TechnicianMyAssignedIncidents] Render - loading:', loading, 'error:', error, 'assignedToMe:', assignedToMe?.length || 0);
+  
     
     // Only show loading spinner if loading is true AND assignedToMe is empty
     if (loading && (!assignedToMe || assignedToMe.length === 0)) {
@@ -157,9 +142,6 @@ const TechnicianMyAssignedIncidents = () => {
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading assigned incidents...</p>
-                        <div style={{marginTop: '10px', fontSize: '12px', color: '#666'}}>
-                            Debug: User={assignedUser}, Loading={String(loading)}, Error={String(error)}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -175,9 +157,7 @@ const TechnicianMyAssignedIncidents = () => {
                 <div className="TechnicianMyAssignedIncidents-content2">
                     <div className="error-container">
                         <p>Error loading assigned incidents: {error}</p>
-                        <p>Debug info: User={assignedUser}, Backend=http://localhost:8000</p>
                         <button onClick={() => {
-                            console.log('[TechnicianMyAssignedIncidents] Retrying with user:', assignedUser);
                             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
                         }}>
                             Retry

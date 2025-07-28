@@ -97,7 +97,6 @@ const AdminAddIncident = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    console.log("Selected file:", file);
   };
 
   const handleRemoveFile = () => {
@@ -151,11 +150,7 @@ const AdminAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    console.log(
-      "[AdminAddIncident] Creating incident with data:",
-      incidentData
-    );
-    console.log("[AdminAddIncident] Logged-in user:", user);
+
 
     // Validate data before sending
     if (!incidentData.informant) {
@@ -222,7 +217,7 @@ const AdminAddIncident = () => {
     if (error) {
       return (
         <div className="status-message error-message">
-          <h3>❌ Error Creating Incident</h3>
+          <h3> Error Creating Incident</h3>
           <p>{error}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>

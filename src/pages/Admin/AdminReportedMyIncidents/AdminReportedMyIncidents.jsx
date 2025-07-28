@@ -1,28 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { FaHistory, FaSearch } from 'react-icons/fa';
-import { TiExportOutline } from 'react-icons/ti';
-import { useNavigate } from 'react-router-dom';
-import { IoIosArrowForward } from 'react-icons/io';
-import { fetchAssignedByMeRequest, fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
-import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
-import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
-import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
-import './AdminReportedMyIncidents.css';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { FaHistory, FaSearch } from "react-icons/fa";
+import { TiExportOutline } from "react-icons/ti";
+import { useNavigate } from "react-router-dom";
+import { IoIosArrowForward } from "react-icons/io";
+import {
+  fetchAssignedByMeRequest,
+  fetchIncidentHistoryRequest,
+} from "../../../redux/incident/incidentSlice";
+import { fetchAllUsersRequest } from "../../../redux/sltusers/sltusersSlice";
+import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedUserDetail";
+import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
+import "./AdminReportedMyIncidents.css";
 
 const AdminReportedMyIncidents = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   // Redux state
-  const { assignedByMe, loading, error, incidentHistory } = useSelector((state) => state.incident);
+  const { assignedByMe, loading, error, incidentHistory } = useSelector(
+    (state) => state.incident
+  );
   const { user } = useSelector((state) => state.auth); // Get logged-in user from auth slice
   const { allUsers } = useSelector((state) => state.sltusers);
-  
+
   // Local state
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -30,17 +35,17 @@ const AdminReportedMyIncidents = () => {
 
   // Fetch incidents reported by the logged-in technician and all users
   useEffect(() => {
-    if (user && user.role === 'admin' && user.serviceNumber) {
+    if (user && user.role === "admin" && user.serviceNumber) {
       dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNumber }));
     }
     dispatch(fetchAllUsersRequest());
   }, [dispatch, user]);
-  
+
   if (loading) {
     return (
       <div className="AdminReportedMyIncidents-main-content">
         <div className="AdminReportedMyIncidents-direction-bar">
-          Incidents {'>'} My Reported Incidents
+          Incidents {">"} My Reported Incidents
         </div>
         <div className="AdminReportedMyIncidents-content2">
           <div className="loading-container">
@@ -56,12 +61,18 @@ const AdminReportedMyIncidents = () => {
     return (
       <div className="AdminReportedMyIncidents-main-content">
         <div className="AdminReportedMyIncidents-direction-bar">
-          Incidents {'>'} My Reported Incidents
+          Incidents {">"} My Reported Incidents
         </div>
         <div className="AdminReportedMyIncidents-content2">
           <div className="error-container">
             <p>Error loading reported incidents: {error}</p>
-            <button onClick={() => dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNumber }))}>
+            <button
+              onClick={() =>
+                dispatch(
+                  fetchAssignedByMeRequest({ serviceNum: user.serviceNumber })
+                )
+              }
+            >
               Retry
             </button>
           </div>
@@ -70,7 +81,7 @@ const AdminReportedMyIncidents = () => {
     );
   }
 
-  const tableData = (assignedByMe || []).map(item => ({
+  const tableData = (assignedByMe || []).map((item) => ({
     refNo: item.incident_number,
     category: item.category, // Category name from backend
     status: item.status,
@@ -78,12 +89,14 @@ const AdminReportedMyIncidents = () => {
     informant: item.informant, // service_number of the reporter
   }));
 
-  const filteredData = tableData.filter(item => {
-    const matchesSearch = Object.values(item).some(val =>
+  const filteredData = tableData.filter((item) => {
+    const matchesSearch = Object.values(item).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
-    const matchesCategory = categoryFilter ? item.category === categoryFilter : true;
+    const matchesCategory = categoryFilter
+      ? item.category === categoryFilter
+      : true;
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
@@ -93,11 +106,13 @@ const AdminReportedMyIncidents = () => {
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
   const handleRowClick = (refNo) => {
-    const incident = assignedByMe.find(item => item.incident_number === refNo);
+    const incident = assignedByMe.find(
+      (item) => item.incident_number === refNo
+    );
     if (incident) {
-        setSelectedIncident(incident);
-        setIsPopupVisible(true);
-        dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
+      setSelectedIncident(incident);
+      setIsPopupVisible(true);
+      dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
     }
   };
 
@@ -106,11 +121,11 @@ const AdminReportedMyIncidents = () => {
       <tr
         key={idx}
         onClick={() => handleRowClick(row.refNo)}
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
       >
-        <td className='AdminReportedMyIncidents-refno'>{row.refNo}</td>
+        <td className="AdminReportedMyIncidents-refno">{row.refNo}</td>
         <td>{row.category}</td>
-        <td className='AdminReportedMyIncidents-status-text'>{row.status}</td>
+        <td className="AdminReportedMyIncidents-status-text">{row.status}</td>
         <td>{row.priority}</td>
       </tr>
     ));
@@ -125,7 +140,7 @@ const AdminReportedMyIncidents = () => {
         <button
           key={i + 1}
           onClick={() => setCurrentPage(i + 1)}
-          className={currentPage === i + 1 ? 'active' : ''}
+          className={currentPage === i + 1 ? "active" : ""}
         >
           {i + 1}
         </button>
@@ -133,23 +148,54 @@ const AdminReportedMyIncidents = () => {
     }
 
     buttons.push(
-      <button key={1} onClick={() => setCurrentPage(1)} className={currentPage === 1 ? 'active' : ''}>1</button>,
-      <button key={2} onClick={() => setCurrentPage(2)} className={currentPage === 2 ? 'active' : ''}>2</button>
+      <button
+        key={1}
+        onClick={() => setCurrentPage(1)}
+        className={currentPage === 1 ? "active" : ""}
+      >
+        1
+      </button>,
+      <button
+        key={2}
+        onClick={() => setCurrentPage(2)}
+        className={currentPage === 2 ? "active" : ""}
+      >
+        2
+      </button>
     );
 
     if (currentPage > 3) buttons.push(<span key="ellipsis1">...</span>);
 
     if (currentPage > 3 && currentPage < totalPages - 2) {
       buttons.push(
-        <button key={currentPage} onClick={() => setCurrentPage(currentPage)} className="active">{currentPage}</button>
+        <button
+          key={currentPage}
+          onClick={() => setCurrentPage(currentPage)}
+          className="active"
+        >
+          {currentPage}
+        </button>
       );
     }
 
-    if (currentPage < totalPages - 2) buttons.push(<span key="ellipsis2">...</span>);
+    if (currentPage < totalPages - 2)
+      buttons.push(<span key="ellipsis2">...</span>);
 
     buttons.push(
-      <button key={totalPages - 1} onClick={() => setCurrentPage(totalPages - 1)} className={currentPage === totalPages - 1 ? 'active' : ''}>{totalPages - 1}</button>,
-      <button key={totalPages} onClick={() => setCurrentPage(totalPages)} className={currentPage === totalPages ? 'active' : ''}>{totalPages}</button>
+      <button
+        key={totalPages - 1}
+        onClick={() => setCurrentPage(totalPages - 1)}
+        className={currentPage === totalPages - 1 ? "active" : ""}
+      >
+        {totalPages - 1}
+      </button>,
+      <button
+        key={totalPages}
+        onClick={() => setCurrentPage(totalPages)}
+        className={currentPage === totalPages ? "active" : ""}
+      >
+        {totalPages}
+      </button>
     );
 
     return buttons;
@@ -157,53 +203,59 @@ const AdminReportedMyIncidents = () => {
 
   const renderPopup = () => {
     if (!isPopupVisible || !selectedIncident) {
-        return null;
+      return null;
     }
 
     const formData = {
-        serviceNo: user.serviceNumber,
-        tpNumber: user.tp_number || user.tpNumber || user.contactNumber || '',
-        name: user.userName,
-        designation: user.designation || user.role || '',
-        email: user.email,
+      serviceNo: user.serviceNumber,
+      tpNumber: user.tp_number || user.tpNumber || user.contactNumber || "",
+      name: user.userName,
+      designation: user.designation || user.role || "",
+      email: user.email,
     };
 
     const incidentDetails = {
-        refNo: selectedIncident.incident_number,
-        category: selectedIncident.category,
-        location: selectedIncident.location,
-        priority: selectedIncident.priority,
-        status: selectedIncident.status,
+      refNo: selectedIncident.incident_number,
+      category: selectedIncident.category,
+      location: selectedIncident.location,
+      priority: selectedIncident.priority,
+      status: selectedIncident.status,
     };
 
     return (
-        <div className="popup-overlay">
-            <div className="popup-content">
-                <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
-                <div className="AdminMyReportedUpdate-tickets-creator">
-                    <span className="AdminMyReportedUpdate-svr-desk">Incidents</span>
-                    <IoIosArrowForward />
-                    <span className="AdminMyReportedUpdate-created-ticket">Reported My Update</span>
-                </div>
-                <div className="AdminMyReportedUpdate-content2">
-                    <AffectedUserDetail formData={formData} />
-                    <IncidentHistory
-                        refNo={incidentDetails.refNo}
-                        category={incidentDetails.category}
-                        location={incidentDetails.location}
-                        priority={incidentDetails.priority}
-                        status={incidentDetails.status}
-                        historyData={incidentHistory}
-                        users={allUsers}
-                    />
-                </div>
-            </div>
+      <div className="popup-overlay">
+        <div className="popup-content">
+          <button
+            className="popup-close"
+            onClick={() => setIsPopupVisible(false)}
+          >
+            X
+          </button>
+          <div className="AdminMyReportedUpdate-tickets-creator">
+            <span className="AdminMyReportedUpdate-svr-desk">Incidents</span>
+            <IoIosArrowForward />
+            <span className="AdminMyReportedUpdate-created-ticket">
+              Reported My Update
+            </span>
+          </div>
+          <div className="AdminMyReportedUpdate-content2">
+            <AffectedUserDetail formData={formData} />
+            <IncidentHistory
+              refNo={incidentDetails.refNo}
+              category={incidentDetails.category}
+              location={incidentDetails.location}
+              priority={incidentDetails.priority}
+              status={incidentDetails.status}
+              historyData={incidentHistory}
+              users={allUsers}
+            />
+          </div>
         </div>
+      </div>
     );
-};
+  };
 
-
-  const uniqueCategories = [...new Set(tableData.map(item => item.category))];
+  const uniqueCategories = [...new Set(tableData.map((item) => item.category))];
 
   if (!user) {
     return <div>Loading user data...</div>;
@@ -211,17 +263,19 @@ const AdminReportedMyIncidents = () => {
   if (!user.serviceNumber) {
     return <div>User data missing serviceNumber. Please contact admin.</div>;
   }
-  if (user.role !== 'admin') {
+  if (user.role !== "admin") {
     return <div>Unauthorized: Only admins can view this page.</div>;
   }
 
   return (
     <div className="AdminReportedMyIncidents-main-content">
-        {renderPopup()}
+      {renderPopup()}
       <div className="AdminReportedMyIncidents-tickets-creator">
         <span className="AdminReportedMyIncidents-svr-desk">Incidents</span>
         <IoIosArrowForward />
-        <span className="AdminReportedMyIncidents-created-ticket">Reported My</span>
+        <span className="AdminReportedMyIncidents-created-ticket">
+          Reported My
+        </span>
       </div>
 
       <div className="AdminReportedMyIncidents-content2">
@@ -237,7 +291,7 @@ const AdminReportedMyIncidents = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="AdminReportedMyIncidents-showSearchBar container-fluid p-0">
           <div className="row m-0 w-100">
             <div className="col-md-7 col-lg-8 p-0">
@@ -245,19 +299,21 @@ const AdminReportedMyIncidents = () => {
                 <div className="d-flex align-items-center me-3 mb-2 mb-sm-0">
                   Entries:
                   <select
-                    onChange={e => setRowsPerPage(Number(e.target.value))}
+                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
                     value={rowsPerPage}
                     className="AdminReportedMyIncidents-showSearchBar-Show-select ms-2"
                   >
-                    {[10, 20, 50, 100].map(size => (
-                      <option key={size} value={size}>{size} entries</option>
+                    {[10, 20, 50, 100].map((size) => (
+                      <option key={size} value={size}>
+                        {size} entries
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div className="d-flex align-items-center me-3 mb-2 mb-sm-0">
                   Status:
                   <select
-                    onChange={e => setStatusFilter(e.target.value)}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                     value={statusFilter}
                     className="AdminReportedMyIncidents-showSearchBar-Show-select ms-2"
                   >
@@ -277,14 +333,14 @@ const AdminReportedMyIncidents = () => {
                   type="text"
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="AdminReportedMyIncidents-showSearchBar-SearchBar-input"
                 />
               </div>
             </div>
           </div>
         </div>
-        
+
         <div className="AdminReportedMyIncidents-table">
           <table className="AdminReportedMyIncidents-table-table">
             <thead>
@@ -295,25 +351,27 @@ const AdminReportedMyIncidents = () => {
                 <th>Priority</th>
               </tr>
             </thead>
-            <tbody>
-              {renderTableRows()}
-            </tbody>
+            <tbody>{renderTableRows()}</tbody>
           </table>
         </div>
         <div className="AdminReportedMyIncidents-content3">
           <span className="AdminReportedMyIncidents-content3-team-entry-info">
-            Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
+            Showing {indexOfFirst + 1} to{" "}
+            {Math.min(indexOfLast, filteredData.length)} of{" "}
+            {filteredData.length} entries
           </span>
           <div className="AdminReportedMyIncidents-content3-team-pagination-buttons">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               Previous
             </button>
             {renderPaginationButtons()}
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             >
               Next

@@ -75,7 +75,6 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
     }
 
     // Incident details
-    console.log('[UserUpdateIncident] incidentData:', incidentData);
     if (incidentData) {
       setIncidentDetails({
         refNo: incidentData.incident_number || incidentData.refNo,

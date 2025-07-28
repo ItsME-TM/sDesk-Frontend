@@ -27,8 +27,6 @@ const TechnicianAddIncident = () => {
     },
   ];
 
-  console.log("[TechnicianAddIncident] User data:", user);
-  console.log("[TechnicianAddIncident] userData:", userData);
 
   const [formData, setFormData] = useState({
     serviceNo: "",
@@ -102,7 +100,6 @@ const TechnicianAddIncident = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    console.log("Selected file:", file);
   };
 
   const handleRemoveFile = () => {
@@ -156,11 +153,6 @@ const TechnicianAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    console.log(
-      "[TechnicianAddIncident] Creating incident with data:",
-      incidentData
-    );
-    console.log("[TechnicianAddIncident] Logged-in user:", user);
     dispatch(createIncidentRequest(incidentData));
 
     // Reset form
