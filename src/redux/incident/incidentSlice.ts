@@ -128,10 +128,6 @@ const incidentSlice = createSlice({
     },
     getAssignedToMeSuccess(state, action) {
       state.loading = false;
-      console.log(
-        "[Reducer] getAssignedToMeSuccess: payload =",
-        action.payload
-      );
       state.assignedToMe = Array.isArray(action.payload)
         ? action.payload
         : action.payload?.data || [];

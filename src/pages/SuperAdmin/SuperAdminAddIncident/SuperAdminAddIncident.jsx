@@ -97,7 +97,6 @@ const SuperAdminAddIncident = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    console.log("Selected file:", file);
   };
 
   const handleRemoveFile = () => {
@@ -151,11 +150,6 @@ const SuperAdminAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    console.log(
-      "[SuperAdminAddIncident] Creating incident with data:",
-      incidentData
-    );
-    console.log("[SuperAdminAddIncident] Logged-in user:", user);
 
     // Validate data before sending
     if (!incidentData.informant) {
@@ -213,7 +207,7 @@ const SuperAdminAddIncident = () => {
     if (submitSuccess) {
       return (
         <div className="status-message success-message">
-          <h3>✅ Incident Created Successfully!</h3>
+          <h3> Incident Created Successfully!</h3>
           <p>The incident has been submitted and will be processed soon.</p>
         </div>
       );
@@ -222,7 +216,7 @@ const SuperAdminAddIncident = () => {
     if (error) {
       return (
         <div className="status-message error-message">
-          <h3>❌ Error Creating Incident</h3>
+          <h3> Error Creating Incident</h3>
           <p>{error}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>
