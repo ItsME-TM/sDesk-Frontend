@@ -122,6 +122,8 @@ const TechnicianInsident = ({
     status: "",
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [lastUpdateWasTransfer, setLastUpdateWasTransfer] = useState(false);
+
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
@@ -257,6 +259,10 @@ const TechnicianInsident = ({
       type: "incident/updateIncidentRequest",
       payload: updatePayload,
     });
+
+    // Track if the update was a transfer
+    setLastUpdateWasTransfer(!!updateStatusData.transferTo);
+
     // Mark that we want to fetch history for this incident after update is successful
     setPendingHistoryIncidentNo(currentIncident.incident_number);
   };
@@ -289,6 +295,19 @@ const TechnicianInsident = ({
       setShowSuccessMessage(true);
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
+
+      // If the last update was a transfer, notify the parent
+      if (lastUpdateWasTransfer) {
+        if (typeof window !== "undefined" && window.dispatchEvent) {
+          window.dispatchEvent(
+            new CustomEvent("incident-transferred", {
+              detail: { incident_number: currentIncident.incident_number },
+            })
+          );
+        }
+        setLastUpdateWasTransfer(false); // Reset transfer tracking
+      }
+
       setTimeout(() => {
         setShowSuccessMessage(false);
         // Close popup if parent provided a close handler (optional)

@@ -18,7 +18,8 @@ const TechnicianMyAssignedIncidents = () => {
 
     const [showIncidentPopup, setShowIncidentPopup] = useState(false);
     const [selectedIncident, setSelectedIncident] = useState(null);
-    
+    const [showTransferSuccess, setShowTransferSuccess] = useState(false);
+
     // Redux state
     const { assignedToMe, loading, error } = useSelector((state) => state.incident);
     const { user } = useSelector((state) => state.auth);
@@ -111,6 +112,32 @@ const TechnicianMyAssignedIncidents = () => {
         dispatch(fetchAllUsersRequest());
         dispatch(fetchCategoryItemsRequest());
         dispatch(fetchLocationsRequest());
+
+        // Listen for the custom event for successful transfer
+        const handleIncidentTransferred = (event) => {
+            const { incident_number } = event.detail;
+
+            // Refetch the assigned incidents list
+            if (assignedUser) {
+                dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+            }
+
+            // Show the success message
+            setShowTransferSuccess(true);
+            setTimeout(() => {
+                setShowTransferSuccess(false);
+            }, 3000); // Hide after 3 seconds
+
+            // Close the popup
+            setShowIncidentPopup(false);
+        };
+
+        window.addEventListener("incident-transferred", handleIncidentTransferred);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener("incident-transferred", handleIncidentTransferred);
+        };
     }, [dispatch, assignedUser, currentUser]);
 
     const getCategoryName = (categoryNumber) => {
@@ -264,6 +291,12 @@ const TechnicianMyAssignedIncidents = () => {
 
     return (
         <div className="TechnicianMyAssignedIncidents-main-content">
+            {showTransferSuccess && (
+                <div className="transfer-success-popup">
+                    <p>Incident Transfer Successful!</p>
+                </div>
+            )}
+
             <div className="TechnicianMyAssignedIncidents-tickets-creator">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
                 <IoIosArrowForward />
