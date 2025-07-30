@@ -57,6 +57,21 @@
     font-size: 13px;
 }
 
+/* Add this to your TechnicianMyAssignedIncidents.css */
+.transfer-success-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #4CAF50; /* Green background */
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    z-index: 1050; /* Ensure it's above other elements */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .TechnicianMyAssignedIncidents-TitleBar-buttons-ExportData {
     display: flex;
     align-items: center;
@@ -66,6 +81,7 @@
     font-weight: 600;
     background-color: #b10e0e;
     color: aliceblue;
+     animation: fadeInOut 3s ease-in-out;
 }
 
 .TechnicianMyAssignedIncidents-showSearchBar {
@@ -175,13 +191,30 @@
     position: sticky;
     bottom: 0;
     z-index: 100;
+    
 }
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+
 
 .TechnicianMyAssignedIncidents-content3-team-pagination-buttons {
     display: flex;
     gap: 5px;
     align-items: center;
 }
+
 
 .TechnicianMyAssignedIncidents-content3-team-pagination-buttons button {
     padding: 2px 8px;
@@ -262,6 +295,9 @@
     .TechnicianMyAssignedIncidents-tickets-creator {
       width: 100%;
     }
+
+
+    
   }
   
   @media (max-width: 767.98px) {
@@ -275,6 +311,8 @@
       gap: 10px;
       max-height: none;
       padding-bottom: 20px;
-    }
+    }  
   }
+
+  
   

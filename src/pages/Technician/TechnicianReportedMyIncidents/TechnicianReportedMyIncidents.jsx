@@ -162,7 +162,7 @@ const TechnicianReportedMyIncidents = () => {
 
     const formData = {
         serviceNo: user.serviceNum,
-        tpNumber: user.tp_number || user.tpNumber || '',
+        tpNumber: user.tp_number || user.tpNumber || user.contactNumber ||  '',
         name: user.user_name || user.name || user.email,
         designation: user.designation || user.role || '',
         email: user.email,

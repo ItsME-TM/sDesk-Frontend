@@ -31,10 +31,6 @@ const SuperAdminAllIncident = () => {
   } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
-  console.log("Redux state - incidents:", incidents);
-  console.log("Redux state - loading:", loading);
-  console.log("Redux state - error:", error);
-  console.log("Redux state - user:", user);
 
   const currentUser = user;
 
@@ -113,24 +109,12 @@ const SuperAdminAllIncident = () => {
   // Only use incidents from Redux state
   const incidentsToUse = incidents || [];
 
-  console.log("=== DEBUGGING DATA FLOW ===");
-  console.log("Redux incidents:", incidents);
-  // Removed reference to directIncidents (no longer used)
-  console.log("Using incidents:", incidentsToUse);
-  console.log("Current user:", currentUser);
-  console.log("CategoryItems loaded:", categoryItems?.length || 0);
-  console.log("Main categories loaded:", mainCategories?.length || 0);
-  console.log("Main categories data:", mainCategories);
-  console.log("Users loaded:", users?.length || 0);
-  console.log("Locations loaded:", locations?.length || 0);
+
 
   const processedIncidents = [];
 
   if (incidentsToUse && incidentsToUse.length > 0) {
-    incidentsToUse.forEach((dbIncident, index) => {
-      console.log(`Processing incident ${index}:`, dbIncident);
-      console.log(`Incident category:`, dbIncident.category);
-
+    incidentsToUse.forEach((dbIncident) => {
       const processedIncident = {
         incident_number: dbIncident.incident_number,
         informant: dbIncident.informant,
@@ -145,16 +129,13 @@ const SuperAdminAllIncident = () => {
         notify_infromant: dbIncident.notify_informant,
         Attachment: dbIncident.Attachment,
       };
-
       processedIncidents.push(processedIncident);
     });
   }
 
-  console.log("Processed incidents:", processedIncidents);
+  
 
   const transformedTeamIncidents = processedIncidents;
-
-  console.log("Final team incidents for table:", transformedTeamIncidents);
 
   const tableData = transformedTeamIncidents.map((incident) => ({
     refNo: incident.incident_number,
@@ -169,28 +150,6 @@ const SuperAdminAllIncident = () => {
     rawCategory: incident.category,
   }));
 
-  console.log("Table data:", tableData);
-  console.log(
-    "Table data with main categories:",
-    tableData.map((item) => ({
-      refNo: item.refNo,
-      rawCategory: item.rawCategory,
-      mainCategory: item.mainCategory,
-    }))
-  );
-  console.log(
-    "Available main categories for dropdown:",
-    mainCategories.map((cat) => cat.name || cat.parent_category_name)
-  );
-  console.log("Sample categoryItems array:", categoryItems?.slice(0, 3));
-  console.log("Unique incident categories:", [
-    ...new Set(tableData.map((item) => item.rawCategory)),
-  ]);
-  console.log("Unique main categories from incidents:", [
-    ...new Set(tableData.map((item) => item.mainCategory)),
-  ]);
-  console.log("Category filter value:", categoryFilter);
-
   const filteredData = tableData.filter((item) => {
     const matchesSearch = Object.values(item).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
@@ -202,42 +161,18 @@ const SuperAdminAllIncident = () => {
     if (categoryFilter) {
       const itemMainCategory = item.mainCategory;
       matchesCategory = itemMainCategory === categoryFilter;
-
-      console.log("Category filtering debug:", {
-        refNo: item.refNo,
-        rawCategory: item.rawCategory,
-        itemMainCategory,
-        categoryFilter,
-        matchesCategory,
-      });
     }
 
     const finalMatch = matchesSearch && matchesStatus && matchesCategory;
 
-    if (categoryFilter) {
-      console.log("Final filtering result:", {
-        refNo: item.refNo,
-        matchesSearch,
-        matchesStatus,
-        matchesCategory,
-        finalMatch,
-      });
-    }
 
     return finalMatch;
   });
-
-  console.log("Filtered data:", filteredData);
-  console.log("Search term:", searchTerm);
-  console.log("Status filter:", statusFilter);
-  console.log("Category filter:", categoryFilter);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
-
-  console.log("Current rows for display:", currentRows);
 
   const handleRowClick = (refNo) => {
     const incident = transformedTeamIncidents.find(
@@ -250,25 +185,13 @@ const SuperAdminAllIncident = () => {
   };
 
   const renderTableRows = () => {
-    console.log("=== RENDERING TABLE ROWS ===");
-    console.log("Current rows:", currentRows);
-    console.log("Current rows length:", currentRows.length);
 
     if (currentRows.length === 0) {
       return (
         <>
           <tr>
             <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
-              DEBUG: No incidents found.
-              <br />
-              Total incidents: {transformedTeamIncidents.length}
-              <br />
-              Filtered: {filteredData.length}
-              <br />
-              Redux loading: {loading ? "true" : "false"}
-              <br />
-              Redux error: {error || "none"}
-              <br />
+              No incidents found.
             </td>
           </tr>
           <tr style={{ backgroundColor: "#f0f0f0" }}>

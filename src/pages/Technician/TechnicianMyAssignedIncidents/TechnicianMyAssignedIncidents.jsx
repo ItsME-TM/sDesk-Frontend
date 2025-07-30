@@ -18,7 +18,8 @@ const TechnicianMyAssignedIncidents = () => {
 
     const [showIncidentPopup, setShowIncidentPopup] = useState(false);
     const [selectedIncident, setSelectedIncident] = useState(null);
-    
+    const [showTransferSuccess, setShowTransferSuccess] = useState(false);
+
     // Redux state
     const { assignedToMe, loading, error } = useSelector((state) => state.incident);
     const { user } = useSelector((state) => state.auth);
@@ -26,12 +27,6 @@ const TechnicianMyAssignedIncidents = () => {
     const { categoryItems } = useSelector((state) => state.categories);
     const { locations } = useSelector((state) => state.location);
     
-    // Debug logging
-    console.log('[TechnicianMyAssignedIncidents] User state:', user);
-    console.log('[TechnicianMyAssignedIncidents] User role:', user?.role);
-    console.log('[TechnicianMyAssignedIncidents] assignedToMe data:', assignedToMe);
-    console.log('[TechnicianMyAssignedIncidents] loading:', loading);
-    console.log('[TechnicianMyAssignedIncidents] error:', error);
     
     // Real authentication check - no mock users
     if (!user) {
@@ -112,19 +107,37 @@ const TechnicianMyAssignedIncidents = () => {
     // Fetch assigned incidents on component mount
     useEffect(() => {
         if (assignedUser && currentUser) {
-            console.log('[TechnicianMyAssignedIncidents] Fetching incidents for user:', assignedUser);
-            console.log('[TechnicianMyAssignedIncidents] Current assignedToMe state:', assignedToMe);
-            console.log('[TechnicianMyAssignedIncidents] Current loading state:', loading);
-            console.log('[TechnicianMyAssignedIncidents] Current error state:', error);
-            
-            // FIX: Use serviceNum as the key for Redux action
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
-            
-            console.log('[TechnicianMyAssignedIncidents] Dispatched fetchAssignedToMeRequest');
         }
         dispatch(fetchAllUsersRequest());
         dispatch(fetchCategoryItemsRequest());
         dispatch(fetchLocationsRequest());
+
+        // Listen for the custom event for successful transfer
+        const handleIncidentTransferred = (event) => {
+            const { incident_number } = event.detail;
+
+            // Refetch the assigned incidents list
+            if (assignedUser) {
+                dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+            }
+
+            // Show the success message
+            setShowTransferSuccess(true);
+            setTimeout(() => {
+                setShowTransferSuccess(false);
+            }, 3000); // Hide after 3 seconds
+
+            // Close the popup
+            setShowIncidentPopup(false);
+        };
+
+        window.addEventListener("incident-transferred", handleIncidentTransferred);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener("incident-transferred", handleIncidentTransferred);
+        };
     }, [dispatch, assignedUser, currentUser]);
 
     const getCategoryName = (categoryNumber) => {
@@ -143,8 +156,7 @@ const TechnicianMyAssignedIncidents = () => {
         return location ? (location.name || location.loc_name) : locationNumber;
     };
 
-    // Loading and error states
-    console.log('[TechnicianMyAssignedIncidents] Render - loading:', loading, 'error:', error, 'assignedToMe:', assignedToMe?.length || 0);
+  
     
     // Only show loading spinner if loading is true AND assignedToMe is empty
     if (loading && (!assignedToMe || assignedToMe.length === 0)) {
@@ -157,9 +169,6 @@ const TechnicianMyAssignedIncidents = () => {
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading assigned incidents...</p>
-                        <div style={{marginTop: '10px', fontSize: '12px', color: '#666'}}>
-                            Debug: User={assignedUser}, Loading={String(loading)}, Error={String(error)}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -175,9 +184,7 @@ const TechnicianMyAssignedIncidents = () => {
                 <div className="TechnicianMyAssignedIncidents-content2">
                     <div className="error-container">
                         <p>Error loading assigned incidents: {error}</p>
-                        <p>Debug info: User={assignedUser}, Backend=http://localhost:8000</p>
                         <button onClick={() => {
-                            console.log('[TechnicianMyAssignedIncidents] Retrying with user:', assignedUser);
                             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
                         }}>
                             Retry
@@ -284,6 +291,12 @@ const TechnicianMyAssignedIncidents = () => {
 
     return (
         <div className="TechnicianMyAssignedIncidents-main-content">
+            {showTransferSuccess && (
+                <div className="transfer-success-popup">
+                    <p>Incident Transfer Successful!</p>
+                </div>
+            )}
+
             <div className="TechnicianMyAssignedIncidents-tickets-creator">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
                 <IoIosArrowForward />

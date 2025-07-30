@@ -36,14 +36,6 @@ const AdminMyTeamIncidentViewAll = () => {
   } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
-  console.log("Redux state - incidents:", incidents);
-  console.log("Redux state - mainCategories:", mainCategories);
-  console.log("Redux state - categoryItems:", categoryItems);
-  console.log("Redux state - users:", users);
-  console.log("Redux state - locations:", locations);
-  console.log("Redux state - loading:", loading);
-  console.log("Redux state - error:", error);
-  console.log("Redux state - user:", user);
 
   const currentAdmin = user;
 
@@ -51,11 +43,8 @@ const AdminMyTeamIncidentViewAll = () => {
   // const [directIncidents, setDirectIncidents] = useState([]);
 
   useEffect(() => {
-    console.log("🚀 Component: Starting data fetch with Redux...");
-
     // Use the combined action to fetch all data at once for better performance
     dispatch(fetchAdminTeamDataRequest());
-
     // Alternative: fetch data separately if you need more granular control
     // dispatch(fetchAllIncidentsRequest());
     // dispatch(fetchMainCategoriesRequest());
@@ -75,8 +64,6 @@ const AdminMyTeamIncidentViewAll = () => {
   const adminTeam = currentAdmin.parent_category_name || "Unknown Team";
 
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
-    console.log("Looking up main category for:", categoryItemCode);
-
     // Process categoryItems to transform them to the expected format if needed
     const transformedCategories = categoryItems.map((item) => ({
       grandchild_category_number: item.category_code,
@@ -96,7 +83,6 @@ const AdminMyTeamIncidentViewAll = () => {
       (cat) => cat.grandchild_category_number === categoryItemCode
     );
     if (categoryItem) {
-      console.log("Found category item by code:", categoryItem);
       return categoryItem.parent_category_name;
     }
 
@@ -108,7 +94,6 @@ const AdminMyTeamIncidentViewAll = () => {
           categoryItemCode.toLowerCase()
     );
     if (categoryByName) {
-      console.log("Found category item by name:", categoryByName);
       return categoryByName.parent_category_name;
     }
 
@@ -119,11 +104,9 @@ const AdminMyTeamIncidentViewAll = () => {
         mainCat.parent_category_number === categoryItemCode
     );
     if (mainCategory) {
-      console.log("Found in main categories:", mainCategory);
       return mainCategory.name || mainCategory.parent_category_name;
     }
 
-    console.log("No category found for:", categoryItemCode);
     return "Unknown";
   };
 
@@ -156,23 +139,10 @@ const AdminMyTeamIncidentViewAll = () => {
   // Use incidents from Redux store directly
   const incidentsToUse = incidents || [];
 
-  console.log("=== DEBUGGING DATA FLOW ===");
-  console.log("Redux incidents:", incidents);
-  console.log("Using incidents:", incidentsToUse);
-  console.log("Current admin:", currentAdmin);
-  console.log("Categories loaded:", categoryItems?.length || 0);
-  console.log("Main categories loaded:", mainCategories?.length || 0);
-  console.log("Main categories data:", mainCategories);
-  console.log("Users loaded:", users?.length || 0);
-  console.log("Locations loaded:", locations?.length || 0);
-
   const processedIncidents = [];
 
   if (incidentsToUse && incidentsToUse.length > 0) {
-    incidentsToUse.forEach((dbIncident, index) => {
-      console.log(`Processing incident ${index}:`, dbIncident);
-      console.log(`Incident category:`, dbIncident.category);
-
+    incidentsToUse.forEach((dbIncident) => {
       const processedIncident = {
         incident_number: dbIncident.incident_number,
         informant: dbIncident.informant,
@@ -187,16 +157,12 @@ const AdminMyTeamIncidentViewAll = () => {
         notify_infromant: dbIncident.notify_informant,
         Attachment: dbIncident.Attachment,
       };
-
       processedIncidents.push(processedIncident);
     });
   }
 
-  console.log("Processed incidents:", processedIncidents);
 
   const transformedTeamIncidents = processedIncidents;
-
-  console.log("Final team incidents for table:", transformedTeamIncidents);
 
   const tableData = transformedTeamIncidents.map((incident) => ({
     refNo: incident.incident_number,
@@ -205,81 +171,31 @@ const AdminMyTeamIncidentViewAll = () => {
     category: incident.category,
     subcategory: incident.category,
     mainCategory: getMainCategoryNameFromDatabase(incident.category),
-
     status: incident.status,
     location: incident.location,
     rawCategory: incident.category,
   }));
 
-  console.log("Table data:", tableData);
-  console.log(
-    "Table data with main categories:",
-    tableData.map((item) => ({
-      refNo: item.refNo,
-      rawCategory: item.rawCategory,
-      mainCategory: item.mainCategory,
-    }))
-  );
-  console.log(
-    "Available main categories for dropdown:",
-    mainCategories.map((cat) => cat.name || cat.parent_category_name)
-  );
-  console.log("Sample categories array:", categoryItems.slice(0, 3));
-  console.log("Unique incident categories:", [
-    ...new Set(tableData.map((item) => item.rawCategory)),
-  ]);
-  console.log("Unique main categories from incidents:", [
-    ...new Set(tableData.map((item) => item.mainCategory)),
-  ]);
-  console.log("Category filter value:", categoryFilter);
 
   const filteredData = tableData.filter((item) => {
     const matchesSearch = Object.values(item).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     );
     const matchesStatus = statusFilter ? item.status === statusFilter : true;
-
-    // Category filtering with improved logic
     let matchesCategory = true;
     if (categoryFilter) {
       const itemMainCategory = item.mainCategory;
       matchesCategory = itemMainCategory === categoryFilter;
-
-      console.log("Category filtering debug:", {
-        refNo: item.refNo,
-        rawCategory: item.rawCategory,
-        itemMainCategory,
-        categoryFilter,
-        matchesCategory,
-      });
     }
-
     const finalMatch = matchesSearch && matchesStatus && matchesCategory;
-
-    if (categoryFilter) {
-      console.log("Final filtering result:", {
-        refNo: item.refNo,
-        matchesSearch,
-        matchesStatus,
-        matchesCategory,
-        finalMatch,
-      });
-    }
-
     return finalMatch;
   });
-
-  console.log("Filtered data:", filteredData);
-  console.log("Search term:", searchTerm);
-  console.log("Status filter:", statusFilter);
-  console.log("Category filter:", categoryFilter);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
-  console.log("Current rows for display:", currentRows);
 
   const handleRowClick = (refNo) => {
     const incident = transformedTeamIncidents.find(
@@ -292,39 +208,15 @@ const AdminMyTeamIncidentViewAll = () => {
   };
 
   const renderTableRows = () => {
-    console.log("=== RENDERING TABLE ROWS ===");
-    console.log("Current rows:", currentRows);
-    console.log("Current rows length:", currentRows.length);
-
     if (currentRows.length === 0) {
       return (
-        <>
-          <tr>
-            <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
-              DEBUG: No incidents found.
-              <br />
-              Total incidents: {transformedTeamIncidents.length}
-              <br />
-              Filtered: {filteredData.length}
-              <br />
-              Redux loading: {loading ? "true" : "false"}
-              <br />
-              Redux error: {error || "none"}
-              <br />
-            </td>
-          </tr>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <td className="team-refno">TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className="team-status-text">Open</td>
-          </tr>
-        </>
+        <tr>
+          <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
+            No incidents found.
+          </td>
+        </tr>
       );
     }
-
     return currentRows.map((row, idx) => (
       <tr
         key={idx}
