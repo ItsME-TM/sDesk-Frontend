@@ -135,7 +135,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   </li>
                 </>
               )}
-              <li>
+              <li className="SideBar-dropdown-header">
                 <Link
                   to={
                     role === "superAdmin"
@@ -158,7 +158,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
               </li>
               {role === "superAdmin" && (
                 <>
-                  <li>
+                  <li className="SideBar-dropdown-header">
                     <Link
                       to="/superAdmin/AdminCategory"
                       className={
@@ -171,7 +171,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                       <BiCategory /> Category
                     </Link>
                   </li>
-                  <li>
+                  <li className="SideBar-dropdown-header">
                     <Link
                       to="/superAdmin/AdminLocation"
                       className={
