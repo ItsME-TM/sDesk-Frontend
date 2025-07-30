@@ -1,4 +1,3 @@
-
 .affected-user-card {
   border: 1px solid #dee2e6;
   border-radius: 0.5rem;
@@ -13,6 +12,22 @@
 .affected-user-card .card-body {
   padding: 1rem;
 }
+
+
+.affected-user-card-modern {
+    border: none;
+    border-radius: 0.75rem;
+}
+
+.affected-user-table-modern td {
+    padding: 1rem 1.5rem;
+    vertical-align: middle;
+}
+
+.affected-user-table-modern .fw-bold {
+    color: #495057;
+}
+
 
 @media (max-width: 992px) {
   .affected-user-card {
@@ -95,3 +110,4 @@
   outline: none; 
   box-shadow: none; 
 }
+
