@@ -471,7 +471,7 @@ const TechnicianInsident = ({
                 </div>
               )}
 
-              <div className="col-12 d-flex justify-content-between">
+              <div className={`col-12 d-flex ${isPopup ? 'justify-content-end' : 'justify-content-between'}`}>
                 {!isPopup && (
                   <button
                     className="technician-details-back-btn"
