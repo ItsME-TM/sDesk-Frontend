@@ -219,3 +219,144 @@
     padding: 5px 10px;
     color: #666;
 }
+
+/* Tablet Responsive - 768px and below */
+@media (max-width: 768px) {
+    .AdminincidentViewAll-TitleBar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px 0;
+    }
+    
+    .AdminincidentViewAll-TitleBar-NameAndIcon {
+        margin: 10px 20px;
+        justify-content: center;
+    }
+    
+    .AdminincidentViewAll-TitleBar-buttons {
+        margin: 10px 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .AdminincidentViewAll-showSearchBar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px 0;
+        gap: 10px;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-Show {
+        margin: 0 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-SearchBar {
+        margin: 0 20px;
+        justify-content: center;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-SearchBar-input {
+        width: 250px;
+    }
+    
+    .AdminincidentViewAll-table {
+        padding: 10px;
+        overflow-x: auto;
+    }
+    
+    .AdminincidentViewAll-table table {
+        min-width: 600px;
+    }
+    
+    .AdminincidentViewAll-content3 {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 10px;
+        max-height: none;
+    }
+    
+    .AdminincidentViewAll-content3-team-pagination-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+/* Mobile Responsive - 320px and below */
+@media (max-width: 320px) {
+    .AdminincidentViewAll-direction-bar {
+        padding-left: 10px;
+        font-size: 13px;
+    }
+    
+    .AdminincidentViewAll-TitleBar-NameAndIcon {
+        margin: 10px;
+        font-size: 18px;
+    }
+    
+    .AdminincidentViewAll-TitleBar-buttons {
+        margin: 10px;
+        font-size: 12px;
+    }
+    
+    .AdminincidentViewAll-TitleBar-buttons-ExportData,
+    .AdminincidentViewAll-TitleBar-buttons-AddUser {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-Show {
+        margin: 0 10px;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-Show-select,
+    .AdminincidentViewAll-showSearchBar-Show-select2 {
+        width: 150px;
+        margin-right: 0;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-SearchBar {
+        margin: 0 10px;
+    }
+    
+    .AdminincidentViewAll-showSearchBar-SearchBar-input {
+        width: 200px;
+        font-size: 12px;
+    }
+    
+    .AdminincidentViewAll-table {
+        padding: 5px;
+    }
+    
+    .AdminincidentViewAll-table table {
+        min-width: 280px;
+        font-size: 10px;
+    }
+    
+    .AdminincidentViewAll-table th,
+    .AdminincidentViewAll-table td {
+        padding: 4px;
+        font-size: 10px;
+    }
+    
+    .AdminincidentViewAll-content3 {
+        padding: 10px;
+        font-size: 10px;
+    }
+    
+    .AdminincidentViewAll-content3-team-pagination-buttons button {
+        padding: 1px 6px;
+        min-width: 25px;
+        font-size: 10px;
+    }
+    
+    .AdminincidentViewAll-content3-team-pagination-buttons span {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+}
