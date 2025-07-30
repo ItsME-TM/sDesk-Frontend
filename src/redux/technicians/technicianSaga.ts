@@ -65,12 +65,14 @@ function* handleCheckTechnicianStatus() {
   try {
     const response = yield call(technicianService.checkTechnicianStatus);
     yield put(checkTechnicianStatusSuccess(response.data));
+    yield put(fetchTechniciansRequest()); // Refresh technicians list after status check
   } catch (error) {
     yield put(checkTechnicianStatusFailure(error.message));
     
   }
+
 }
-function* handleFetchActiveTechnicians(): any {
+function* handleFetchActiveTechnicians(){
   try {
     const response = yield call(technicianService.fetchActiveTechnicians);
     yield put(fetchActiveTechniciansSuccess(response.data));
@@ -79,7 +81,7 @@ function* handleFetchActiveTechnicians(): any {
   }
 }
 
-function* handleForceLogoutTechnician(action): any {
+function* handleForceLogoutTechnician(action){
   try {
     const response = yield call(technicianService.forceLogoutTechnician, action.payload.serviceNum);
     yield put(forceLogoutTechnicianSuccess({ serviceNum: action.payload.serviceNum }));

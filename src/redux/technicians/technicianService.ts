@@ -51,7 +51,7 @@ export const updateTechnician = async (serviceNum: string, data: Partial<Technic
 
 export const deleteTechnician = async (serviceNum: string) => {
   try{
-    return await axios.delete(buildUrl(API_BASE,`/technician/${serviceNum}`), { withCredentials: true });
+    return await axios.delete(buildUrl(API_BASE,`/technician/${serviceNum}`) ,{ withCredentials: true });
   }
 catch(error){
  console.error (`Error deleting technician  with serviceNumber ${serviceNum}:`,error);
@@ -61,7 +61,7 @@ catch(error){
 
 export const checkTechnicianStatus = async () => {
   try{
-     return await axios.get(`${API_BASE}/technician/check-status`, { withCredentials: true });
+     return await axios.get(buildUrl(API_BASE,`/check-status`) ,{ withCredentials: true });
   } catch (error ){
     console.error("Error checking technician status:", error);
     throw error;
