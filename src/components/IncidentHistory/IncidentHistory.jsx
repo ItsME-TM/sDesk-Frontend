@@ -84,9 +84,9 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                     </Table>
                 </div>
             </Card.Body>
-            <Card.Footer className="bg-light text-muted d-flex justify-content-between flex-wrap">
-                <div><strong>Category:</strong> {getCategoryName(category)}</div>
-                <div><strong>Location:</strong> {getLocationName(location)}</div>
+            <Card.Footer className="bg-light text-muted d-flex flex-row gap-2 justify-content-start flex-wrap" style={{gap: '0.75rem'}}>
+                <div className="me-2"><strong>Category:</strong> {getCategoryName(category)}</div>
+                <div className="me-2"><strong>Location:</strong> {getLocationName(location)}</div>
                 <div><strong>Priority:</strong> {priority}</div>
             </Card.Footer>
         </Card>
