@@ -84,6 +84,10 @@ function AdminUserList() {
     const main = mainCategories.find((m) => m.id === teamId);
     return main ? main.name : teamId || "Unknown";
   };
+  const getTeamId = (teamId) => {
+    const main = mainCategories.find((m) => m.id === teamId);
+    return main ? main.name : teamId || "Unknown";
+  };
 
   const getSubCategoryName = (subCatId) => {
     const sub = subCategories.find((s) => s.id === subCatId);
@@ -102,6 +106,7 @@ function AdminUserList() {
           serviceNum: user.serviceNumber || user.serviceNum || "",
           name: user.name,
           team: getTeamName(user.team),
+          teamId: getTeamId(user.teamId),
           cat1: getSubCategoryName(user.cat1),
           cat2: getSubCategoryName(user.cat2),
           cat3: getSubCategoryName(user.cat3),
@@ -150,7 +155,7 @@ function AdminUserList() {
           team: updatedFields.teamName || updatedFields.team,
           active: updatedFields.active,
           tier: Number(updatedFields.tier),
-          teamLevel: updatedFields.tier === "1" ? "Tier1" : "Tier2",
+          teamId: updatedFields.teamId || updatedFields.teamId,
           level: updatedFields.tier === "1" ? "Tier1" : "Tier2",
           cat1: cat1 || "",
           cat2: cat2 || "",
@@ -386,7 +391,7 @@ function AdminUserList() {
                   active: newUser.active,
                   tier: Number(newUser.tier),
                   level: Number(newUser.tier) === 1 ? "Tier1" : "Tier2",
-                  teamLevel: "Default",
+                  teamId: newUser.teamId ,
                   cat1: newUser.cat1 || "",
                   cat2: newUser.cat2 || "",
                   cat3: newUser.cat3 || "",
