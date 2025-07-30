@@ -8,7 +8,7 @@ import { FaLocationArrow } from "react-icons/fa";
 import { FaAnchor } from "react-icons/fa";
 import { VscGraph } from "react-icons/vsc";
 import { FaList } from "react-icons/fa6";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaTimes } from "react-icons/fa";
 import { FiPlusCircle } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import { FaLocationDot } from "react-icons/fa6";
@@ -34,9 +34,28 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
 
   const location = useLocation();
 
+  React.useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("sidebar-open");
+    } else {
+      document.body.classList.remove("sidebar-open");
+    }
+    return () => {
+      document.body.classList.remove("sidebar-open");
+    };
+  }, [isOpen]);
+
   return (
     <aside className={`SideBar-sidebar-container ${isOpen ? "open" : ""}`}>
       <div className="SideBar-sdeskTitle">
+        {/* Mobile close icon */}
+        <button
+          className="SideBar-close-btn"
+          onClick={closeSidebar}
+          aria-label="Close sidebar"
+        >
+          <FaTimes size="1.5em" />
+        </button>
         <div className="SideBar-icon_text_container">
           <FaHome size="1.8em" />
           <h2>sDESK</h2>
@@ -190,7 +209,6 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
             <>
               <li className="SideBar-dropdown-header">
                 <Link
-                 
                   className={
                     location.pathname ===
                     (role === "admin"
@@ -273,21 +291,22 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                         </Link>
                       </li>
                       {
-                      <li className="SideBar-sub-list">
-                        {role === "technician" && (
-                          <Link
-                            to="/technician/TechnicianMyAssignedInsidents"
-                            className={
-                              location.pathname === "/technician/TechnicianMyAssignedInsidents"
-                                ? "active"
-                                : ""
-                            }
-                            onClick={closeSidebar}
-                          >
-                            <FaList /> My Assigned Incidents
-                          </Link>
-                        )}
-                      </li>
+                        <li className="SideBar-sub-list">
+                          {role === "technician" && (
+                            <Link
+                              to="/technician/TechnicianMyAssignedInsidents"
+                              className={
+                                location.pathname ===
+                                "/technician/TechnicianMyAssignedInsidents"
+                                  ? "active"
+                                  : ""
+                              }
+                              onClick={closeSidebar}
+                            >
+                              <FaList /> My Assigned Incidents
+                            </Link>
+                          )}
+                        </li>
                       }
                     </>
                   )}
