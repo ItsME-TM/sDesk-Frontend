@@ -17,11 +17,13 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
     role: 'technician',
     tier: '1',
     active: true,
+    teamId:loggedInUser?.teamId|| '',
     categories: [
       loggedInUser?.cat1,
       loggedInUser?.cat2,
       loggedInUser?.cat3,
       loggedInUser?.cat4
+
     ].filter(Boolean), // take from logged user
   });
 
@@ -89,6 +91,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
         id: '',
         name: '',
         email: '',
+        teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
         role: 'technician',
         tier: '1',
@@ -146,6 +149,7 @@ const handleSubmit = e => {
     serviceNum: formData.id,
     email: formData.email,
     name: formData.name,
+    teamId: formData.teamId,
     team: formData.teamName,
     tier: Number(formData.tier),
     active: formData.active,
