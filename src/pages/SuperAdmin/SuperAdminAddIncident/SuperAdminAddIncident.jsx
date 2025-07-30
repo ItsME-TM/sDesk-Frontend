@@ -16,12 +16,12 @@ const SuperAdminAddIncident = () => {
   const { loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
-  // For demo purposes, create a mock super admin user data
+  // Get admin user data
   const userData = [
     {
-      service_number: user?.serviceNum || "SA001",
-      user_name: user?.userName || "Super Admin User",
-      email: user?.email || "superadmin@company.com",
+      service_number: user?.serviceNum || "ADMIN001", // Use logged-in user's serviceNum or fallback
+      user_name: user?.name || "Admin User",
+      email: user?.email || "admin@company.com",
     },
   ];
 
@@ -97,14 +97,12 @@ const SuperAdminAddIncident = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    console.log("Selected file:", file);
   };
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
     document.getElementById("file-upload").value = "";
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -115,7 +113,6 @@ const SuperAdminAddIncident = () => {
       { key: "priority", label: "Priority" },
       { key: "description", label: "Description" },
     ];
-
     const missingFields = requiredFields
       .filter((field) => {
         if (field.key.includes(".")) {
@@ -125,13 +122,10 @@ const SuperAdminAddIncident = () => {
         return !formData[field.key];
       })
       .map((field) => field.label);
-
     if (missingFields.length > 0) {
       alert(`Please fill in all required fields: ${missingFields.join(", ")}`);
       return;
-    }
-
-    // Validate priority values
+    } // Validate priority values
     const validPriorities = ["Medium", "High", "Critical"];
     if (!validPriorities.includes(formData.priority)) {
       alert("Please select a valid priority: Medium, High, or Critical");
@@ -143,33 +137,33 @@ const SuperAdminAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: user?.serviceNum || userData[0].service_number, // Use super admin's service number as informant (properly trimmed)
-      affected_user_service_no: formData.serviceNo.trim(), // Store affected user's service number separately (trimmed)
+      informant: formData.serviceNo, // Affected User's service number
       location: formData.location.name, // Use location name, not number
-      handler: userData[0].service_number,
-      update_by: userData[0].service_number,
+      handler: formData.serviceNo, // Affected User's service number as handler
+      update_by: formData.serviceNo, // Affected User's service number
       category: formData.category.name, // Use category name, not number
       update_on: new Date().toISOString().split("T")[0], // Date format: YYYY-MM-DD
       status: "Open", // Must be 'Open', 'In Progress', 'Hold', or 'Closed'
       priority: formData.priority, // Must be 'Medium', 'High', or 'Critical'
       description: formData.description || "",
       notify_informant: true,
-      urgent_notification_to: userData[0].email || "superadmin@company.com",
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    console.log(
-      "[SuperAdminAddIncident] Creating incident with data:",
-      incidentData
-    );
-    console.log(
-      "[SuperAdminAddIncident] Super Admin serviceNum:",
-      user?.serviceNum
-    );
-    console.log(
-      "[SuperAdminAddIncident] Affected user serviceNum:",
-      formData.serviceNo
-    );
+
+    // Validate data before sending
+    if (!incidentData.informant) {
+      alert("User serviceNum missing. Please log in again.");
+      return;
+    }
+    if (!incidentData.category) {
+      alert("Category is required. Please select a category.");
+      return;
+    }
+    if (!incidentData.location) {
+      alert("Location is required. Please select a location.");
+      return;
+    }
 
     dispatch(createIncidentRequest(incidentData));
 
@@ -213,7 +207,7 @@ const SuperAdminAddIncident = () => {
     if (submitSuccess) {
       return (
         <div className="status-message success-message">
-          <h3>✅ Incident Created Successfully!</h3>
+          <h3> Incident Created Successfully!</h3>
           <p>The incident has been submitted and will be processed soon.</p>
         </div>
       );
@@ -222,7 +216,7 @@ const SuperAdminAddIncident = () => {
     if (error) {
       return (
         <div className="status-message error-message">
-          <h3>❌ Error Creating Incident</h3>
+          <h3> Error Creating Incident</h3>
           <p>{error}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>
@@ -241,6 +235,7 @@ const SuperAdminAddIncident = () => {
       {renderStatusMessage()}
 
       <div className="SuperAdminAddIncident-content2">
+        {" "}
         <AffectedUserDetails
           formData={formData}
           setFormData={setFormData}

@@ -2,55 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { useNavigate } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
-import { fetchAssignedByMeRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAssignedByMeRequest, fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
+import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import './SuperAdminReportedMyIncidents.css';
 
 const SuperAdminReportedMyIncidents = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
-  
   // Redux state
-  const { assignedByMe, loading, error } = useSelector((state) => state.incident);
-  const { user } = useSelector((state) => state.auth); // Get logged-in user from auth slice
-  
+  const { assignedByMe, loading, error, incidentHistory } = useSelector((state) => state.incident);
+  const { user } = useSelector((state) => state.auth);
+  const { allUsers } = useSelector((state) => state.sltusers);
+
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  // Fetch incidents reported by the logged-in superAdmin
+  // Fetch incidents reported by the logged-in super admin and all users
   useEffect(() => {
-    // Check persisted data first
-    const persistedAuth = localStorage.getItem('persist:root');
-    
-    if (!user) {
-      console.log(
-        "[SuperAdminReportedMyIncidents] Dispatching fetchAssignedByMeRequest"
-      );
-      
-      // If we have persisted data, wait for rehydration before fetching
-      if (persistedAuth) {
-        try {
-          const authData = JSON.parse(persistedAuth);
-          if (authData.auth) {
-            const parsedAuth = JSON.parse(authData.auth);
-            if (parsedAuth.user && parsedAuth.user.role === 'superAdmin') {
-              // Valid persisted super admin, don't fetch immediately
-              console.log("[SuperAdminReportedMyIncidents] Found persisted superAdmin, waiting for rehydration");
-              return;
-            }
-          }
-        } catch (e) {
-          console.error('Error parsing persisted auth data:', e);
-        }
-      }
-      
-      dispatch(fetchAssignedByMeRequest({ informant: user?.serviceNum }));
+    if (user && (user.role === 'superadmin' || user.role === 'superAdmin') && user.serviceNum) {
+      dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
     }
+    dispatch(fetchAllUsersRequest());
   }, [dispatch, user]);
   
   if (loading) {
@@ -88,12 +68,12 @@ const SuperAdminReportedMyIncidents = () => {
   }
 
   // Table data for superAdmin's reported incidents
-  const tableData = assignedByMe.map(item => ({
+  const tableData = (assignedByMe || []).map(item => ({
     refNo: item.incident_number,
-    category: item.category, // Category name from backend
+    category: item.category,
     status: item.status,
     priority: item.priority,
-    informant: item.informant, // serviceNum of the reporter
+    informant: item.informant,
   }));
 
   const filteredData = tableData.filter(item => {
@@ -112,26 +92,54 @@ const SuperAdminReportedMyIncidents = () => {
 
   const handleRowClick = (refNo) => {
     const incident = assignedByMe.find(item => item.incident_number === refNo);
-    if (incident && user) {
-      navigate('/superAdmin/SuperAdminMyReportedUpdate', {
-        state: {
-          formData: {
-            serviceNo: user.service_number,
-            tpNumber: user.tp_number,
-            name: user.user_name,
-            designation: user.designation,
-            email: user.email,
-          },
-          incidentDetails: {
-            refNo: incident.incident_number,
-            category: incident.category,
-            location: incident.location,
-            priority: incident.priority,
-            status: incident.status,
-          },
-        },
-      });
+    if (incident) {
+        setSelectedIncident(incident);
+        setIsPopupVisible(true);
+        dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
     }
+  };
+  const renderPopup = () => {
+    if (!isPopupVisible || !selectedIncident) {
+        return null;
+    }
+    const formData = {
+        serviceNo: user.serviceNum,
+        tpNumber: user.tp_number || user.tpNumber || user.contactNumber || '',
+        name: user.user_name || user.name || user.email,
+        designation: user.designation || user.role || '',
+        email: user.email,
+    };
+    const incidentDetails = {
+        refNo: selectedIncident.incident_number,
+        category: selectedIncident.category,
+        location: selectedIncident.location,
+        priority: selectedIncident.priority,
+        status: selectedIncident.status,
+    };
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
+                <div className="SuperAdminMyReportedUpdate-tickets-creator">
+                    <span className="SuperAdminMyReportedUpdate-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="SuperAdminMyReportedUpdate-created-ticket">Reported My Update</span>
+                </div>
+                <div className="SuperAdminMyReportedUpdate-content2">
+                    <AffectedUserDetail formData={formData} />
+                    <IncidentHistory
+                        refNo={incidentDetails.refNo}
+                        category={incidentDetails.category}
+                        location={incidentDetails.location}
+                        priority={incidentDetails.priority}
+                        status={incidentDetails.status}
+                        historyData={incidentHistory}
+                        users={allUsers}
+                    />
+                </div>
+            </div>
+        </div>
+    );
   };
 
   const renderTableRows = () => {
@@ -193,23 +201,26 @@ const SuperAdminReportedMyIncidents = () => {
   if (!user) {
     return <div>Loading user data...</div>;
   }
-  if (user.role !== 'superAdmin') {
+  if (!user.serviceNum) {
+    return <div>User data missing serviceNum. Please contact admin.</div>;
+  }
+  if (user.role !== 'superadmin' && user.role !== 'superAdmin') {
     return <div>Unauthorized: Only super admins can view this page.</div>;
   }
 
   return (
     <div className="SuperAdminReportedMyIncidents-main-content">
+        {renderPopup()}
       <div className="SuperAdminReportedMyIncidents-tickets-creator">
         <span className="SuperAdminReportedMyIncidents-svr-desk">Incidents</span>
         <IoIosArrowForward />
         <span className="SuperAdminReportedMyIncidents-created-ticket">Reported My</span>
       </div>
-
       <div className="SuperAdminReportedMyIncidents-content2">
         <div className="SuperAdminReportedMyIncidents-TitleBar">
           <div className="SuperAdminReportedMyIncidents-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-             My Incidents - {user.name || user.email}
+            My Incidents - {user.name || user.email}
           </div>
           <div className="SuperAdminReportedMyIncidents-TitleBar-buttons">
             <button className="SuperAdminReportedMyIncidents-TitleBar-buttons-ExportData">
@@ -218,7 +229,6 @@ const SuperAdminReportedMyIncidents = () => {
             </button>
           </div>
         </div>
-        
         <div className="SuperAdminReportedMyIncidents-showSearchBar container-fluid p-0">
           <div className="row m-0 w-100">
             <div className="col-md-7 col-lg-8 p-0">
@@ -278,7 +288,6 @@ const SuperAdminReportedMyIncidents = () => {
             </div>
           </div>
         </div>
-        
         <div className="SuperAdminReportedMyIncidents-table">
           <table className="SuperAdminReportedMyIncidents-table-table">
             <thead>

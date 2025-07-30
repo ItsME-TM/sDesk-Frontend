@@ -4,7 +4,10 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
-import { fetchAssignedByMeRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAssignedByMeRequest, fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
+import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
 import './TechnicianReportedMyIncidents.css';
 
 const TechnicianReportedMyIncidents = () => {
@@ -12,9 +15,9 @@ const TechnicianReportedMyIncidents = () => {
   const dispatch = useDispatch();
   
   // Redux state
-  const { assignedByMe, loading, error } = useSelector((state) => state.incident);
+  const { assignedByMe, loading, error, incidentHistory } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth); // Get logged-in user from auth slice
-  console.log('[TechnicianMyReported] user object:', user);
+  const { allUsers } = useSelector((state) => state.sltusers);
   
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,15 +25,15 @@ const TechnicianReportedMyIncidents = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
-  // Fetch incidents reported by the logged-in technician
+  // Fetch incidents reported by the logged-in technician and all users
   useEffect(() => {
     if (user && user.role === 'technician' && user.serviceNum) {
-      console.log('[TechnicianMyReported] Fetching incidents for technician serviceNum:', user.serviceNum);
       dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
-    } else {
-      console.log('[TechnicianMyReported] User data not ready:', user);
     }
+    dispatch(fetchAllUsersRequest());
   }, [dispatch, user]);
   
   if (loading) {
@@ -67,10 +70,6 @@ const TechnicianReportedMyIncidents = () => {
     );
   }
 
-  // Table data for technician's reported incidents
-  console.log('[TechnicianMyReported] assignedByMe data:', assignedByMe);
-  console.log('[TechnicianMyReported] user.serviceNum:', user?.serviceNum);
-
   const tableData = (assignedByMe || []).map(item => ({
     refNo: item.incident_number,
     category: item.category, // Category name from backend
@@ -78,8 +77,6 @@ const TechnicianReportedMyIncidents = () => {
     priority: item.priority,
     informant: item.informant, // service_number of the reporter
   }));
-
-  console.log('[TechnicianMyReported] tableData:', tableData);
 
   const filteredData = tableData.filter(item => {
     const matchesSearch = Object.values(item).some(val =>
@@ -97,25 +94,10 @@ const TechnicianReportedMyIncidents = () => {
 
   const handleRowClick = (refNo) => {
     const incident = assignedByMe.find(item => item.incident_number === refNo);
-    if (incident && user) {
-      navigate('/technician/TechnicianMyReportedUpdate', {
-        state: {
-          formData: {
-            serviceNo: user.service_number,
-            tpNumber: user.tp_number,
-            name: user.user_name || user.name || user.email,
-            designation: user.designation,
-            email: user.email,
-          },
-          incidentDetails: {
-            refNo: incident.incident_number,
-            category: incident.category,
-            location: incident.location,
-            priority: incident.priority,
-            status: incident.status,
-          },
-        },
-      });
+    if (incident) {
+        setSelectedIncident(incident);
+        setIsPopupVisible(true);
+        dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
     }
   };
 
@@ -173,6 +155,54 @@ const TechnicianReportedMyIncidents = () => {
     return buttons;
   };
 
+  const renderPopup = () => {
+    if (!isPopupVisible || !selectedIncident) {
+        return null;
+    }
+
+    const formData = {
+        serviceNo: user.serviceNum,
+        tpNumber: user.tp_number || user.tpNumber || user.contactNumber ||  '',
+        name: user.user_name || user.name || user.email,
+        designation: user.designation || user.role || '',
+        email: user.email,
+    };
+
+    const incidentDetails = {
+        refNo: selectedIncident.incident_number,
+        category: selectedIncident.category,
+        location: selectedIncident.location,
+        priority: selectedIncident.priority,
+        status: selectedIncident.status,
+    };
+
+    return (
+        <div className="popup-overlay">
+            <div className="popup-content">
+                <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
+                <div className="TechnicianMyReportedUpdate-tickets-creator">
+                    <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianMyReportedUpdate-created-ticket">Reported My Update</span>
+                </div>
+                <div className="TechnicianMyReportedUpdate-content2">
+                    <AffectedUserDetail formData={formData} />
+                    <IncidentHistory
+                        refNo={incidentDetails.refNo}
+                        category={incidentDetails.category}
+                        location={incidentDetails.location}
+                        priority={incidentDetails.priority}
+                        status={incidentDetails.status}
+                        historyData={incidentHistory}
+                        users={allUsers}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
   const uniqueCategories = [...new Set(tableData.map(item => item.category))];
 
   if (!user) {
@@ -187,6 +217,7 @@ const TechnicianReportedMyIncidents = () => {
 
   return (
     <div className="TechnicianReportedMyIncidents-main-content">
+        {renderPopup()}
       <div className="TechnicianReportedMyIncidents-tickets-creator">
         <span className="TechnicianReportedMyIncidents-svr-desk">Incidents</span>
         <IoIosArrowForward />

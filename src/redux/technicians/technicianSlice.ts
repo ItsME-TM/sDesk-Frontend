@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Technician } from "./technicianTypes";
-import * as technicianService from "./technicianService";
+
 
 const initialState = {
   technicians: [] as Technician[],
@@ -98,6 +98,44 @@ const technicianSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    // NEW: Socket-based technician status management
+    updateTechnicianOnlineStatus(state, action) {
+      const { serviceNum, isOnline } = action.payload;
+      state.technicians = state.technicians.map(tech => 
+        tech.serviceNum === serviceNum 
+          ? { ...tech, active: isOnline }
+          : tech
+      );
+      // Also update active technicians list
+      if (isOnline) {
+        const technician = state.technicians.find(tech => tech.serviceNum === serviceNum);
+        if (technician && !state.activeTechnicians.find(tech => tech.serviceNum === serviceNum)) {
+          state.activeTechnicians.push(technician);
+        }
+      } else {
+        state.activeTechnicians = state.activeTechnicians.filter(tech => tech.serviceNum !== serviceNum);
+      }
+    },
+    forceLogoutTechnicianRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    forceLogoutTechnicianSuccess(state, action) {
+      state.loading = false;
+      state.error = null;
+      // Mark technician as inactive
+      const { serviceNum } = action.payload;
+      state.technicians = state.technicians.map(tech => 
+        tech.serviceNum === serviceNum 
+          ? { ...tech, active: false }
+          : tech
+      );
+      state.activeTechnicians = state.activeTechnicians.filter(tech => tech.serviceNum !== serviceNum);
+    },
+    forceLogoutTechnicianFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -115,21 +153,20 @@ export const {
   deleteTechnicianSuccess,
   deleteTechnicianFailure,
   checkTechnicianStatusRequest,
-checkTechnicianStatusSuccess,
-checkTechnicianStatusFailure,
-fetchActiveTechniciansRequest,
-fetchActiveTechniciansSuccess,
-  fetchActiveTechniciansFailure
+  checkTechnicianStatusSuccess,
+  checkTechnicianStatusFailure,
+  fetchActiveTechniciansRequest,
+  fetchActiveTechniciansSuccess,
+  fetchActiveTechniciansFailure,
+  updateTechnicianOnlineStatus,
+  forceLogoutTechnicianRequest,
+  forceLogoutTechnicianSuccess,
+  forceLogoutTechnicianFailure
 } = technicianSlice.actions;
 
-export const fetchTechnicians = () => async (dispatch: any) => {
-  dispatch(fetchTechniciansRequest());
-  try {
-    const response = await technicianService.fetchTechnicians();
-    dispatch(fetchTechniciansSuccess(response.data));
-  } catch (error: any) {
-    dispatch(fetchTechniciansFailure(error.message || "Failed to fetch technicians"));
-  }
-};
+//Selectors
+export const selectTechnicians = (state: any) => state.technician.technicians;
+export const selectTechniciansLoading = (state: any) => state.technician.loading;
+export const selectTechniciansError = (state: any) => state.technician.error;
 
 export default technicianSlice.reducer;

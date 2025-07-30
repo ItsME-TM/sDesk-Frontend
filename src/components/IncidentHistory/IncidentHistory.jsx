@@ -1,27 +1,30 @@
 import React from 'react';
 import './IncidentHistory.css';
 import { CiLink } from "react-icons/ci";
-// import { sDesk_t2_category_dataset } from '../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_location_dataset } from '../../data/sDesk_t2_location_dataset';
+import { useSelector } from 'react-redux';
+
+// Helper function to format date as 'YYYY-MM-DD HH:mm:ss'
+const formatDateTime = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
 
 const IncidentHistory = ({ refNo, category, location, priority, historyData, users }) => {
+    const { locations } = useSelector((state) => state.location);
 
-    // TODO: Replace with backend lookup or prop-based category name resolution
-    const getCategoryName = (categoryNumber) => categoryNumber;
+    const getCategoryName = (categoryName) => categoryName;
 
-    const getLocationName = (locationNumber) => {
-        for (const district of sDesk_t2_location_dataset) {
-            for (const sublocation of district.sublocations) {
-                if (sublocation.loc_number === locationNumber) {
-                    return sublocation.loc_name;
-                }
-            }
-        }
-        return locationNumber;    };
+    const getLocationName = (locationId) => {
+        const foundLocation = locations.find(loc => loc.id === locationId || loc.loc_number === locationId);
+        return foundLocation ? (foundLocation.name || foundLocation.loc_name) : locationId;
+    };
 
     const getUserName = (serviceNumber) => {
-        const user = users.find(user => user.service_number === serviceNumber);
-        return user ? user.display_name || user.user_name : serviceNumber;
+        if (!Array.isArray(users)) return serviceNumber;
+        const user = users.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+        return user ? user.display_name || user.user_name || user.name : serviceNumber;
     };
 
     return (
@@ -47,7 +50,7 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                     <tr key={index}>
                                         <td className="assigned-column">{getUserName(entry.assignedTo)}</td>
                                         <td className="updated-by-column">{getUserName(entry.updatedBy)}</td>
-                                        <td className="updated-on-column">{entry.updatedOn}</td>
+                                        <td className="updated-on-column">{formatDateTime(entry.updatedOn)}</td>
                                         <td className="status-column">{entry.status}</td>
                                         <td className="comments-column">{entry.comments}</td>
                                     </tr>

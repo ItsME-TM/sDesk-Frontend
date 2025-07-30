@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
 import { useNavigate } from 'react-router-dom';
 import { fetchAllIncidentsRequest } from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
 import './AdminAllIncidents.css';
 
 const AdminAllIncidents = () => {
@@ -15,6 +15,9 @@ const AdminAllIncidents = () => {
     
     // Redux state
     const { incidents, loading, error } = useSelector((state) => state.incident);
+    const { allUsers } = useSelector((state) => state.sltusers);
+    const { categoryItems } = useSelector((state) => state.categories);
+    const { locations } = useSelector((state) => state.location);
     
     // Local state
     const [searchTerm, setSearchTerm] = useState('');
@@ -24,14 +27,13 @@ const AdminAllIncidents = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const currentAdmin = sDesk_t2_users_dataset.find(user => user.service_number === 'SV001' && user.role === 'admin');
-
-    // Fetch all incidents on component mount
+    // Fetch all data on component mount
     useEffect(() => {
         dispatch(fetchAllIncidentsRequest());
-    }, [dispatch]);    if (!currentAdmin) {
-        return <div>Error: Admin user not found.</div>;
-    }
+        dispatch(fetchAllUsersRequest());
+        dispatch(fetchCategoryItemsRequest());
+        dispatch(fetchLocationsRequest());
+    }, [dispatch]);
 
     // Loading and error states
     if (loading) {
@@ -70,55 +72,30 @@ const AdminAllIncidents = () => {
 
     // Get category name (grandchild) for display
     const getCategoryName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                const item = subcategory.items.find(item => item.grandchild_category_number === categoryNumber);
-                if (item) {
-                    return item.grandchild_category_name;
-                }
-            }
-        }
-        return categoryNumber;
+        const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+        return category ? category.grandchild_category_name : categoryNumber;
     };
 
     // Get team name (parent category) for an incident's category
     const getTeamName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-                    return parent.parent_category_name;
-                }
-            }
-        }
-        return 'Unknown';
+        const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+        return category ? category.parent_category_name : 'Unknown';
     };
 
     // Get subcategory name (child category) for an incident's category
     const getSubcategoryName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                if (subcategory.items.some(item => item.grandchild_category_number === categoryNumber)) {
-                    return subcategory.child_category_name;
-                }
-            }
-        }
-        return 'Unknown';
+        const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+        return category ? category.child_category_name : 'Unknown';
     };
 
     const getUserName = (serviceNumber) => {
-        const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
+        const user = allUsers.find(user => user.service_number === serviceNumber);
         return user ? user.user_name : serviceNumber;
     };
 
     const getLocationName = (locationNumber) => {
-        for (const district of sDesk_t2_location_dataset) {
-            for (const sublocation of district.sublocations) {
-                if (sublocation.loc_number === locationNumber) {
-                    return sublocation.loc_name;
-                }
-            }
-        }
-        return locationNumber;
+        const location = locations.find(loc => loc.loc_number === locationNumber);
+        return location ? location.loc_name : locationNumber;
     };    // Prepare table data from Redux incidents
     const tableData = incidents.map(incident => ({
         refNo: incident.incident_number,
@@ -148,9 +125,9 @@ const AdminAllIncidents = () => {
     const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
     const handleRowClick = (refNo) => {
-        const incident = sDesk_t2_incidents_dataset.find(item => item.incident_number === refNo);
+        const incident = incidents.find(item => item.incident_number === refNo);
         if (incident) {
-            const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
+            const informant = allUsers.find(user => user.service_number === incident.informant);
             if (informant) {
                 navigate('/admin/AdminUpdateIncident', {
                     state: {
@@ -233,7 +210,7 @@ const AdminAllIncidents = () => {
     const getSubcategoriesForTeam = (teamName) => {
         if (!teamName) {
             // If no team is selected, return all subcategories
-            return sDesk_t2_category_dataset
+            return categoryItems
                 .flatMap(parent => parent.subcategories)
                 .map(sub => ({
                     number: sub.child_category_number,
@@ -242,7 +219,7 @@ const AdminAllIncidents = () => {
                 .filter((v, i, a) => a.findIndex(t => t.number === v.number) === i);
         }
 
-        const selectedTeam = sDesk_t2_category_dataset.find(
+        const selectedTeam = categoryItems.find(
             parent => parent.parent_category_name === teamName
         );
         return selectedTeam
@@ -321,7 +298,7 @@ const AdminAllIncidents = () => {
                             className="AdminAllIncidents-showSearchBar-Show-select"
                         >
                             <option value="">All Teams</option>
-                            {sDesk_t2_category_dataset.map(parent => (
+                            {categoryItems.map(parent => (
                                 <option key={parent.parent_category_number} value={parent.parent_category_name}>
                                     {parent.parent_category_name}
                                 </option>

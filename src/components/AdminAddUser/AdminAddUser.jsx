@@ -129,41 +129,48 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
     }
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    const newErrors = {};
-    if (!formData.id) newErrors.id = 'Service Number is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.teamName) newErrors.teamName = 'Team is required';
-    if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
 
-    const payload = {
-      serviceNum: formData.id,
-      email: formData.email,
-      name: formData.name,
-      team: formData.teamName,
-      tier: Number(formData.tier),
-      active: formData.active,
-      cat1: formData.categories[0] || '',
-      cat2: formData.categories[1] || '',
-      cat3: formData.categories[2] || '',
-      cat4: formData.categories[3] || '',
-      level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
-      rr: 1,
-      designation: 'Technician',
-      contactNumber: '0000000000',
-      teamLevel: 'Default',
-      teamLeader: formData.teamLeader ?? false,
-      assignAfterSignOff: formData.assignAfterSignOff ?? false,
-      permanentMember: formData.permanentMember ?? false,
-      subrootUser: formData.subrootUser ?? false,
-      isEdit,
-    };
-    onSubmit(payload);
+const selectedCategories = formData.categories || [];
+const handleSubmit = e => {
+  e.preventDefault();
+  const newErrors = {};
+  if (!formData.id) newErrors.id = 'Service Number is required';
+  if (!formData.email) newErrors.email = 'Email is required';
+  if (!formData.name) newErrors.name = 'Name is required';
+  if (!formData.teamName) newErrors.teamName = 'Team is required';
+  if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
+  const payload = {
+    serviceNum: formData.id,
+    email: formData.email,
+    name: formData.name,
+    team: formData.teamName,
+    tier: Number(formData.tier),
+    active: formData.active,
+    cat1: formData.categories[0] || '',
+    cat2: formData.categories[1] || '',
+    cat3: formData.categories[2] || '',
+    cat4: formData.categories[3] || '',
+    level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
+    rr: 1,
+    designation: 'Technician',
+    contactNumber: '0000000000',
+    teamLevel: 'Default',
+    teamLeader: formData.teamLeader ?? false,
+    assignAfterSignOff: formData.assignAfterSignOff ?? false,
+    permanentMember: formData.permanentMember ?? false,
+    subrootUser: formData.subrootUser ?? false,
+    isEdit,
   };
+
+  console.log('Submitting payload:', payload);
+  console.log('Selected categories:', formData.categories);
+
+  onSubmit(payload);
+};
+
 
   const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
@@ -286,4 +293,4 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
   );
 };
 
-export default AdminAddUser;
+export default AdminAddUser; 
