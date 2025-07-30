@@ -202,21 +202,21 @@
   
   .modal-backdrop {
     position: fixed;
-    top: 10px;
-    left: 50px;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.4);
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(0,0,0,0.4);
   }
   
   .modal-card {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    box-shadow: none !important;
     padding: 32px 24px 24px 24px;
     min-width: 350px;
     max-width: 1200px; /* Increased from 600px to 900px */
@@ -239,4 +239,12 @@
   
   .modal-card button:hover {
     background: #555;
+  }
+
+  @media (max-width: 768px) {
+    .modal-card {
+      max-width: 95vw;
+      padding: 20px 15px;
+      max-height: 95vh;
+    }
   }
