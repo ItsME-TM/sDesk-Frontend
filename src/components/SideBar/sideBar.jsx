@@ -135,7 +135,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   </li>
                 </>
               )}
-              <li>
+              <li className="SideBar-dropdown-header">
                 <Link
                   to={
                     role === "superAdmin"
@@ -158,7 +158,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
               </li>
               {role === "superAdmin" && (
                 <>
-                  <li>
+                  <li className="SideBar-dropdown-header">
                     <Link
                       to="/superAdmin/AdminCategory"
                       className={
@@ -171,7 +171,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                       <BiCategory /> Category
                     </Link>
                   </li>
-                  <li>
+                  <li className="SideBar-dropdown-header">
                     <Link
                       to="/superAdmin/AdminLocation"
                       className={
@@ -208,24 +208,48 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
             role === "superAdmin") && (
             <>
               <li className="SideBar-dropdown-header">
-                <Link
-                  className={
-                    location.pathname ===
-                    (role === "admin"
-                      ? "/admin/AdminAllIncidents"
-                      : role === "technician"
-                      ? "/technician/TechnicianAllTeam"
-                      : "/superAdmin/AdminAllIncidents")
-                      ? "active"
-                      : ""
+                {(() => {
+                  let incidentPaths = [];
+                  if (role === "admin") {
+                    incidentPaths = [
+                      "/admin/AdminAllIncidents",
+                      "/admin/AdminAddIncident",
+                      "/admin/AdminMyTeamIncidentViewAll",
+                      "/admin/AdminMyReportedIncidents",
+                    ];
+                  } else if (role === "technician") {
+                    incidentPaths = [
+                      "/technician/TechnicianAllTeam",
+                      "/technician/TechnicianAddIncident",
+                      "/technician/TechnicianMyAssignedInsidents",
+                      "/technician/TechnicianReportedMyIncidents",
+                    ];
+                  } else if (role === "superAdmin") {
+                    incidentPaths = [
+                      "/superAdmin/AdminAllIncidents",
+                      "/superAdmin/SuperAdminAllIncidents",
+                      "/superAdmin/SuperAdminAddIncident",
+                      "/superAdmin/SuperAdminMyReportedIncidents",
+                    ];
                   }
-                  onClick={closeSidebar}
-                >
-                  <FaAnchor /> Incidents
-                </Link>
-                <span onClick={toggleIncidents}>
-                  {isIncidentsOpen ? <FaChevronUp /> : <FaChevronDown />}
-                </span>
+                  return (
+                    <>
+                      <Link
+                        className={
+                          incidentPaths.includes(location.pathname)
+                            ? "active"
+                            : ""
+                        }
+                        onClick={closeSidebar}
+                      >
+                        <FaAnchor /> Incidents
+                      </Link>
+                      <span onClick={toggleIncidents}>
+                        {isIncidentsOpen ? <FaChevronUp /> : <FaChevronDown />}
+                      </span>
+                    </>
+                  );
+                })()}
               </li>
               {isIncidentsOpen && (
                 <>
