@@ -480,7 +480,7 @@
   }
 
   .UserViewIncident-TitleBar-buttons {
-    margin: 10px 15px 10px 0px;
+    margin: -40px 15px 10px 0px;
     justify-content: flex-end;
   }
 
