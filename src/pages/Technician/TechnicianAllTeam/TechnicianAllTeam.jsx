@@ -351,15 +351,8 @@ const TechnicianAllTeam = () => {
           >
             X
           </button>
-          <div className="TechnicianMyReportedUpdate-tickets-creator">
-            <span className="TechnicianMyReportedUpdate-svr-desk">
-              Incidents
-            </span>
-            <IoIosArrowForward />
-            <span className="TechnicianMyReportedUpdate-created-ticket">
-              Reported My Update
-            </span>
-          </div>
+         <br/>
+         <br/>
           <div className="TechnicianMyReportedUpdate-content2">
             <AffectedUserDetail formData={formData} />
             <IncidentHistory
