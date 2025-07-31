@@ -198,8 +198,6 @@
     background-color: #f0f0f0; 
     padding: 10px; 
     border-radius: 5px; 
-    width: 1290px;
-   
   }
   
   .TechnicianAllTeam-svr-desk {
@@ -239,4 +237,99 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .TechnicianAllTeam-showSearchBar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .TechnicianAllTeam-showSearchBar-Show {
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        width: 100%;
+    }
+
+    .TechnicianAllTeam-showSearchBar-Show-select,
+    .TechnicianAllTeam-showSearchBar-Show-select2 {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .TechnicianAllTeam-showSearchBar-SearchBar {
+        width: 100%;
+        margin: 10px 0 0 0;
+    }
+
+    .TechnicianAllTeam-table {
+        padding: 10px;
+    }
+
+    .TechnicianAllTeam-content3 {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .TechnicianAllTeam-content3-team-pagination-buttons {
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .TechnicianAllTeam-TitleBar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .TechnicianAllTeam-TitleBar-NameAndIcon {
+        margin: 0;
+        justify-content: center;
+    }
+
+    .TechnicianAllTeam-TitleBar-buttons {
+        margin: 10px 0 0 0;
+        justify-content: center;
+    }
+
+    .TechnicianAllTeam-table th,
+    .TechnicianAllTeam-table td {
+        font-size: 10px;
+        padding: 4px;
+    }
+}
+
+.TechnicianMyReportedUpdate-content2 {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .TechnicianMyReportedUpdate-content2 {
+        flex-direction: column;
+    }
+
+    .popup-content {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .popup-content {
+        width: 90%;
+        max-height: 90vh;
+        padding: 10px;
+    }
+
+    .popup-close {
+        top: 5px;
+        right: 5px;
+        font-size: 20px;
+    }
 }
