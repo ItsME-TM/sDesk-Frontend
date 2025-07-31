@@ -107,3 +107,31 @@
     background-color: #fff;
 
 }
+
+@media (max-width: 1200px) {
+    .incident-popup-content {
+        max-width: 95%;
+        margin-left: 2.5%;
+    }
+}
+
+@media (max-width: 768px) {
+    .incident-popup-content {
+        padding: 20px;
+        margin-left: 0;
+        max-width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+    .incident-popup-content .AddInicident-content2-UserDetails{
+        max-width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .incident-popup-content {
+        padding: 10px;
+    }
+}
