@@ -361,7 +361,7 @@
     max-height: 95vh;
     padding: 24px 20px 20px 20px;
     border-radius: 10px;
-    margin: 0;
+    margin: -350px auto 0 auto;
   }
 
   /* Enhance scrolling for tablet */
