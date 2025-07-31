@@ -1,3 +1,12 @@
+/* Shared gap for main sections */
+.section-gap {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
 
 .technician-dashboard {
     display: flex; 

@@ -426,14 +426,14 @@ const TechnicianInsident = ({
 
           <div className="technician-main-content col-12">
             <div className="row">
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <AffectedUserDetail
                   formData={formData}
                   setFormData={setFormData}
                 />
               </div>
 
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
@@ -449,7 +449,7 @@ const TechnicianInsident = ({
                 />
               </div>
               {currentIncident && (
-                <div className="col-12 mb-3">
+                <div className="col-12 section-gap">
                   <UpdateStatus
                     incidentData={{
                       regNo: currentIncident.incident_number,
