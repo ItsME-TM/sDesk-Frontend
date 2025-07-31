@@ -169,8 +169,6 @@ const handleSubmit = e => {
     isEdit,
   };
 
-  console.log('Submitting payload:', payload);
-  console.log('Selected categories:', formData.categories);
 
   onSubmit(payload);
 };
@@ -178,11 +176,11 @@ const handleSubmit = e => {
 
   const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
-  useEffect(() => {
-    if (sltUserError?.includes('not found')) {
-      console.warn('SLT User not found for this service number. User can enter details manually.');
-    }
-  }, [sltUserError]);
+useEffect(() => {
+  if (sltUserError?.includes('not found')) {
+    setErrors(prev => ({ ...prev, id: 'User not found. Please enter manually.' }));
+  }
+}, [sltUserError]);
 
   return (
     <div className="AdminAddUser-modal">
