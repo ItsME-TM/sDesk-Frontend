@@ -314,24 +314,22 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Team - All Incidents
                         </Link>
                       </li>
-                      {
+                      {role === "technician" && (
                         <li className="SideBar-sub-list">
-                          {role === "technician" && (
-                            <Link
-                              to="/technician/TechnicianMyAssignedInsidents"
-                              className={
-                                location.pathname ===
-                                "/technician/TechnicianMyAssignedInsidents"
-                                  ? "active"
-                                  : ""
-                              }
-                              onClick={closeSidebar}
-                            >
-                              <FaList /> My Assigned Incidents
-                            </Link>
-                          )}
+                          <Link
+                            to="/technician/TechnicianMyAssignedInsidents"
+                            className={
+                              location.pathname ===
+                              "/technician/TechnicianMyAssignedInsidents"
+                                ? "active"
+                                : ""
+                            }
+                            onClick={closeSidebar}
+                          >
+                            <FaList /> My Assigned Incidents
+                          </Link>
                         </li>
-                      }
+                      )}
                     </>
                   )}
                   <li className="SideBar-sub-list">
