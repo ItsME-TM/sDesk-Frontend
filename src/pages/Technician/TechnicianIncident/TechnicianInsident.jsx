@@ -447,6 +447,7 @@ const TechnicianInsident = ({
                   historyData={historyDataWithNames}
                   users={usersState.users || []}
                 />
+                <br/>
               </div>
               {currentIncident && (
                 <div className="col-12 section-gap">
