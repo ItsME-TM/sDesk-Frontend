@@ -470,7 +470,7 @@ const TechnicianAllTeam = () => {
         </div>
         <div className="TechnicianAllTeam-showSearchBar">
           <div className="TechnicianAllTeam-showSearchBar-Show">
-            Entries:
+            <span>Entries:</span>
             <select
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
               value={rowsPerPage}
@@ -482,7 +482,7 @@ const TechnicianAllTeam = () => {
                 </option>
               ))}
             </select>
-            Status:
+            <span>Status:</span>
             <select
               onChange={(e) => setStatusFilter(e.target.value)}
               value={statusFilter}
@@ -494,7 +494,7 @@ const TechnicianAllTeam = () => {
               <option value="In Progress">In Progress</option>
               <option value="Closed">Closed</option>
             </select>
-            Category:
+            <span>Category:</span>
             <select
               onChange={(e) => setCategoryFilter(e.target.value)}
               value={categoryFilter}
@@ -520,19 +520,21 @@ const TechnicianAllTeam = () => {
           </div>
         </div>
         <div className="TechnicianAllTeam-table">
-          <table className="TechnicianAllTeam-table-table">
-            <thead>
-              <tr>
-                <th>Ref No</th>
-                <th>Assigned To</th>
-                <th>Affected User</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody>{renderTableRows()}</tbody>
-          </table>
+          <div className="TechnicianAllTeam-table-wrapper">
+            <table className="TechnicianAllTeam-table-table">
+              <thead>
+                <tr>
+                  <th>Ref No</th>
+                  <th>Assigned To</th>
+                  <th>Affected User</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>{renderTableRows()}</tbody>
+            </table>
+          </div>
         </div>
         <div className="TechnicianAllTeam-content3">
           <span className="TechnicianAllTeam-content3-team-entry-info">
