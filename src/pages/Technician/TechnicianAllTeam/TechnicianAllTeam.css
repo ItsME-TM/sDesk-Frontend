@@ -539,8 +539,9 @@
 @media (max-width: 480px) {
     .popup-content {
         width: 90%;
-        max-height: 30vh;
+        max-height: 65vh !important;
         padding: 6px;
+        margin-top: -200px;
     }
 
     .popup-close {
