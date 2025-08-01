@@ -7,7 +7,8 @@
     background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 5vh;
     z-index: 1000;
 }
 
@@ -102,8 +103,44 @@
 /* Adjust width of Affected User Details within the popup */
 .incident-popup-content .AddInicident-content2-UserDetails {
     max-width: 82%;
-    height: 230px; /* Adjust this value as needed */
+    height: 200px; /* Adjust this value as needed */
     margin-left: 09%; /* Remove right margin to center if needed */
     background-color: #fff;
 
+}
+
+@media (max-width: 1200px) {
+    .incident-popup-content {
+        max-width: 95%;
+        margin-left: 2.5%;
+    }
+}
+
+@media (max-width: 768px) {
+    .incident-popup-content {
+        padding: 20px;
+        margin-left: 0;
+        max-width: 70%;
+        height: auto;
+        max-height: 60vh;
+        border-radius: 8px;
+    }
+    .incident-popup-content .AddInicident-content2-UserDetails{
+        max-width: 100%;
+        margin-left: 0;
+        height: 130px;
+    }
+}
+
+@media (max-width: 480px) {
+    .incident-popup-content {
+        padding: 15px;
+        max-width: 75%;
+        height: auto;
+        max-height: 65vh;
+        border-radius: 8px;
+    }
+     .incident-popup-content .AddInicident-content2-UserDetails{
+        height: 110px;
+    }
 }

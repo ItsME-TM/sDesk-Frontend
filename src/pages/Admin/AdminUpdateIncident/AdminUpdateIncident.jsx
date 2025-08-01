@@ -136,11 +136,7 @@ const AdminUpdateIncident = () => {
 
   return (
     <div className="AdminUpdateIncident-main-content">
-      <div className="AdminUpdateIncident-direction-bar">
-        <span className="AdminUpdateIncident-svr-desk">Incidents</span>
-        <IoIosArrowForward />
-        <span className="AdminUpdateIncident-created-ticket">Update Incident</span>
-      </div>
+   
 
       <div className="AdminUpdateIncident-content2">
         <AffectedUserDetail formData={formData} />
