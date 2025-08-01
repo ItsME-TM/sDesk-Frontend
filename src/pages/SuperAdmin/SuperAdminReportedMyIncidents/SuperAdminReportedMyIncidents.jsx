@@ -120,11 +120,7 @@ const SuperAdminReportedMyIncidents = () => {
         <div className="popup-overlay">
             <div className="popup-content">
                 <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
-                <div className="SuperAdminMyReportedUpdate-tickets-creator">
-                    <span className="SuperAdminMyReportedUpdate-svr-desk">Incidents</span>
-                    <IoIosArrowForward />
-                    <span className="SuperAdminMyReportedUpdate-created-ticket">Reported My Update</span>
-                </div>
+               
                 <div className="SuperAdminMyReportedUpdate-content2">
                     <AffectedUserDetail formData={formData} />
                     <IncidentHistory

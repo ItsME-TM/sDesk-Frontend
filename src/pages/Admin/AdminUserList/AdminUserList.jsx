@@ -45,7 +45,6 @@ function AdminUserList() {
   const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
 
   useEffect(() => {
-    console.log("Selection changed:", selectShowOption);
     dispatch(fetchSubCategoriesRequest());
     dispatch({ type: "category/fetchMainCategoriesRequest" });
 
@@ -65,20 +64,7 @@ function AdminUserList() {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  const handleTechnicianForceLoggedOut = (data) => {
-    console.log("[AdminUserList] Technician was force logged out:", data);
-    setOnlineTechnicians((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(data.serviceNum);
-      return newSet;
-    });
-    dispatch(
-      updateTechnicianOnlineStatus({
-        serviceNum: data.serviceNum,
-        active: "False",
-      })
-    );
-  };
+  
 
   const getTeamName = (teamId) => {
     const main = mainCategories.find((m) => m.id === teamId);
@@ -94,13 +80,13 @@ function AdminUserList() {
     return sub ? sub.name : subCatId || "Unknown";
   };
   const admin = useSelector((state) => state.auth?.user);
-  const adminTeamName = admin?.teamName; // ✅ Use `teamId` from admin object
+  const adminTeamName = admin?.teamName; 
 
   const users = useMemo(
     () =>
       technicians
         .filter((user) => user.team === adminTeamName)
-        // <-- filter by admin's team
+
         .map((user) => ({
           email: user.email,
           serviceNum: user.serviceNumber || user.serviceNum || "",
@@ -141,9 +127,9 @@ function AdminUserList() {
     if (editUser) {
       try {
         await updateUserRoleById(editUser.serviceNum, newRole);
-        console.log("Successfully updated SLT user role");
+     
       } catch (err) {
-        console.warn("Failed to update SLT user role:", err);
+        
       }
 
       const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
@@ -170,7 +156,7 @@ function AdminUserList() {
 
       // NEW: If technician is being deactivated and is currently online, force logout
       if (
-        updatedFields.active === alse &&
+        updatedFields.active ===  alse &&
         onlineTechnicians.has(editUser.serviceNum)
       ) {
         dispatch(
@@ -228,7 +214,7 @@ function AdminUserList() {
   };
 
   // NEW: Handle force logout technician
-  const handleForceLogout = (serviceNum) => {
+  const handleTechnicianForceLoggedOut = (serviceNum) => {
     const user = technicians.find(
       (u) => u.serviceNumber === serviceNum || u.serviceNum === serviceNum
     );
@@ -344,7 +330,7 @@ function AdminUserList() {
                         {user.active === "True" && (
                           <button
                             className="AdminUserList-table-logout-btn"
-                            onClick={() => handleForceLogout(user.serviceNum)}
+                            onClick={() => handleTechnicianForceLoggedOut(user.serviceNum)}
                             title="Force Logout"
                           >
                             Logout
@@ -373,11 +359,9 @@ function AdminUserList() {
               if (newUser.serviceNum) {
                 try {
                   await updateUserRoleById(newUser.serviceNum, "technician");
-                  console.log(
-                    "Successfully updated SLT user role to technician"
-                  );
+                 
                 } catch (err) {
-                  console.warn("Failed to update SLT user role:", err);
+                  
                 }
               }
 

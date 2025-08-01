@@ -247,72 +247,83 @@
   }
   
 
-@media (max-width: 768px) {
+
     .TechnicianMyAssignedIncidents-showSearchBar {
-      flex-direction: column;
-      height: auto !important;
-      max-height: none !important;
+        flex-direction: column;
+        height: auto !important;
+        max-height: none !important;
     }
-    
+
     .TechnicianMyAssignedIncidents-showSearchBar-Show,
     .TechnicianMyAssignedIncidents-showSearchBar-SearchBar {
-      margin: 5px 20px;
-      width: 100%;
+        margin: 5px 20px;
+        width: 100%;
     }
-    
+
     .TechnicianMyAssignedIncidents-showSearchBar-Show {
-      flex-wrap: wrap;
+        flex-wrap: wrap;
     }
-    
+
     .TechnicianMyAssignedIncidents-showSearchBar-Show-select,
     .TechnicianMyAssignedIncidents-showSearchBar-Show-select2 {
-      width: auto;
-      margin-right: 10px;
-      margin-left: 5px;
+        width: auto;
+        margin-right: 10px;
+        margin-left: 5px;
     }
-    
+
     .TechnicianMyAssignedIncidents-showSearchBar-SearchBar-input {
-      width: 100%;
+        width: 100%;
     }
-  }
-  
-  @media (max-width: 768px) {
+
     .TechnicianMyAssignedIncidents-showSearchBar-Show {
-      flex-direction: column;
-      align-items: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
     }
-    
-    .TechnicianMyAssignedIncidents-showSearchBar-Show > div {
-      margin-bottom: 10px;
-      width: 100%;
+
+    .TechnicianMyAssignedIncidents-showSearchBar-Show>div {
+        margin-bottom: 10px;
+        width: 100%;
     }
-    
+
     .TechnicianMyAssignedIncidents-showSearchBar-Show-select,
     .TechnicianMyAssignedIncidents-showSearchBar-Show-select2 {
-      width: 70%;
+        width: 70%;
     }
-    
+
     .TechnicianMyAssignedIncidents-tickets-creator {
-      width: 100%;
+        width: 100%;
     }
 
 
-    
-  }
-  
-  @media (max-width: 768px) {
+
     .TechnicianMyAssignedIncidents-table {
-      overflow-x: auto;
+        overflow-x: auto;
     }
-    
+
     .TechnicianMyAssignedIncidents-content3 {
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      max-height: none;
-      padding-bottom: 20px;
-    }  
-  }
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        max-height: none;
+        padding-bottom: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .TechnicianMyAssignedIncidents-TitleBar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+    .TechnicianMyAssignedIncidents-TitleBar-NameAndIcon{
+        font-size: 1rem;
+        margin: 0;
+    }
+    .TechnicianMyAssignedIncidents-TitleBar-buttons{
+        margin: 0;
+        margin-top: 10px;
+    }
+}
 
 
 

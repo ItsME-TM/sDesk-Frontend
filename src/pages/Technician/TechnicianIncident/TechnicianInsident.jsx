@@ -422,24 +422,18 @@ const TechnicianInsident = ({
       {/* Debug panel removed for production UI */}
       <div className="technician-dashboard container-fluid p-0">
         <div className="technician-dashboard-main row m-0">
-          <div className="technicianinsident-tickets-creator col-12 d-flex align-items-center mb-3">
-            <span className="technicianinsident-svr-desk">Dashboard</span>
-            <IoIosArrowForward className="mx-2" />
-            <span className="technicianinsident-created-ticket">
-              Incident Update
-            </span>
-          </div>
+         
 
           <div className="technician-main-content col-12">
             <div className="row">
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <AffectedUserDetail
                   formData={formData}
                   setFormData={setFormData}
                 />
               </div>
 
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
@@ -453,9 +447,10 @@ const TechnicianInsident = ({
                   historyData={historyDataWithNames}
                   users={usersState.users || []}
                 />
+                <br/>
               </div>
               {currentIncident && (
-                <div className="col-12 mb-3">
+                <div className="col-12 section-gap">
                   <UpdateStatus
                     incidentData={{
                       regNo: currentIncident.incident_number,
@@ -477,7 +472,7 @@ const TechnicianInsident = ({
                 </div>
               )}
 
-              <div className="col-12 d-flex justify-content-between">
+              <div className={`col-12 d-flex ${isPopup ? 'justify-content-end' : 'justify-content-between'}`}>
                 {!isPopup && (
                   <button
                     className="technician-details-back-btn"

@@ -8,7 +8,8 @@
     background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 5vh;
     z-index: 1000;
 }
 
@@ -103,9 +104,10 @@
 /* Adjust width of Affected User Details within the popup */
 .incident-popup-content .AddInicident-content2-UserDetails {
     max-width: 82%;
-    height: 230px; /* Adjust this value as needed */
+    height: 200px; /* Adjust this value as needed */
     margin-left: 09%; /* Remove right margin to center if needed */
     background-color: #fff;
 
 }
+
 
