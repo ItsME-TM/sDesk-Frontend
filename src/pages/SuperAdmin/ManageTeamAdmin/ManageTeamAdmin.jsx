@@ -463,8 +463,7 @@ const ManageTeamAdmin = () => {
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
-                    onChange={handleChange}
-                   
+                    readOnly
                   />
                 </div>
                 <div className="form-group">
