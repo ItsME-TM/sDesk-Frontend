@@ -160,9 +160,9 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                 <>
                   <li>
                     <Link
-                      to="/superAdmin/AdminCategory"
+                      to="/superAdmin/SuperAdminCategory"
                       className={
-                        location.pathname === "/superAdmin/AdminCategory"
+                        location.pathname === "/superAdmin/SuperAdminCategory"
                           ? "active"
                           : ""
                       }
@@ -173,9 +173,9 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   </li>
                   <li>
                     <Link
-                      to="/superAdmin/AdminLocation"
+                      to="/superAdmin/SuperAdminLocation"
                       className={
-                        location.pathname === "/superAdmin/AdminLocation"
+                        location.pathname === "/superAdmin/SuperAdminLocation"
                           ? "active"
                           : ""
                       }
