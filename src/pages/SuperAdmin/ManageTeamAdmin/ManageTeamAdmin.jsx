@@ -134,7 +134,7 @@ const ManageTeamAdmin = () => {
           email: "",
           contactNumber: "",
         }));
-        setSubmitError("User not found in database.");
+        setSubmitError("Invalid service number.");
       }
     } catch (error) {
       setForm((prev) => ({
@@ -144,7 +144,7 @@ const ManageTeamAdmin = () => {
         email: "",
         contactNumber: "",
       }));
-      setSubmitError("User not found in database.");
+      setSubmitError("Invalid service number.");
     }
   };
 
