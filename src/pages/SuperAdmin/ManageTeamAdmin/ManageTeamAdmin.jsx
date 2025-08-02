@@ -106,6 +106,18 @@ const ManageTeamAdmin = () => {
       const response = await fetchUserByServiceNum(value);
       const user = response.data;
       if (user) {
+        // Check if user is already an admin in slt_users table
+        if (user.role && user.role.toLowerCase() === "admin") {
+          setForm((prev) => ({
+            ...prev,
+            userName: "",
+            designation: "admin",
+            email: "",
+            contactNumber: "",
+          }));
+          setSubmitError("This user cannot be added because he is already an admin.");
+          return;
+        }
         setForm((prev) => ({
           ...prev,
           userName: user.display_name || "",
