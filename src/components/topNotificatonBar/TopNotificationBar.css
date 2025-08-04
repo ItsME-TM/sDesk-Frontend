@@ -87,7 +87,6 @@
   border-radius: 4px;
   padding: 4px 12px;
   margin-right: 4px;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
 }
 
 .TopNotificationBar-role {
@@ -98,7 +97,6 @@
   padding: 4px 10px;
   margin-left: 2px;
   font-weight: 500;
-  box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
 }
 
 .TopNotificationBar-logout-btn {
@@ -183,4 +181,13 @@
 }
 .TopNotificationBar-logout-confirm-no:hover, .ConfirmPopup-cancel:hover {
   background: #bdbdbd;
+}
+@media (max-width: 767px) {
+  .TopNotificationBar-role {
+    font-size: 12px;
+  }
+  .TopNotificationBar-userName {
+    font-size: 14px;
+    margin: 0px 0px 0px 10px;
+  }
 }
