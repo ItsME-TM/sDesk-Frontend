@@ -205,21 +205,11 @@ const SuperAdminAllIncident = () => {
 
     if (currentRows.length === 0) {
       return (
-        <>
-          <tr>
-            <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
-              No incidents found.
-            </td>
-          </tr>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <td className="team-refno">TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className="team-status-text">Open</td>
-          </tr>
-        </>
+        <tr>
+          <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
+            No incidents found.
+          </td>
+        </tr>
       );
     }
 
