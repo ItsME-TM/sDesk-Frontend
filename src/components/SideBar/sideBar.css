@@ -103,8 +103,8 @@
   color: #ecb233;
 }
 
-/* Responsive adjustments for all mobile and tablet devices */
-@media (max-width: 1024px) {
+/* Mobile devices (phones) */
+@media (max-width: 768px) {
   .SideBar-sidebar-container {
     position: fixed;
     top: 0;
@@ -119,13 +119,14 @@
     touch-action: none;
     overscroll-behavior: contain;
   }
+
   .SideBar-dropdown-header {
     padding-left: 20px;
     padding-right: 20px;
   }
+
   .SideBar-sidebar-container.open {
     left: 0; /* Slide in when open */
-    /* Prevent background scroll and horizontal drag */
     overflow-x: hidden;
     overscroll-behavior: contain;
     touch-action: none;
@@ -134,6 +135,7 @@
   .SideBar-close-btn {
     display: block;
   }
+
   .SideBar-sdeskTitle {
     width: 100vw;
     min-width: 100vw;
@@ -147,6 +149,7 @@
     box-sizing: border-box;
     padding: 0 16px;
   }
+
   .SideBar-icon_text_container {
     margin-left: auto;
     margin-right: auto;
@@ -154,6 +157,7 @@
     align-items: center;
     gap: 18px;
   }
+
   .SideBar-sidebar {
     width: 100vw;
     max-width: 100vw;
@@ -163,9 +167,152 @@
   }
 }
 
-@media (min-width: 769px) {
+/* Tablet devices */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .SideBar-sidebar-container {
+    position: fixed;
+    top: 0;
+    left: -350px; /* Hidden off-screen by default */
+    width: 350px;
+    max-width: 350px;
+    height: 100vh;
+    background-color: #131212;
+    transition: left 0.3s ease; /* Smooth slide animation */
+    z-index: 1000;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    touch-action: none;
+    overscroll-behavior: contain;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    display: flex; /* Ensure the container is displayed */
+    flex-direction: column;
+  }
+
+  .SideBar-sidebar-container.open {
+    left: 0; /* Slide in when open */
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    touch-action: none;
+  }
+
+  .SideBar-close-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: #fff;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    z-index: 1100;
+    cursor: pointer;
+    font-size: 20px;
+  }
+
+  .SideBar-sdeskTitle {
+    width: 350px;
+    min-width: 350px;
+    max-width: 350px;
+    justify-content: center;
+    position: relative;
+    background-color: #ec1919;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 16px;
+    flex-shrink: 0; /* Prevent title from shrinking */
+  }
+
+  .SideBar-icon_text_container {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .SideBar-sidebar {
+    width: 350px;
+    max-width: 350px;
+    min-width: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: auto; /* Allow vertical scrolling */
+    flex: 1; /* Take remaining space */
+    background-color: #131212;
+    color: aliceblue;
+  }
+
+  .SideBar-dropdown-header {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Specific handling for medium tablets around 912px width */
+@media (min-width: 900px) and (max-width: 950px) {
+  .SideBar-sidebar-container {
+    width: 300px;
+    left: -300px;
+  }
+
+  .SideBar-sidebar-container.open {
+    left: 0;
+  }
+
+  .SideBar-sdeskTitle {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+  }
+
+  .SideBar-sidebar {
+    width: 300px;
+    max-width: 300px;
+  }
+}
+
+/* Desktop/PC view */
+@media (min-width: 1025px) {
   .SideBar-sidebar-container {
     position: relative;
     left: 0; /* Always visible on desktop */
+    width: 250px;
+    background-color: #131212;
+    color: aliceblue;
+    overflow-y: auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .SideBar-close-btn {
+    display: none;
+  }
+
+  .SideBar-sdeskTitle {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0px;
+    background-color: #ec1919;
+    width: 250px;
+    height: 50px;
+    font-weight: bold;
+  }
+
+  .SideBar-icon_text_container {
+    display: flex;
+    gap: 18px;
+    color: aliceblue;
+  }
+
+  .SideBar-sidebar {
+    width: 250px;
+    background-color: #131212;
+    padding: 20px;
+    padding-top: 1px;
+    height: 100vh;
+    color: aliceblue;
+    overflow-y: auto;
   }
 }
