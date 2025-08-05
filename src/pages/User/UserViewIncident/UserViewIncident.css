@@ -1,3 +1,68 @@
+@media (max-width: 622px) {
+  .UserViewIncident-main-content {
+    padding: 0.5rem 0.2rem;
+    width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .UserViewIncident-content2 {
+    padding: 0.5rem 0.2rem;
+    width: 100vw;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .UserViewIncident-TitleBar {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .UserViewIncident-table-table {
+    font-size: 12px;
+    width: 100vw;
+    min-width: 0;
+    display: block;
+    overflow-x: auto;
+    box-sizing: border-box;
+  }
+  .UserViewIncident-table-table thead,
+  .UserViewIncident-table-table tbody,
+  .UserViewIncident-table-table tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+  .UserViewIncident-table-table th,
+  .UserViewIncident-table-table td {
+    padding: 6px 4px;
+    font-size: 12px;
+    word-break: break-word;
+  }
+  .UserViewIncident-showSearchBar {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .UserViewIncident-content3 {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+    font-size: 12px;
+  }
+  .UserViewIncident-content3-team-pagination-buttons button {
+    font-size: 12px;
+    padding: 2px 8px;
+    margin: 0 2px;
+  }
+  .UserViewIncident-TitleBar-buttons-ExportData {
+    width: 100%;
+    font-size: 12px;
+    padding: 4px 0;
+  }
+  .UserViewIncident-refno {
+    font-size: 12px;
+    word-break: break-all;
+  }
+}
 /* UserViewIncident.css - Responsive version maintaining original UI */
 
 .UserViewIncident-main-content {
