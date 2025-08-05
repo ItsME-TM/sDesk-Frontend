@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable no-unused-vars */
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
