@@ -459,7 +459,7 @@ const TechnicianAllTeam = () => {
         <div className="TechnicianAllTeam-TitleBar">
           <div className="TechnicianAllTeam-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-            Incident History - {user?.team || "Team"} - All Team Members
+            Incident History - {user?.team || "Team"} 
           </div>
           <div className="TechnicianAllTeam-TitleBar-buttons">
             <button className="TechnicianAllTeam-TitleBar-buttons-ExportData">
