@@ -588,7 +588,7 @@
     border-radius: 8px;
     padding: 20px;
     width: 100%;
-    max-width: 900px;
+    max-width: 1100px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -599,7 +599,7 @@
     position: absolute;
     top: 10px;
     right: 15px;
-    background: none;
+    background: #d32f2f;
     border: none;
     font-size: 24px;
     cursor: pointer;
@@ -607,9 +607,6 @@
     z-index: 1001;
 }
 
-.popup-close:hover {
-    color: #333;
-}
 
 @media (max-width: 991.98px) {
     .popup-overlay {
@@ -656,5 +653,8 @@
         right: 8px;
         font-size: 18px;
     }
-}
-
+    /* Remove hover effect for .popup-close */
+    .popup-close:hover {
+        background: #d32f2f;
+        color: #fff;
+    } }
