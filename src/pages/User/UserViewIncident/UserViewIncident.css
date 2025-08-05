@@ -14,7 +14,15 @@
   .UserViewIncident-TitleBar {
     flex-direction: column;
     gap: 0.5rem;
-    align-items: flex-start;
+    align-items: stretch;
+    width: 100%;
+  }
+  .UserViewIncident-TitleBar-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   .UserViewIncident-table-table {
     font-size: 12px;
@@ -54,9 +62,13 @@
     margin: 0 2px;
   }
   .UserViewIncident-TitleBar-buttons-ExportData {
-    width: 100%;
+    width: auto;
     font-size: 12px;
-    padding: 4px 0;
+    padding: 4px 12px;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-end;
   }
   .UserViewIncident-refno {
     font-size: 12px;
