@@ -8,7 +8,6 @@ export const fetchTeamAdminByServiceNumber = async (serviceNum: string) => {
   try {
     return await axios.get(buildUrl(API_BASE, `/admin/serviceNumber/${serviceNum}`), { withCredentials: true });
   } catch (error) {
-    console.error(`Error fetching team admin by service number ${serviceNum}:`, error);
     throw error;
   }
 };
@@ -17,7 +16,6 @@ export const fetchTeamAdmins = async () => {
   try {
     return await axios.get(buildUrl(API_BASE, '/admins'), { withCredentials: true });
   } catch (error) {
-    console.error("Error fetching team admins:", error);
     throw error;
   }
 };
@@ -30,7 +28,6 @@ export const createTeamAdmin = async (
       withCredentials: true,
     });
   } catch (error) {
-    console.error("Error creating team admin:", error);
     throw error;
   }
 };
@@ -41,7 +38,6 @@ export const updateTeamAdmin = async (id: string, data: TeamAdmin) => {
       withCredentials: true,
     });
   } catch (error) {
-    console.error(`Error updating team admin with id ${id}:`, error);
     throw error;
   }
 };
@@ -52,7 +48,6 @@ export const deleteTeamAdmin = async (id: string) => {
       withCredentials: true,
     });
   } catch (error) {
-    console.error(`Error deleting team admin with id ${id}:`, error);
     throw error;
   }
 };

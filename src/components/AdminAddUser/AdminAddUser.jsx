@@ -169,8 +169,6 @@ const handleSubmit = e => {
     isEdit,
   };
 
-  console.log('Submitting payload:', payload);
-  console.log('Selected categories:', formData.categories);
 
   onSubmit(payload);
 };
@@ -180,7 +178,6 @@ const handleSubmit = e => {
 
   useEffect(() => {
     if (sltUserError?.includes('not found')) {
-      console.warn('SLT User not found for this service number. User can enter details manually.');
     }
   }, [sltUserError]);
 

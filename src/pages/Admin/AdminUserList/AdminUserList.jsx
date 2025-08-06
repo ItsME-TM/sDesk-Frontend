@@ -45,7 +45,6 @@ function AdminUserList() {
   const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
 
   useEffect(() => {
-    console.log("Selection changed:", selectShowOption);
     dispatch(fetchSubCategoriesRequest());
     dispatch({ type: "category/fetchMainCategoriesRequest" });
 
@@ -66,7 +65,6 @@ function AdminUserList() {
   }, [dispatch]);
 
   const handleTechnicianForceLoggedOut = (data) => {
-    console.log("[AdminUserList] Technician was force logged out:", data);
     setOnlineTechnicians((prev) => {
       const newSet = new Set(prev);
       newSet.delete(data.serviceNum);
@@ -141,9 +139,7 @@ function AdminUserList() {
     if (editUser) {
       try {
         await updateUserRoleById(editUser.serviceNum, newRole);
-        console.log("Successfully updated SLT user role");
       } catch (err) {
-        console.warn("Failed to update SLT user role:", err);
       }
 
       const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
@@ -205,10 +201,8 @@ function AdminUserList() {
           userToDelete.serviceNum || userToDelete.serviceNumber;
         if (sltServiceNum) {
           await updateUserRoleById(sltServiceNum, "user");
-          console.log("Successfully updated SLT user role to user");
         }
       } catch (err) {
-        console.warn("Failed to update SLT user role to user:", err);
       }
       dispatch(
         deleteTechnicianRequest(
@@ -373,11 +367,7 @@ function AdminUserList() {
               if (newUser.serviceNum) {
                 try {
                   await updateUserRoleById(newUser.serviceNum, "technician");
-                  console.log(
-                    "Successfully updated SLT user role to technician"
-                  );
                 } catch (err) {
-                  console.warn("Failed to update SLT user role:", err);
                 }
               }
 

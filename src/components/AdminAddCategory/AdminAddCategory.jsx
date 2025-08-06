@@ -118,7 +118,6 @@ const AdminAddCategory = ({
           return;
         }
         const payload = { name: formData.name.trim() };
-        console.log("Dispatching createCategoryRequest payload:", payload);
         dispatch(createCategoryRequest(payload));
         setTimeout(() => setIsSubmitting(false), 1000);
         return;
@@ -149,7 +148,6 @@ const AdminAddCategory = ({
           name: formData.name.trim(),
           mainCategoryId: parentObj.id,
         };
-        console.log("Dispatching createSubCategoryRequest payload:", payload);
         dispatch({ type: "categories/createSubCategoryRequest", payload });
         setTimeout(() => setIsSubmitting(false), 1000);
         return;
@@ -181,7 +179,6 @@ const AdminAddCategory = ({
           name: formData.name.trim(),
           subCategoryId: String(formData.sub),
         };
-        console.log("Dispatching createCategoryItemRequest payload:", payload);
         dispatch(createCategoryItemRequest(payload));
         setTimeout(() => setIsSubmitting(false), 1000);
         return;
@@ -193,7 +190,6 @@ const AdminAddCategory = ({
           name: formData.name,
           subCategoryId: formData.sub,
         };
-        console.log("Dispatching updateCategoryItemRequest payload:", payload);
         dispatch(updateCategoryItemRequest(payload));
         setLocalSuccess("Category item updated successfully!✅");
         setTimeout(() => {
