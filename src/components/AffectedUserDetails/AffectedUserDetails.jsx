@@ -42,6 +42,14 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
         } else {
             // Clear previous lookup results if service number is too short
             dispatch(clearLookupUser());
+            // Clear user-related fields
+            setFormData(prevData => ({
+                ...prevData,
+                name: '',
+                email: '',
+                designation: '',
+                tpNumber: '',
+            }));
         }
     };
 
@@ -82,7 +90,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
                             <div className="lookup-status success">
                                 ✅ User Found
                             </div>
-                        ) : error && error.includes('User not found') ? (
+                        ) : (!loading && !user && error && error.includes('User not found') && formData.serviceNo && formData.serviceNo.trim().length >= 3) ? (
                             <div className="lookup-status error">
                                 ❌ User Not Found
                             </div>
