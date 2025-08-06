@@ -160,9 +160,9 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                 <>
                   <li className="SideBar-dropdown-header">
                     <Link
-                      to="/superAdmin/AdminCategory"
+                      to="/superAdmin/SuperAdminCategory"
                       className={
-                        location.pathname === "/superAdmin/AdminCategory"
+                        location.pathname === "/superAdmin/SuperAdminCategory"
                           ? "active"
                           : ""
                       }
@@ -173,9 +173,9 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   </li>
                   <li className="SideBar-dropdown-header">
                     <Link
-                      to="/superAdmin/AdminLocation"
+                      to="/superAdmin/SuperAdminLocation"
                       className={
-                        location.pathname === "/superAdmin/AdminLocation"
+                        location.pathname === "/superAdmin/SuperAdminLocation"
                           ? "active"
                           : ""
                       }
@@ -314,24 +314,22 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Team - All Incidents
                         </Link>
                       </li>
-                      {
+                      {role === "technician" && (
                         <li className="SideBar-sub-list">
-                          {role === "technician" && (
-                            <Link
-                              to="/technician/TechnicianMyAssignedInsidents"
-                              className={
-                                location.pathname ===
-                                "/technician/TechnicianMyAssignedInsidents"
-                                  ? "active"
-                                  : ""
-                              }
-                              onClick={closeSidebar}
-                            >
-                              <FaList /> My Assigned Incidents
-                            </Link>
-                          )}
+                          <Link
+                            to="/technician/TechnicianMyAssignedInsidents"
+                            className={
+                              location.pathname ===
+                              "/technician/TechnicianMyAssignedInsidents"
+                                ? "active"
+                                : ""
+                            }
+                            onClick={closeSidebar}
+                          >
+                            <FaList /> My Assigned Incidents
+                          </Link>
                         </li>
-                      }
+                      )}
                     </>
                   )}
                   <li className="SideBar-sub-list">

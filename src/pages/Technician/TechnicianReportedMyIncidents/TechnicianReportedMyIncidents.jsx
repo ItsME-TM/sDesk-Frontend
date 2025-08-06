@@ -103,12 +103,19 @@ const TechnicianReportedMyIncidents = () => {
 
   const renderTableRows = () => {
     return currentRows.map((row, idx) => (
-      <tr
-        key={idx}
-        onClick={() => handleRowClick(row.refNo)}
-        style={{ cursor: 'pointer' }}
-      >
-        <td className='TechnicianReportedMyIncidents-refno'>{row.refNo}</td>
+      <tr key={idx}>
+        <td className='TechnicianReportedMyIncidents-refno'>
+          <a
+            href="#"
+            onClick={e => {
+              e.preventDefault();
+              handleRowClick(row.refNo);
+            }}
+            style={{ color: '#222', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            {row.refNo}
+          </a>
+        </td>
         <td>{row.category}</td>
         <td className='TechnicianReportedMyIncidents-status-text'>{row.status}</td>
         <td>{row.priority}</td>
@@ -180,11 +187,9 @@ const TechnicianReportedMyIncidents = () => {
         <div className="popup-overlay">
             <div className="popup-content">
                 <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
-                <div className="TechnicianMyReportedUpdate-tickets-creator">
-                    <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
-                    <IoIosArrowForward />
-                    <span className="TechnicianMyReportedUpdate-created-ticket">Reported My Update</span>
-                </div>
+                
+                <br/>
+                <br/>
                 <div className="TechnicianMyReportedUpdate-content2">
                     <AffectedUserDetail formData={formData} />
                     <IncidentHistory

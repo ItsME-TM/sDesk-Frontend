@@ -176,10 +176,11 @@ const handleSubmit = e => {
 
   const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
-  useEffect(() => {
-    if (sltUserError?.includes('not found')) {
-    }
-  }, [sltUserError]);
+useEffect(() => {
+  if (sltUserError?.includes('not found')) {
+    setErrors(prev => ({ ...prev, id: 'User not found. Please enter manually.' }));
+  }
+}, [sltUserError]);
 
   return (
     <div className="AdminAddUser-modal">

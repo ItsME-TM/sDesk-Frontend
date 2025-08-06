@@ -5,7 +5,7 @@ import { IoIosClose } from "react-icons/io";
 import Select from "react-select";
 
 const regionOptions = [
-  { value: "METRO", label: "Metro" },
+  { value: "Metro", label: "Metro" },
   { value: "R1", label: "R1" },
   { value: "R2", label: "R2" },
   { value: "R3", label: "R3" },

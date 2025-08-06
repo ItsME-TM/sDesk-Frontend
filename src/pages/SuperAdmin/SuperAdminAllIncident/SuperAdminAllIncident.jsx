@@ -51,25 +51,41 @@ const SuperAdminAllIncident = () => {
 
   // Use Redux state for categoryItems/mainCategories
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
-    // First, try to find from the loaded categoryItems
-    const categoryItem = categoryItems?.find(
+    // Process categoryItems to transform them to the expected format if needed
+    const transformedCategories = categoryItems.map((item) => ({
+      grandchild_category_number: item.category_code,
+      grandchild_category_name: item.name,
+      child_category_name: item.subCategory?.name || "Unknown Sub",
+      child_category_number: item.subCategory?.category_code || "Unknown",
+      parent_category_number:
+        item.subCategory?.mainCategory?.category_code || "Unknown",
+      parent_category_name: item.subCategory?.mainCategory?.name || "Unknown",
+      // For backwards compatibility
+      category_code: item.category_code,
+      name: item.name,
+    }));
+
+    // First, try to find from the loaded categories (Redux data)
+    const categoryItem = transformedCategories.find(
       (cat) => cat.grandchild_category_number === categoryItemCode
     );
     if (categoryItem) {
       return categoryItem.parent_category_name;
     }
-    // If not found in categoryItems, search by name
-    const categoryByName = categoryItems?.find(
+
+    // If not found in API data, search by name
+    const categoryByName = transformedCategories.find(
       (cat) =>
         cat.grandchild_category_name &&
         cat.grandchild_category_name.toLowerCase() ===
-          String(categoryItemCode).toLowerCase()
+          categoryItemCode.toLowerCase()
     );
     if (categoryByName) {
       return categoryByName.parent_category_name;
     }
+
     // Check if the code itself is a main category
-    const mainCategory = mainCategories?.find(
+    const mainCategory = mainCategories.find(
       (mainCat) =>
         mainCat.category_code === categoryItemCode ||
         mainCat.parent_category_number === categoryItemCode
@@ -77,6 +93,7 @@ const SuperAdminAllIncident = () => {
     if (mainCategory) {
       return mainCategory.name || mainCategory.parent_category_name;
     }
+
     return "Unknown";
   };
 
@@ -188,21 +205,11 @@ const SuperAdminAllIncident = () => {
 
     if (currentRows.length === 0) {
       return (
-        <>
-          <tr>
-            <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
-              No incidents found.
-            </td>
-          </tr>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <td className="team-refno">TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className="team-status-text">Open</td>
-          </tr>
-        </>
+        <tr>
+          <td colSpan="6" style={{ textAlign: "center", padding: "20px" }}>
+            No incidents found.
+          </td>
+        </tr>
       );
     }
 
