@@ -150,11 +150,16 @@ export const fetchAllLocations = async () => {
   }
 };
 
-export const fetchDashboardStats = async (userParentCategory?: string) => {
+export const fetchDashboardStats = async (params?: {
+  userParentCategory?: string;
+  userType?: string;
+  technicianId?: string;
+  teamName?: string;
+}) => {
   try {
-    const params = userParentCategory ? { userParentCategory } : {};
-    return await axios.get(`${API_BASE}/incident/dashboard-stats`, { 
-      params,
+    const queryParams = params || {};
+    return await axios.get(buildUrl(API_BASE, "/incident/dashboard-stats"), { 
+      params: queryParams,
       withCredentials: true 
     });
   } catch (error) {

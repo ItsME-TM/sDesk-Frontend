@@ -299,7 +299,7 @@ function* handleFetchAllLocations() {
 }
 function* handleFetchDashboardStats(action) {
   try {
-    const response = yield call(fetchDashboardStats, action.payload?.userParentCategory);
+    const response = yield call(fetchDashboardStats, action.payload);
     yield put(fetchDashboardStatsSuccess(response.data));
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
