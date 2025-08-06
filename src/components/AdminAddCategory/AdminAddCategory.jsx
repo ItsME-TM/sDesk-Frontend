@@ -33,7 +33,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
         dispatch(fetchSubCategoriesRequest());
     }, [dispatch]);
 
-    // Fetch subcategories for selected parent (main category) when parent changes in grandchild form
     useEffect(() => {
         if (categoryType === 'grandchild' && formData.parent) {
             dispatch(fetchSubCategoriesByMainCategoryIdRequest(formData.parent));
@@ -157,8 +156,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
             return;
         }
     };
-
-    // Filter subcategories for selected parent
     const filteredSubCategories = categoryType === 'grandchild' && formData.parent
         ? subCategories.filter(sub => sub.mainCategory && sub.mainCategory.id === formData.parent)
         : [];
@@ -192,7 +189,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
                 }, 2000);
             }
         }
-        // eslint-disable-next-line
     }, [mainCategoryError, mainCategorySuccess, categoryError, subCategorySuccess, subCategoryError, categoryItemSuccess, categoryItemError]);
 
     return (
@@ -399,7 +395,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
                             </span>
                         </div>
                     </form>
-                    {/* Show success message only if localSuccess is set */}
                     {localSuccess && (
                         <div className="AdminAddCategory-success-message" role="alert" aria-live="polite">
                             ✅ {localSuccess}

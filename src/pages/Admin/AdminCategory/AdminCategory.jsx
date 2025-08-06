@@ -35,6 +35,7 @@ const AdminCategory = () => {
     dispatch(fetchMainCategoriesRequest());
   }, [dispatch]);
 
+  // Transform categoryItems for table display
   const categories = categoryItems.map((item) => ({
     catID: item.category_code,
     categoryName: item.name,
@@ -42,11 +43,13 @@ const AdminCategory = () => {
     parentCategoryName: item.subCategory?.mainCategory?.name || "",
   }));
 
+  // Get unique parent category names for dropdown (from mainCategories)
   const parentCategoryOptions = Array.from(
     new Set(mainCategories.map((cat) => cat.name).filter(Boolean))
   );
 
   const handleEdit = (catID) => {
+    // Only allow editing for grandchild/category-item
     const item = categoryItems.find((item) => item.category_code === catID);
     if (item) {
       setEditCategory({
@@ -67,6 +70,7 @@ const AdminCategory = () => {
 
   const confirmDelete = () => {
     if (deleteTargetID) {
+      // Find the item by catID to get its DB id
       const item = categoryItems.find(
         (item) => item.category_code === deleteTargetID
       );
@@ -89,6 +93,7 @@ const AdminCategory = () => {
   };
 
   const handleExport = () => {
+    // Prepare data for export (use filteredCategories for current view, or categories for all)
     const exportData = filteredCategories.map((row) => ({
       "CAT ID": row.catID,
       "Category Name": row.categoryName,
@@ -220,7 +225,7 @@ const AdminCategory = () => {
         <AdminAddCategory
           onClose={() => setIsAddCategoryOpen(false)}
           onSubmit={(newCategory) => {
-            setCategories((prevCategories) => [...prevCategories, newCategory]);
+            // TODO: handle new category with real data
             setSuccessMessage("Parent category added successfully!");
             setTimeout(() => setSuccessMessage(""), 3000);
           }}
