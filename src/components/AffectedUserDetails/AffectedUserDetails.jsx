@@ -66,6 +66,13 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
         }
     }, [user, setFormData]);
 
+    // Clear lookup user data on component unmount
+    useEffect(() => {
+        return () => {
+            dispatch(clearLookupUser());
+        };
+    }, [dispatch]);
+
     return (
         <div className="AddInicident-content2-UserDetails">
             <div className="AddInicident-content2-UserDetails-TitleBar">
