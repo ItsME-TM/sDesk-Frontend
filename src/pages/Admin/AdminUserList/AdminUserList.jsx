@@ -64,7 +64,6 @@ function AdminUserList() {
     return () => clearInterval(interval);
   }, [dispatch]);
 
-  
 
   const getTeamName = (teamId) => {
     const main = mainCategories.find((m) => m.id === teamId);
@@ -129,7 +128,6 @@ function AdminUserList() {
         await updateUserRoleById(editUser.serviceNum, newRole);
      
       } catch (err) {
-        
       }
 
       const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
@@ -191,10 +189,8 @@ function AdminUserList() {
           userToDelete.serviceNum || userToDelete.serviceNumber;
         if (sltServiceNum) {
           await updateUserRoleById(sltServiceNum, "user");
-          console.log("Successfully updated SLT user role to user");
         }
       } catch (err) {
-        console.warn("Failed to update SLT user role to user:", err);
       }
       dispatch(
         deleteTechnicianRequest(
@@ -361,7 +357,6 @@ function AdminUserList() {
                   await updateUserRoleById(newUser.serviceNum, "technician");
                  
                 } catch (err) {
-                  
                 }
               }
 
