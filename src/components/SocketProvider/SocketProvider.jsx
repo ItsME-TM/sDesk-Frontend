@@ -158,7 +158,7 @@ const SocketProvider = ({ children }) => {
       }
     };
     const handleInactiveByAdmin = (data) => {
-      console.log("⚠️ Technician marked inactive:", data.message);
+      
       removeAlertsByType("technician_inactive"); // remove any existing
       addAlert(
         {
@@ -174,7 +174,7 @@ const SocketProvider = ({ children }) => {
     };
 
     const handleTechnicianStatusChanged = ({ serviceNum, active }) => {
-      console.log("📡 Technician status changed:", serviceNum, active);
+      
 
       if (user?.role === "admin" || user?.role === "superAdmin") {
         dispatch(fetchTechniciansRequest());

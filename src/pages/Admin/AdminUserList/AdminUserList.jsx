@@ -14,7 +14,7 @@ import {
   updateTechnicianRequest,
   forceLogoutTechnicianRequest,
   updateTechnicianOnlineStatus,
-  checkTechnicianStatusRequest,
+
 } from "../../../redux/technicians/technicianSlice";
 
 import { fetchSubCategoriesRequest } from "../../../redux/categories/categorySlice";
