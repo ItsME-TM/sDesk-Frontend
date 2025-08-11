@@ -20,9 +20,6 @@ const UserViewIncident = () => {
     (state) => state.incident
   );
 
-  // Debugging logs
-  console.log("User from Redux:", user);
-  console.log("Assigned by me from Redux:", assignedByMe);
 
   // State for filters and pagination
   const [filteredIncidents, setFilteredIncidents] = useState([]);
@@ -38,7 +35,6 @@ const UserViewIncident = () => {
   // Fetch incidents and categories from the backend
   useEffect(() => {
     if (user && user.serviceNum) {
-      console.log(`Dispatching fetchAssignedByMeRequest for serviceNum: ${user.serviceNum}`);
       dispatch(fetchAssignedByMeRequest({ serviceNum: user.serviceNum }));
     }
     dispatch(fetchCategoriesRequest());
@@ -47,8 +43,6 @@ const UserViewIncident = () => {
   useEffect(() => {
     // Ensure assignedByMe is not null/undefined before filtering
     const incidentsToFilter = assignedByMe || [];
-    console.log("Incidents to filter:", incidentsToFilter);
-
     const filtered = incidentsToFilter.filter((incident) => {
       const statusMatch =
         statusFilter === "all" || incident.status === statusFilter;
@@ -129,13 +123,13 @@ const UserViewIncident = () => {
   return (
     <div className="UserViewIncident-main-content">
       <div className="UserViewIncident-direction-bar">
-        Incidents {">"} My Incidents
+        Incidents
       </div>
       <div className="UserViewIncident-content2">
         <div className="UserViewIncident-TitleBar">
           <div className="UserViewIncident-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-            My Incidents - {user.name || user.email} (Reported by me)
+            My Incidents - {user.name || user.email} 
           </div>
           <div className="UserViewIncident-TitleBar-buttons">
             <button className="UserViewIncident-TitleBar-buttons-ExportData">
@@ -157,19 +151,6 @@ const UserViewIncident = () => {
               <option value="Hold">Hold</option>
               <option value="In Progress">In Progress</option>
               <option value="Closed">Closed</option>
-            </select>
-            Category:
-            <select
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              value={categoryFilter}
-              className="UserViewIncident-showSearchBar-Show-select2"
-            >
-              <option value="all">All Categories</option>
-              {(categories || []).map((cat) => (
-                <option key={cat.id} value={cat.name}>
-                  {cat.name}
-                </option>
-              ))}
             </select>
           </div>
           <div className="UserViewIncident-showSearchBar-SearchBar">
@@ -210,7 +191,7 @@ const UserViewIncident = () => {
                     >
                       <td
                         className="UserViewIncident-refno"
-                        style={{ cursor: "pointer", color: "#007bff", textDecoration: "underline" }}
+                        style={{ cursor: "pointer", color: "black", textDecoration: "none" }}
                         onClick={() => handleRefNoClick(incident)}
                       >
                         {incident.incident_number}
@@ -258,7 +239,6 @@ const UserViewIncident = () => {
       {showUpdatePopup && (
         <div className="modal-backdrop">
           <div className="modal-card">
-            <button style={{ float: "right" }} onClick={() => setShowUpdatePopup(false)}>Close</button>
             <UserUpdateIncident
               incidentData={selectedIncident}
               isPopup={true}

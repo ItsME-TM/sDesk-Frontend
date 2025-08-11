@@ -1,28 +1,35 @@
 import React, { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { fetchLoggedUserRequest } from '../../redux/auth/authSlice';
+import { fetchLoggedUserRequest, refreshTokenRequest } from '../../redux/auth/authSlice';
 
 const PrivateRoute = () => {
-    const dispatch = useAppDispatch();
-    const { isLoggedIn, loading, user } = useAppSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, isLoggedIn, loading, authInitialized } = useAppSelector((state) => state.auth);
+  const hasJwtCookie = document.cookie.includes('jwt');
 
-    useEffect(() => {
-        if (!user) {
-            console.log('[PrivateRoute] User not found, fetching logged user');
-            dispatch(fetchLoggedUserRequest());
-        }
-    }, [dispatch, user]);
-
-    if (loading) {
-        return <div>Loading...</div>;
+  // 🔁 Only try fetching once on mount if not initialized
+  useEffect(() => {
+    if (!authInitialized && !loading) {
+      if (hasJwtCookie) {
+        dispatch(fetchLoggedUserRequest());
+      } else {
+        dispatch(refreshTokenRequest());
+      }
     }
+  }, [authInitialized, loading, dispatch, hasJwtCookie]);
 
-    if (!isLoggedIn) {
-        return <Navigate to="/LogIn" replace />;
-    }
+  // 🟡 Still initializing: show loading
+  if (!authInitialized || loading) {
+    return <div>Loading...</div>;
+  }
 
-    return <Outlet />;
+  // ❌ After initialization, if no user or not logged in —> redirect
+  if (!user || !isLoggedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default PrivateRoute;

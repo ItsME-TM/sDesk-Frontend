@@ -2,7 +2,6 @@ import axios from "axios";
 import { MainCategory, SubCategory, CategoryItem } from "./categoryTypes";
 import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
-// Main Category Services
 export const fetchMainCategories = async () => {
   try {
     return await axios.get(buildUrl(API_BASE, "/categories/main"), {
@@ -183,13 +182,11 @@ export const fetchCategoryItemById = async (id: string) => {
   }
 };
 
-// PATCH: Ensure subCategoryId is sent as a string, not a number
 export const createCategoryItem = async (data: {
   name: string;
   subCategoryId: string;
 }) => {
   try {
-    // Only send the required fields, and ensure subCategoryId is a string
     return await axios.post(
       buildUrl(API_BASE, "/categories/item"),
       {

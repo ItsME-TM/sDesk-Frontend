@@ -1,16 +1,18 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset'; 
 import { IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { fetchAssignedToMeRequest } from '../../../redux/incident/incidentSlice';
-import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident'; // Import the TechnicianInsident component
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
+import TechnicianInsident from '../../Technician/TechnicianIncident/TechnicianInsident';
 import './TechnicianMyAssignedIncidents.css';
-import './IncidentPopup.css'; // New CSS for the modal
+import './IncidentPopup.css';
 
 const TechnicianMyAssignedIncidents = () => {
     const navigate = useNavigate();
@@ -18,17 +20,14 @@ const TechnicianMyAssignedIncidents = () => {
 
     const [showIncidentPopup, setShowIncidentPopup] = useState(false);
     const [selectedIncident, setSelectedIncident] = useState(null);
-    
+    const [showTransferSuccess, setShowTransferSuccess] = useState(false);
+
     // Redux state
     const { assignedToMe, loading, error } = useSelector((state) => state.incident);
     const { user } = useSelector((state) => state.auth);
-    
-    // Debug logging
-    console.log('[TechnicianMyAssignedIncidents] User state:', user);
-    console.log('[TechnicianMyAssignedIncidents] User role:', user?.role);
-    console.log('[TechnicianMyAssignedIncidents] assignedToMe data:', assignedToMe);
-    console.log('[TechnicianMyAssignedIncidents] loading:', loading);
-    console.log('[TechnicianMyAssignedIncidents] error:', error);
+    const { allUsers } = useSelector((state) => state.sltusers);
+    const { categoryItems } = useSelector((state) => state.categories);
+    const { locations } = useSelector((state) => state.location);
     
     // Real authentication check - no mock users
     if (!user) {
@@ -96,7 +95,6 @@ const TechnicianMyAssignedIncidents = () => {
     }
 
     const currentUser = user;
-
     const assignedUser = currentUser.serviceNum;
     
     // Local state
@@ -109,50 +107,55 @@ const TechnicianMyAssignedIncidents = () => {
     // Fetch assigned incidents on component mount
     useEffect(() => {
         if (assignedUser && currentUser) {
-            console.log('[TechnicianMyAssignedIncidents] Fetching incidents for user:', assignedUser);
-            console.log('[TechnicianMyAssignedIncidents] Current assignedToMe state:', assignedToMe);
-            console.log('[TechnicianMyAssignedIncidents] Current loading state:', loading);
-            console.log('[TechnicianMyAssignedIncidents] Current error state:', error);
-            
-            // FIX: Use serviceNum as the key for Redux action
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
-            
-            console.log('[TechnicianMyAssignedIncidents] Dispatched fetchAssignedToMeRequest');
         }
+        dispatch(fetchAllUsersRequest());
+        dispatch(fetchCategoryItemsRequest());
+        dispatch(fetchLocationsRequest());
+
+        // Listen for the custom event for successful transfer
+        const handleIncidentTransferred = (event) => {
+            const { incident_number } = event.detail;
+
+            // Refetch the assigned incidents list
+            if (assignedUser) {
+                dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+            }
+
+            // Show the success message
+            setShowTransferSuccess(true);
+            setTimeout(() => {
+                setShowTransferSuccess(false);
+            }, 3000); // Hide after 3 seconds
+
+            // Close the popup
+            setShowIncidentPopup(false);
+        };
+
+        window.addEventListener("incident-transferred", handleIncidentTransferred);
+
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener("incident-transferred", handleIncidentTransferred);
+        };
     }, [dispatch, assignedUser, currentUser]);
 
     const getCategoryName = (categoryNumber) => {
-        for (const parent of sDesk_t2_category_dataset) {
-            for (const subcategory of parent.subcategories) {
-                const item = subcategory.items.find(
-                    item => item.grandchild_category_number === categoryNumber
-                );
-                if (item) {
-                    return item.grandchild_category_name;
-                }
-            }
-        }
-        return categoryNumber;
+        const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+        return category ? category.grandchild_category_name : categoryNumber;
     };
 
     const getUserName = (serviceNumber) => {
-        const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-        return user ? user.user_name : serviceNumber;
+        if (!Array.isArray(allUsers)) return serviceNumber;
+        const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+        return user ? (user.display_name || user.user_name || user.name) : serviceNumber;
     };
 
     const getLocationName = (locationNumber) => {
-        for (const district of sDesk_t2_location_dataset) {
-            for (const sublocation of district.sublocations) {
-                if (sublocation.loc_number === locationNumber) {
-                    return sublocation.loc_name;
-                }
-            }
-        }
-        return locationNumber;    };
+        const location = locations.find(loc => loc.loc_number === locationNumber || loc.id === locationNumber);
+        return location ? (location.name || location.loc_name) : locationNumber;
+    };
 
-    // Loading and error states
-    console.log('[TechnicianMyAssignedIncidents] Render - loading:', loading, 'error:', error, 'assignedToMe:', assignedToMe?.length || 0);
-    
     // Only show loading spinner if loading is true AND assignedToMe is empty
     if (loading && (!assignedToMe || assignedToMe.length === 0)) {
         return (
@@ -164,9 +167,6 @@ const TechnicianMyAssignedIncidents = () => {
                     <div className="loading-container">
                         <div className="loading-spinner"></div>
                         <p>Loading assigned incidents...</p>
-                        <div style={{marginTop: '10px', fontSize: '12px', color: '#666'}}>
-                            Debug: User={assignedUser}, Loading={String(loading)}, Error={String(error)}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -182,9 +182,7 @@ const TechnicianMyAssignedIncidents = () => {
                 <div className="TechnicianMyAssignedIncidents-content2">
                     <div className="error-container">
                         <p>Error loading assigned incidents: {error}</p>
-                        <p>Debug info: User={assignedUser}, Backend=http://localhost:8000</p>
                         <button onClick={() => {
-                            console.log('[TechnicianMyAssignedIncidents] Retrying with user:', assignedUser);
                             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
                         }}>
                             Retry
@@ -291,6 +289,12 @@ const TechnicianMyAssignedIncidents = () => {
 
     return (
         <div className="TechnicianMyAssignedIncidents-main-content">
+            {showTransferSuccess && (
+                <div className="transfer-success-popup">
+                    <p>Incident Transfer Successful!</p>
+                </div>
+            )}
+
             <div className="TechnicianMyAssignedIncidents-tickets-creator">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
                 <IoIosArrowForward />
@@ -310,84 +314,103 @@ const TechnicianMyAssignedIncidents = () => {
                     </div>
                 </div>
 
-                <div className="TechnicianMyAssignedIncidents-showSearchBar container-fluid p-0">
-                    <div className="row m-0 w-100">
-                        <div className="col-md-7 col-lg-8 p-0">
-                            <div className="TechnicianMyAssignedIncidents-showSearchBar-Show d-flex flex-wrap align-items-center">
-                                <div className="d-flex align-items-center me-3 mb-2 mb-sm-0">
-                                    Entries:
-                                    <select 
-                                        onChange={e => setRowsPerPage(Number(e.target.value))} 
-                                        value={rowsPerPage} 
-                                        className="TechnicianMyAssignedIncidents-showSearchBar-Show-select ms-2"
-                                    >
-                                        {[10, 20, 50, 100].map(size => (
-                                            <option key={size} value={size}>{size} entries</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="d-flex align-items-center me-3 mb-2 mb-sm-0">
-                                    Status:
-                                    <select 
-                                        onChange={e => setStatusFilter(e.target.value)} 
-                                        value={statusFilter} 
-                                        className="TechnicianMyAssignedIncidents-showSearchBar-Show-select ms-2"
-                                    >
-                                        <option value="">All Status</option>
-                                        <option value="Open">Open</option>
-                                        <option value="Hold">Hold</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Closed">Closed</option>
-                                    </select>
-                                </div>
-                                <div className="d-flex align-items-center mb-2 mb-sm-0">
-                                    Category:
-                                    <select 
-                                        onChange={e => setCategoryFilter(e.target.value)} 
-                                        value={categoryFilter} 
-                                        className="TechnicianMyAssignedIncidents-showSearchBar-Show-select2 ms-2"
-                                    >
-                                        <option value="">All Categories</option>
-                                        {uniqueCategories.map(cat => (
-                                            <option key={cat.number} value={cat.number}>{cat.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
+                {/* Search & Filter Bar */}
+                <div className="TechnicianMyAssignedIncidents-showSearchBar flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
+                    <div className="TechnicianMyAssignedIncidents-showSearchBar-Show flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto">
+                            <span>Entries:</span>
+                            <select 
+                                onChange={e => setRowsPerPage(Number(e.target.value))} 
+                                value={rowsPerPage} 
+                                className="TechnicianMyAssignedIncidents-showSearchBar-Show-select w-full sm:w-24"
+                            >
+                                {[10, 20, 50, 100].map(size => (
+                                    <option key={size} value={size}>{size} entries</option>
+                                ))}
+                            </select>
                         </div>
-                        <div className="col-md-5 col-lg-4 p-0 d-flex justify-content-md-end justify-content-start mt-2 mt-md-0">
-                            <div className="TechnicianMyAssignedIncidents-showSearchBar-SearchBar">
-                                <FaSearch />
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={e => setSearchTerm(e.target.value)}
-                                    className="TechnicianMyAssignedIncidents-showSearchBar-SearchBar-input"
-                                />
-                            </div>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto">
+                            <span>Status:</span>
+                            <select 
+                                onChange={e => setStatusFilter(e.target.value)} 
+                                value={statusFilter} 
+                                className="TechnicianMyAssignedIncidents-showSearchBar-Show-select2 w-full sm:w-32"
+                            >
+                                <option value="">All Status</option>
+                                <option value="Open">Open</option>
+                                <option value="Hold">Hold</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto">
+                            <span>Category:</span>
+                            <select 
+                                onChange={e => setCategoryFilter(e.target.value)} 
+                                value={categoryFilter} 
+                                className="TechnicianMyAssignedIncidents-showSearchBar-Show-select2 w-full sm:w-40"
+                            >
+                                <option value="">All Categories</option>
+                                {uniqueCategories.map(cat => (
+                                    <option key={cat.number} value={cat.number}>{cat.name}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
+                    <div className="TechnicianMyAssignedIncidents-showSearchBar-SearchBar flex items-center gap-2 w-full sm:w-64">
+                        <FaSearch />
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="TechnicianMyAssignedIncidents-showSearchBar-SearchBar-input w-full"
+                        />
+                    </div>
                 </div>
-                
+
+                {/* Table for desktop/tablet, cards for mobile */}
                 <div className="TechnicianMyAssignedIncidents-table">
-                    <table className="TechnicianMyAssignedIncidents-table-table">
-                        <thead>
-                            <tr>
-                                <th>Ref No</th>
-                                <th>Affected User</th>
-                                <th>Category</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>{renderTableRows()}</tbody>
-                    </table>
+                    <div className="hidden sm:block">
+                        <table className="TechnicianMyAssignedIncidents-table-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Ref No</th>
+                                    <th>Affected User</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>{renderTableRows()}</tbody>
+                        </table>
+                    </div>
+                    <div className="sm:hidden flex flex-col gap-4">
+                        {currentRows.length === 0 ? (
+                            <div className="incident-mobile-card">
+                                <div className="incident-mobile-card-header">
+                                    <span className="font-bold text-blue-700">No incidents found</span>
+                                </div>
+                            </div>
+                        ) : (
+                            currentRows.map((row, idx) => (
+                                <div key={idx} className="incident-mobile-card">
+                                    <div className="incident-mobile-card-header">
+                                        <span className="font-bold text-blue-700">Ref No: {row.refNo}</span>
+                                        <span className="incident-mobile-card-status">{row.status}</span>
+                                    </div>
+                                    <div className="incident-mobile-card-detail text-purple-700">Affected User: <span className="font-semibold">{row.affectedUser}</span></div>
+                                    <div className="incident-mobile-card-detail text-pink-700">Category: <span className="font-semibold">{row.category}</span></div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
-                <div className="TechnicianMyAssignedIncidents-content3">
+
+                <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
                     <span>
                         Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
                     </span>
-                    <div className="TechnicianMyAssignedIncidents-content3-team-pagination-buttons">
+                    <div className="TechnicianMyAssignedIncidents-content3-team-pagination-buttons flex gap-2 flex-wrap">
                         <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}>Previous</button>
                         {renderPaginationButtons()}
                         <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
@@ -405,6 +428,4 @@ const TechnicianMyAssignedIncidents = () => {
         </div>
     );
 };
-
 export default TechnicianMyAssignedIncidents;
-

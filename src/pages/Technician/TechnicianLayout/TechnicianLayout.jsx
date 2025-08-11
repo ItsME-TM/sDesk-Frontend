@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import SideBar from '../../../components/SideBar/sideBar';
 import './TechnicianLayout.css';
-import TopNotificationBar from '../../../components/topNotificatonBar/TopNotificationBar';
 import { useAppSelector, useAppDispatch } from '../../../redux/hooks';
+import TopNotificationBar from '../../../components/topNotificatonBar/TopNotificationBar';
 import { logoutRequest } from '../../../redux/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,8 +12,8 @@ const TechnicianLayout = () => {
     const user = useAppSelector(state => state.auth.user);
     const role = user?.role;
     const loading = useAppSelector(state => state.auth.loading);
-    const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -24,12 +24,12 @@ const TechnicianLayout = () => {
     };
 
     useEffect(() => {
-        if (user && role !== 'technician' && role !== 'teamLeader') {
-            console.log('Unauthorized access attempt by user:', user);
-            dispatch(logoutRequest()); 
-            navigate('/login', { replace: true }); 
+        if (user && role !== 'technician'){
+            dispatch(logoutRequest());
+            navigate('/login', { replace: true });
+
         }
-    }, [user, role, dispatch, navigate]);
+    },[user, role, dispatch, navigate])
 
     if (loading) {
         return <div>Loading...</div>;
@@ -37,7 +37,6 @@ const TechnicianLayout = () => {
     if (!user) {
         return <div>User not found</div>;
     }
-
     return (
         <div className="Technician-layout-dashboard">
             <SideBar role={role} isOpen={isSidebarOpen} closeSidebar={closeSidebar} />

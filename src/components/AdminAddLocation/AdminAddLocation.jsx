@@ -5,7 +5,7 @@ import { IoIosClose } from "react-icons/io";
 import Select from "react-select";
 
 const regionOptions = [
-  { value: "METRO", label: "Metro" },
+  { value: "Metro", label: "Metro" },
   { value: "R1", label: "R1" },
   { value: "R2", label: "R2" },
   { value: "R3", label: "R3" },
@@ -47,44 +47,13 @@ const AdminAddLocation = ({
       });
     }
   }, [isEdit, editLocation]);
-  // Location Code validation function
-  const validateLocationCode = (code) => {
-    // Check if code matches LOC_XXX pattern where XXX is 3 digits starting from 001
-    const locationCodePattern = /^LOC_\d{3}$/;
-
-    if (!code) {
-      return "Location Code is required";
-    }
-
-    if (!locationCodePattern.test(code)) {
-      return "Location Code must be in format LOC_XXX (e.g., LOC_001, LOC_002)";
-    }
-
-    // Extract the number part and validate it's >= 001
-    const numberPart = parseInt(code.substring(4));
-    if (numberPart < 1) {
-      return "Location Code number must start from LOC_001 or higher";
-    }
-
-    return null; // No error
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Real-time validation for Location Code
-    if (name === "locationCode") {
-      const codeError = validateLocationCode(value);
-      if (codeError) {
-        setErrors((prev) => ({ ...prev, locationCode: codeError }));
-      } else {
-        setErrors((prev) => ({ ...prev, locationCode: undefined }));
-      }
-    } else {
-      // Clear other field errors when user types
-      if (value && errors[name])
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
+    // Clear field errors when user types
+    if (value && errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
   const handleRegionChange = (selectedOption) => {
@@ -102,13 +71,9 @@ const AdminAddLocation = ({
     e.preventDefault();
     const newErrors = {};
 
-    // Validate Location Code with custom validation
-    const locationCodeError = validateLocationCode(formData.locationCode);
-    if (locationCodeError) {
-      newErrors.locationCode = locationCodeError;
-    }
-
-    // Validate other fields
+    // Validate required fields
+    if (!formData.locationCode)
+      newErrors.locationCode = "Please Enter the Location code";
     if (!formData.locationName)
       newErrors.locationName = "Location Name is required";
     if (!formData.region) newErrors.region = "Region is required";
@@ -149,7 +114,7 @@ const AdminAddLocation = ({
                 }}
               />
               <small className="AdminAddLocation-helper-text">
-                Format: LOC_XXX (e.g., LOC_001, LOC_002, LOC_010)
+                Enter Location Code
               </small>
             </div>
             <div className="AdminAddLocation-field">

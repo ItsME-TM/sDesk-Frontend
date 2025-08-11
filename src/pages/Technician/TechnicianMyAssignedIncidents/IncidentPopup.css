@@ -1,3 +1,4 @@
+
 .incident-popup-overlay {
     position: fixed;
     top: 0;
@@ -7,30 +8,68 @@
     background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 5vh;
     z-index: 1000;
 }
 
 .incident-popup-content {
     background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: none !important;
+    padding: 32px 32px 24px 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
-    overflow: auto;
+    min-width: 350px;
+    max-width: 1200px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-left: 50px;
+}
+
+.incident-popup-close-btn-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 3px; /* Increased margin to move button lower */
 }
 
 .incident-popup-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
+    position: static;
+    margin-right: 0;
+    margin-left: auto;
+    background: #c91111;
+    color: #fff;
     border: none;
-    font-size: 24px;
+    border-radius: 4px;
+    font-size: 20px;
+    padding: 6px 14px;
     cursor: pointer;
-    color: #333;
+    transition: background-color 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+}
+
+.incident-popup-close-btn:hover {
+    background: #555;
+}
+
+.incident-popup-submit-btn {
+    background: #0e7bc9;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 24px;
+    font-size: 160px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background-color 0.3s;
+    align-self: flex-end;
+    margin-left: 0;
 }
 
 /* Styles to make TechnicianInsident content visible within the popup */
@@ -65,8 +104,10 @@
 /* Adjust width of Affected User Details within the popup */
 .incident-popup-content .AddInicident-content2-UserDetails {
     max-width: 82%;
-    height: 230px; /* Adjust this value as needed */
+    height: 200px; /* Adjust this value as needed */
     margin-left: 09%; /* Remove right margin to center if needed */
     background-color: #fff;
 
 }
+
+

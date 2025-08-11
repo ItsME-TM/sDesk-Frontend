@@ -20,11 +20,7 @@ const AdminMyAssignedIncidents = () => {
     user => user.service_number === 'SV001' && user.role === 'admin'
   );
 
-  if (!currentAdmin) {
-    return <div>Error: Admin user not found.</div>;
-  }
-
-  const assignedUser = currentAdmin.service_number;
+  const assignedUser = currentAdmin ? currentAdmin.service_number : null;
   
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,7 +31,9 @@ const AdminMyAssignedIncidents = () => {
 
   // Fetch assigned incidents on component mount
   useEffect(() => {
-    dispatch(fetchAssignedToMeRequest(assignedUser));
+    if (assignedUser) {
+      dispatch(fetchAssignedToMeRequest(assignedUser));
+    }
   }, [dispatch, assignedUser]);
 
   const getCategoryName = (categoryNumber) => {
@@ -148,20 +146,6 @@ const AdminMyAssignedIncidents = () => {
     }
   };
 
-  const renderTableRows = () => {
-    return currentRows.map((row, idx) => (
-      <tr
-        key={idx}
-        onClick={() => handleRowClick(row.refNo)}
-        style={{ cursor: 'pointer' }}
-      >
-        <td className='team-refno'>{row.refNo}</td>
-        <td>{row.affectedUser}</td>
-        <td>{row.category}</td>
-        <td className='team-status-text'>{row.status}</td>
-      </tr>
-    ));
-  };
 
   const renderPaginationButtons = () => {
     const maxButtons = 7;
@@ -209,103 +193,119 @@ const AdminMyAssignedIncidents = () => {
     }));
 
   return (
-    <div className="AdminMyAssignedIncidents-main-content">
-      <div className="AdminMyAssignedIncidents-direction-bar">
-        Incidents {'>'} My Assigned Incidents
+    <div className="AdminMyAssignedIncidents-main-content bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 min-h-screen">
+      {/* Responsive direction bar */}
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 text-base font-semibold text-purple-700 bg-gradient-to-r from-white via-purple-50 to-pink-50 shadow mb-4 rounded-lg border border-purple-200">
+        <span>Incidents</span>
+        <span className="mx-1 text-pink-500">{'>'}</span>
+        <span>My Assigned Incidents</span>
       </div>
-      <div className="AdminMyAssignedIncidents-content2">
-        <div className="AdminMyAssignedIncidents-TitleBar">
-          <div className="AdminMyAssignedIncidents-TitleBar-NameAndIcon">
-            <FaHistory size={20} />
-            My Assigned Incidents - {currentAdmin.user_name}
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
+        {/* Title Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+          <div className="flex items-center gap-3 text-2xl font-bold text-blue-700 drop-shadow">
+            <FaHistory size={28} className="text-pink-500" />
+            <span>My Assigned Incidents - <span className="text-purple-600">{currentAdmin.user_name}</span></span>
           </div>
-          <div className="AdminMyAssignedIncidents-TitleBar-buttons">
-            <button className="AdminMyAssignedIncidents-TitleBar-buttons-ExportData">
-              <TiExportOutline />
-              Export Data
-            </button>
-          </div>
+          <button className="flex items-center gap-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition text-base font-semibold border-2 border-blue-300">
+            <TiExportOutline className="text-yellow-200" />
+            Export Data
+          </button>
         </div>
-        <div className="AdminMyAssignedIncidents-showSearchBar">
-          <div className="AdminMyAssignedIncidents-showSearchBar-Show">
-            Entries:
-            <select
-              onChange={e => setRowsPerPage(Number(e.target.value))}
-              value={rowsPerPage}
-              className="AdminMyAssignedIncidents-showSearchBar-Show-select"
-            >
-              {[10, 20, 50, 100].map(size => (
-                <option key={size} value={size}>{size} entries</option>
-              ))}
-            </select>
-            Status:
-            <select
-              onChange={e => setStatusFilter(e.target.value)}
-              value={statusFilter}
-              className="AdminMyAssignedIncidents-showSearchBar-Show-select"
-            >
-              <option value="">All Status</option>
-              <option value="Open">Open</option>
-              <option value="Hold">Hold</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Closed">Closed</option>
-            </select>
-            Category:
-            <select
-              onChange={e => setCategoryFilter(e.target.value)}
-              value={categoryFilter}
-              className="AdminMyAssignedIncidents-showSearchBar-Show-select2"
-            >
-              <option value="">All Categories</option>
-              {uniqueCategories.map(cat => (
-                <option key={cat.number} value={cat.number}>{cat.name}</option>
-              ))}
-            </select>
+        {/* Search & Filter Bar */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-6 w-full">
+          <div className="flex flex-col md:flex-row flex-wrap gap-3 md:gap-6 w-full md:w-auto">
+            <div className="flex flex-col md:flex-row gap-2 md:items-center w-full md:w-auto">
+              <span className="font-semibold text-blue-700">Entries:</span>
+              <select
+                onChange={e => setRowsPerPage(Number(e.target.value))}
+                value={rowsPerPage}
+                className="border-2 border-blue-300 rounded-lg px-3 py-2 text-base w-full md:w-32 bg-blue-50 focus:ring-2 focus:ring-blue-400"
+              >
+                {[10, 20, 50, 100].map(size => (
+                  <option key={size} value={size}>{size} entries</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col md:flex-row gap-2 md:items-center w-full md:w-auto">
+              <span className="font-semibold text-purple-700">Status:</span>
+              <select
+                onChange={e => setStatusFilter(e.target.value)}
+                value={statusFilter}
+                className="border-2 border-purple-300 rounded-lg px-3 py-2 text-base w-full md:w-36 bg-purple-50 focus:ring-2 focus:ring-purple-400"
+              >
+                <option value="">All Status</option>
+                <option value="Open">Open</option>
+                <option value="Hold">Hold</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div className="flex flex-col md:flex-row gap-2 md:items-center w-full md:w-auto">
+              <span className="font-semibold text-pink-700">Category:</span>
+              <select
+                onChange={e => setCategoryFilter(e.target.value)}
+                value={categoryFilter}
+                className="border-2 border-pink-300 rounded-lg px-3 py-2 text-base w-full md:w-44 bg-pink-50 focus:ring-2 focus:ring-pink-400"
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(cat => (
+                  <option key={cat.number} value={cat.number}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="AdminMyAssignedIncidents-showSearchBar-SearchBar">
-            <FaSearch />
+          <div className="flex items-center gap-2 border-2 border-purple-300 rounded-lg px-3 py-2 bg-white w-full md:w-72 shadow focus-within:ring-2 focus-within:ring-purple-400">
+            <FaSearch className="text-pink-500" />
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="AdminMyAssignedIncidents-showSearchBar-SearchBar-input"
+              className="outline-none w-full text-base bg-transparent text-purple-700 placeholder:text-purple-400"
             />
           </div>
         </div>
-        <div className="AdminMyAssignedIncidents-table">
-          <table className="AdminMyAssignedIncidents-table-table">
-            <thead>
+        {/* Responsive Table */}
+        <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-blue-200">
+          <table className="min-w-full text-base">
+            <thead className="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100">
               <tr>
-                <th>Ref No</th>
-                <th>Affected User</th>
-                <th>Category</th>
-                <th>Status</th>
+                <th className="px-4 py-3 text-left text-blue-700 font-bold">Ref No</th>
+                <th className="px-4 py-3 text-left text-purple-700 font-bold">Affected User</th>
+                <th className="px-4 py-3 text-left text-pink-700 font-bold">Category</th>
+                <th className="px-4 py-3 text-left text-green-700 font-bold">Status</th>
+                <th className="px-4 py-3 text-left text-blue-700 font-bold">Assigned Technician</th>
               </tr>
             </thead>
             <tbody>
-              {renderTableRows()}
+              {currentRows.map((row, idx) => {
+                const incident = assignedToMe.find(item => item.incident_number === row.refNo);
+                const technician = incident ? sDesk_t2_users_dataset.find(u => u.service_number === incident.technician) : null;
+                return (
+                  <tr key={idx} className="border-b hover:bg-blue-50 cursor-pointer transition-all duration-150" onClick={() => handleRowClick(row.refNo)}>
+                    <td className="px-4 py-3 text-blue-700 font-semibold underline">{row.refNo}</td>
+                    <td className="px-4 py-3 text-purple-700">{row.affectedUser}</td>
+                    <td className="px-4 py-3 text-pink-700">{row.category}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg border-2 ${row.status === 'Open' ? 'bg-green-200 text-green-800 border-green-400' : row.status === 'In Progress' ? 'bg-yellow-200 text-yellow-800 border-yellow-400' : row.status === 'Hold' ? 'bg-orange-200 text-orange-800 border-orange-400' : 'bg-gray-200 text-gray-700 border-gray-400'}`}>{row.status}</span>
+                    </td>
+                    <td className="px-4 py-3 text-blue-700">{technician ? technician.user_name : '-'}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
-        <div className="AdminMyAssignedIncidents-content3">
-          <span className="AdminMyAssignedIncidents-content3-team-entry-info">
+        {/* Pagination */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-6">
+          <span className="text-base text-purple-700 font-semibold">
             Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
           </span>
-          <div className="AdminMyAssignedIncidents-content3-team-pagination-buttons">
-            <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="px-3 py-2 rounded-lg border-2 border-blue-300 bg-white text-blue-700 font-bold disabled:opacity-50 shadow">Previous</button>
             {renderPaginationButtons()}
-            <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
+            <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="px-3 py-2 rounded-lg border-2 border-blue-300 bg-white text-blue-700 font-bold disabled:opacity-50 shadow">Next</button>
           </div>
         </div>
       </div>

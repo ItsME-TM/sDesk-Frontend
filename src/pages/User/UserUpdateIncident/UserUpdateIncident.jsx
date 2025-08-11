@@ -4,23 +4,24 @@ import './UserUpdateIncident.css';
 import { IoIosArrowForward } from 'react-icons/io';
 import AffectedUserDetail from '../../../components/AffectedUserDetail/AffectedUserDetail';
 import IncidentHistory from '../../../components/IncidentHistory/IncidentHistory';
-import { sDesk_t2_incidents_dataset } from '../../../data/sDesk_t2_incidents_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchIncidentHistoryRequest } from '../../../redux/incident/incidentSlice';
+import {
+  fetchIncidentHistoryRequest,
+  getIncidentByNumberRequest
+} from '../../../redux/incident/incidentSlice';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { FaTimes } from 'react-icons/fa';
 
-// Accept loggedInUser as a prop
 const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const historyData = useSelector(state => state.incident.incidentHistory) || [];
-  const loadingHistory = useSelector(state => state.incident.loadingHistory);
-  const errorHistory = useSelector(state => state.incident.errorHistory);
-  // Set formData to loggedInUser if available, else fallback to blank
+  const { incidentHistory, loading: loadingHistory, error: errorHistory, currentIncident } = useSelector(state => state.incident);
+  const { allUsers } = useSelector(state => state.sltusers);
+
   const [formData, setFormData] = useState({
-    serviceNo: loggedInUser?.serviceNum || '',
-    tpNumber: '',
+    serviceNo: (loggedInUser?.serviceNum || incidentData?.informant || ''),
+    tpNumber: loggedInUser?.contactNumber || '',
     name: loggedInUser?.name || '',
     designation: loggedInUser?.role || '',
     email: loggedInUser?.email || '',
@@ -40,17 +41,27 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
 
   const [isLoading, setIsLoading] = useState(true);
 
+  const getUserName = (serviceNumber) => {
+    const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+    return user ? user.display_name || user.user_name || user.name : serviceNumber;
+  };
 
   useEffect(() => {
-    // Always set formData to loggedInUser if available (for popup)
+    dispatch(fetchAllUsersRequest());
+
     if (loggedInUser) {
       setFormData({
-        serviceNo: loggedInUser.serviceNum || '',
-        tpNumber: loggedInUser.tpNumber || '',
+        serviceNo: loggedInUser.serviceNum || incidentData?.informant || '',
+        tpNumber: loggedInUser.contactNumber || '',
         name: loggedInUser.name || '',
         designation: loggedInUser.role || '',
         email: loggedInUser.email || '',
       });
+    } else if (incidentData && incidentData.informant) {
+      setFormData(formData => ({
+        ...formData,
+        serviceNo: incidentData.informant
+      }));
     } else if (location.state?.formData) {
       setFormData({
         serviceNo: location.state.formData.serviceNo || location.state.formData.serviceNum || '',
@@ -61,8 +72,6 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
       });
     }
 
-    // Incident details
-    console.log('[UserUpdateIncident] incidentData:', incidentData);
     if (incidentData) {
       setIncidentDetails({
         refNo: incidentData.incident_number || incidentData.refNo,
@@ -75,109 +84,99 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         updatedOn: incidentData.update_on || incidentData.updatedOn,
         comments: incidentData.description || incidentData.comments,
       });
-      // Fetch incident history using redux-saga
       const refNo = String(incidentData.incident_number || incidentData.refNo);
       dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
       setIsLoading(false);
     } else if (location.state?.incidentDetails) {
       const details = location.state.incidentDetails;
-      const fullIncident = sDesk_t2_incidents_dataset.find(
-        inc => inc.incident_number === details.refNo
-      );
-      if (fullIncident) {
-        setIncidentDetails({
-          refNo: details.refNo,
-          category: details.category,
-          location: details.location,
-          priority: fullIncident.priority || details.priority,
-          status: fullIncident.status || details.status,
-          assignedTo: getUserName(fullIncident.handler) || 'Unassigned',
-          updateBy: getUserName(fullIncident.update_by) || 'System',
-          updatedOn: fullIncident.update_on || new Date().toLocaleString(),
-          comments: fullIncident.description || 'No comments'
-        });
-        if (fullIncident.history) {
-          setHistoryData(fullIncident.history.map(item => ({
-            assignedTo: getUserName(item.handler) || 'Unassigned',
-            updatedBy: getUserName(item.update_by) || 'System',
-            updatedOn: item.update_on || new Date().toLocaleString(),
-            status: item.status || 'Pending',
-            comments: item.description || 'No comments'
-          })));
-        } else {
-          setHistoryData([{
-            assignedTo: getUserName(fullIncident.handler) || 'Unassigned',
-            updatedBy: getUserName(fullIncident.update_by) || 'System',
-            updatedOn: fullIncident.update_on || new Date().toLocaleString(),
-            status: fullIncident.status || 'Pending',
-            comments: fullIncident.description || 'No comments'
-          }]);
-        }
-      } else {
-        setIncidentDetails({
-          ...details,
-          assignedTo: getUserName(details.assignedTo) || details.assignedTo,
-          updateBy: getUserName(details.updateBy) || details.updateBy,
-        });
-      }
+      const refNo = details.refNo;
+      dispatch(getIncidentByNumberRequest({ incident_number: refNo }));
+      dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
     }
     setIsLoading(false);
-  }, [incidentData, location.state, loggedInUser]);
+  }, [incidentData, location.state, loggedInUser, dispatch]);
 
-  const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
-  };
+  useEffect(() => {
+    if (currentIncident && allUsers.length > 0) {
+      setIncidentDetails({
+        refNo: currentIncident.incident_number,
+        category: currentIncident.category,
+        location: currentIncident.location,
+        priority: currentIncident.priority,
+        status: currentIncident.status,
+        assignedTo: getUserName(currentIncident.handler),
+        updateBy: getUserName(currentIncident.update_by),
+        updatedOn: currentIncident.update_on || new Date().toLocaleString(),
+        comments: currentIncident.description || 'No comments'
+      });
+    }
+  }, [currentIncident, allUsers]);
 
   const handleBackClick = () => {
     navigate('/user/UserViewIncident');
   };
 
-
   if (isLoading || loadingHistory) {
-    return <div className="loading-container">Loading...</div>;
+    return <div className="d-flex justify-content-center align-items-center vh-100">Loading...</div>;
   }
   if (errorHistory) {
-    return <div className="loading-container">Error: {errorHistory}</div>;
+    return <div className="d-flex justify-content-center align-items-center vh-100 text-danger">Error: {errorHistory}</div>;
   }
 
-  return (
-    <div className={isPopup ? "UserUpdateIncident-modal-content" : "UserUpdateIncident-main-content"}>
-      {isPopup && (
-        <button style={{ float: "right" }} onClick={onClose}>Close</button>
-      )}
-      <div className="UserUpdateIncident-direction-bar">
-        <span className="UserUpdateIncident-svr-desk">Incidents</span>
-        <IoIosArrowForward />
-        <span className="UserUpdateIncident-created-ticket">My Incidents</span>
-      </div>
+  const mainContentClass = isPopup 
+    ? "UserUpdateIncident-modal-content" 
+    : "container-fluid vh-100 d-flex flex-column";
 
-      <div className="UserUpdateIncident-content2">
-        <AffectedUserDetail formData={formData} />
-        {/* historyData now comes from redux */}
-        <IncidentHistory
-          refNo={incidentDetails.refNo}
-          category={incidentDetails.category}
-          location={incidentDetails.location}
-          priority={incidentDetails.priority}
-          status={incidentDetails.status}
-          assignedTo={incidentDetails.assignedTo}
-          updateBy={incidentDetails.updateBy}
-          updatedOn={incidentDetails.updatedOn}
-          comments={incidentDetails.comments}
-          historyData={historyData}
-          users={sDesk_t2_users_dataset}
-        />
-        <div className="UserUpdateIncident-button-container">
-          {!isPopup && (
+  return (
+    <div className={mainContentClass}>
+      {isPopup && (
+        <button className="btn-close-modal" onClick={onClose}>
+          <FaTimes />
+        </button>
+      )}
+      
+      {!isPopup && (
+        <div className="direction-bar">
+          <span>Incidents</span>
+          <IoIosArrowForward />
+          <span>My Incidents</span>
+        </div>
+      )}
+
+      <div className="content-area flex-grow-1 overflow-auto p-md-4 p-2">
+        <div className="container-fluid">
+          <div className="row g-4">
+            <div className="col-12">
+              <AffectedUserDetail formData={formData} />
+            </div>
+            <div className="col-12">
+              <IncidentHistory
+                refNo={incidentDetails.refNo}
+                category={incidentDetails.category}
+                location={incidentDetails.location}
+                priority={incidentDetails.priority}
+                status={incidentDetails.status}
+                assignedTo={incidentDetails.assignedTo}
+                updateBy={incidentDetails.updateBy}
+                updatedOn={incidentDetails.updatedOn}
+                comments={incidentDetails.comments}
+                historyData={incidentHistory}
+                users={allUsers}
+              />
+            </div>
+          </div>
+        </div>
+        
+        {!isPopup && (
+          <div className="text-end mt-4">
             <button
-              className="UserUpdateIncident-details-back-btn"
+              className="btn btn-danger"
               onClick={handleBackClick}
             >
               Go Back
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

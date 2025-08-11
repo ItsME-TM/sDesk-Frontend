@@ -3,6 +3,7 @@ export interface SLTUser {
   serviceNum: string;
   display_name: string;
   email: string;
+  contactNumber?: string;
   role: 'user' | 'admin' | 'technician' | 'teamLeader' | 'superAdmin';
   azureId?: string;
 }

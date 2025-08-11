@@ -5,16 +5,24 @@ import "./TechnicianInsident.css";
 import { IoIosArrowForward } from "react-icons/io";
 import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
 import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
-import AffectedUserDetails from "../../../components/AffectedUserDetails/AffectedUserDetails";
-import { 
-  getIncidentByNumberRequest, 
-  fetchIncidentHistoryRequest 
+import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedUserDetail";
+import {
+  getIncidentByNumberRequest,
+  fetchIncidentHistoryRequest,
 } from "../../../redux/incident/incidentSlice";
 import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice";
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
-import { fetchUserByServiceNumberRequest, fetchAllUsersRequest } from "../../../redux/sltusers/sltusersSlice";
+import {
+  fetchUserByServiceNumberRequest,
+  fetchAllUsersRequest,
+} from "../../../redux/sltusers/sltusersSlice";
 
-const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
+const TechnicianInsident = ({
+  incidentData,
+  isPopup,
+  loggedInUser,
+  affectedUserDetails,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -31,7 +39,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   // Local state
   const [formData, setFormData] = useState({
     serviceNo: "",
-    tpNumber: undefined,
+    tpNumber: "",
     name: "",
     designation: "",
     email: "",
@@ -45,46 +53,49 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   // Auto-fill Name, Designation, Email when Service No changes
   useEffect(() => {
     const serviceNo = formData.serviceNo?.trim();
-    
+
     // Clear fields if Service No is empty
     if (!serviceNo) {
       setFormData((prev) => ({
         ...prev,
-        name: '',
-        designation: '',
-        email: '',
+        name: "",
+        designation: "",
+        email: "",
+        tpNumber: "",
       }));
       return;
     }
 
     // Wait for users to be loaded before attempting auto-fill
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       return;
     }
 
     // Find user by serviceNum or service_number from slt_users table
-    const user = usersState.allUsers?.find(
+    const user = usersState.users?.find(
       (u) => String(u.serviceNum || u.service_number) === String(serviceNo)
     );
-    
+
     if (user) {
       // Auto-fill found user details
       setFormData((prev) => ({
         ...prev,
-        name: user.display_name || user.user_name || '',
-        designation: user.role || '',
-        email: user.email || '',
+        name: user.display_name || user.user_name || "",
+        designation: user.role || "",
+        email: user.email || "",
+        tpNumber: user.contactNumber || "", // Auto-fill TP Number with contactNumber from backend
       }));
     } else {
       // Clear fields if user not found
       setFormData((prev) => ({
         ...prev,
-        name: '',
-        designation: '',
-        email: '',
+        name: "",
+        designation: "",
+        email: "",
+        tpNumber: "",
       }));
     }
-  }, [formData.serviceNo, usersState.allUsers]);
+  }, [formData.serviceNo, usersState.users]);
 
   const [incidentDetails, setIncidentDetails] = useState({
     refNo: "",
@@ -102,7 +113,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   const [isLoading, setIsLoading] = useState(false); // Start with false
   const [error, setError] = useState(null);
   const [updateStatusData, setUpdateStatusData] = useState({
-    updatedBy: "",
+    updatedBy: loggedInUser?.userName || loggedInUser?.name,
     category: "",
     location: "",
     transferTo: "",
@@ -111,10 +122,12 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
     status: "",
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [lastUpdateWasTransfer, setLastUpdateWasTransfer] = useState(false);
+
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
-    if (!usersState.allUsers || usersState.allUsers.length === 0) {
+    if (!usersState.users || usersState.users.length === 0) {
       dispatch(fetchAllUsersRequest());
     }
   }, [dispatch, usersState.allUsers]);
@@ -132,16 +145,16 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
     dispatch(fetchCategoriesRequest());
     dispatch(fetchLocationsRequest());
     dispatch(fetchAllUsersRequest()); // Enable to load users for auto-fill
-    
+
     if (isPopup && incidentData) {
       // For popup mode, use provided incident data immediately
       // Set initial form data with informant as Service No
       setFormData({
         serviceNo: incidentData.informant || "",
         tpNumber: undefined,
-        name: "", // Will be auto-filled by useEffect
-        designation: "", // Will be auto-filled by useEffect
-        email: "", // Will be auto-filled by useEffect
+        name: affectedUserDetails?.name || "",
+        designation: affectedUserDetails?.designation || "",
+        email: affectedUserDetails?.email || "", // Will be auto-filled by useEffect
       });
       // Fetch incident history
       dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
@@ -157,7 +170,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
     // Update user data from Redux
     if (usersState.user) {
       const userData = usersState.user;
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         serviceNo: userData?.service_number || prev.serviceNo,
         name: userData?.display_name || userData?.user_name || prev.name,
@@ -169,7 +182,9 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
 
   // Separate useEffect for incident details to avoid loops
   useEffect(() => {
-    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    const currentIncident = isPopup
+      ? incidentData
+      : incidentState.currentIncident;
     if (currentIncident) {
       setIncidentDetails({
         refNo: currentIncident.incident_number || "",
@@ -179,7 +194,8 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
         status: currentIncident.status || "",
         assignedTo: currentIncident.handler || "",
         updateBy: currentIncident.update_by || "",
-        updatedOn: currentIncident.update_on || currentIncident.updated_at || "",
+        updatedOn:
+          currentIncident.update_on || currentIncident.updated_at || "",
         comments: currentIncident.description || "",
       });
     }
@@ -192,22 +208,32 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
       setIsLoading(false);
       return;
     }
-    
+
     // For non-popup mode, only wait for incident loading, not categories/locations
     setIsLoading(incidentState.loading);
 
     // Update error state
-    const anyError = incidentState.error || categoryState.error || locationState.error;
+    const anyError =
+      incidentState.error || categoryState.error || locationState.error;
     setError(anyError);
-  }, [incidentState.loading, incidentState.error, categoryState.error, locationState.error, isPopup]);
+  }, [
+    incidentState.loading,
+    incidentState.error,
+    categoryState.error,
+    locationState.error,
+    isPopup,
+  ]);
 
   const handleUpdateStatusChange = (data) => {
     setUpdateStatusData(data);
   };
   // --- FIX: Track update request and fetch history only after update is successful ---
-  const [pendingHistoryIncidentNo, setPendingHistoryIncidentNo] = useState(null);
+  const [pendingHistoryIncidentNo, setPendingHistoryIncidentNo] =
+    useState(null);
   const handleUpdateClick = () => {
-    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    const currentIncident = isPopup
+      ? incidentData
+      : incidentState.currentIncident;
     if (!currentIncident) return;
 
     // Prepare data for update
@@ -219,15 +245,24 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
         priority: updateStatusData.priority || currentIncident.priority,
         status: updateStatusData.status || currentIncident.status,
         handler: updateStatusData.transferTo || currentIncident.handler,
-        description: updateStatusData.description || currentIncident.description,
+        description:
+          updateStatusData.description || currentIncident.description,
         update_by: updateStatusData.updatedBy || currentIncident.update_by,
         // Add this line to support auto-assign Tier2
-        automaticallyAssignForTier2: updateStatusData.transferTo === 'tier2-auto',
+        automaticallyAssignForTier2:
+          updateStatusData.transferTo === "tier2-auto",
       },
     };
 
     // Dispatch Redux action to update incident
-    dispatch({ type: "incident/updateIncidentRequest", payload: updatePayload });
+    dispatch({
+      type: "incident/updateIncidentRequest",
+      payload: updatePayload,
+    });
+
+    // Track if the update was a transfer
+    setLastUpdateWasTransfer(!!updateStatusData.transferTo);
+
     // Mark that we want to fetch history for this incident after update is successful
     setPendingHistoryIncidentNo(currentIncident.incident_number);
   };
@@ -235,7 +270,9 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   // Show success message, close popup, and fetch history if update is successful (popup mode)
   const lastHandledIncidentRef = useRef(null);
   useEffect(() => {
-    const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+    const currentIncident = isPopup
+      ? incidentData
+      : incidentState.currentIncident;
     // Only run if we have a pending history fetch for this incident
     if (
       isPopup &&
@@ -250,10 +287,27 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
       lastHandledIncidentRef.current !== currentIncident.incident_number
     ) {
       // Fetch latest incident history after update is successful
-      dispatch(fetchIncidentHistoryRequest({ incident_number: currentIncident.incident_number }));
+      dispatch(
+        fetchIncidentHistoryRequest({
+          incident_number: currentIncident.incident_number,
+        })
+      );
       setShowSuccessMessage(true);
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
+
+      // If the last update was a transfer, notify the parent
+      if (lastUpdateWasTransfer) {
+        if (typeof window !== "undefined" && window.dispatchEvent) {
+          window.dispatchEvent(
+            new CustomEvent("incident-transferred", {
+              detail: { incident_number: currentIncident.incident_number },
+            })
+          );
+        }
+        setLastUpdateWasTransfer(false); // Reset transfer tracking
+      }
+
       setTimeout(() => {
         setShowSuccessMessage(false);
         // Close popup if parent provided a close handler (optional)
@@ -262,7 +316,14 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
         }
       }, 1500);
     }
-  }, [incidentState, isPopup, incidentData, incidentState.currentIncident, dispatch, pendingHistoryIncidentNo]);
+  }, [
+    incidentState,
+    isPopup,
+    incidentData,
+    incidentState.currentIncident,
+    dispatch,
+    pendingHistoryIncidentNo,
+  ]);
 
   const handleBackClick = () => {
     navigate("/technician/TechnicianAssignedIncidents");
@@ -301,7 +362,9 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   }
 
   // Add a fallback UI if incident is null after loading
-  const currentIncident = isPopup ? incidentData : incidentState.currentIncident;
+  const currentIncident = isPopup
+    ? incidentData
+    : incidentState.currentIncident;
   if (!currentIncident && !isLoading && !error) {
     return (
       <div
@@ -322,12 +385,16 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
   // Helper functions to get name from id
   const getCategoryName = (id) => {
     if (!id) return "";
-    const found = categoryState.categoryItems?.find((c) => c.id === id || c.category_id === id);
+    const found = categoryState.categoryItems?.find(
+      (c) => c.id === id || c.category_id === id
+    );
     return found ? found.name || found.category_name : id;
   };
   const getLocationName = (id) => {
     if (!id) return "";
-    const found = locationState.list?.find((l) => l.id === id || l.location_id === id);
+    const found = locationState.list?.find(
+      (l) => l.id === id || l.location_id === id
+    );
     return found ? found.name || found.location_name : id;
   };
 
@@ -338,15 +405,16 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
     location: getLocationName(incidentDetails.location),
   };
   // Get history data from Redux state
-  const historyDataWithNames = incidentState.incidentHistory?.map((h) => ({
-    assignedTo: h.assignedTo,
-    updatedBy: h.updatedBy,
-    updatedOn: new Date(h.updatedOn).toLocaleString(),
-    status: h.status,
-    comments: h.comments,
-    category: getCategoryName(h.category),
-    location: getLocationName(h.location),
-  })) || [];
+  const historyDataWithNames =
+    incidentState.incidentHistory?.map((h) => ({
+      assignedTo: h.assignedTo,
+      updatedBy: h.updatedBy,
+      updatedOn: new Date(h.updatedOn).toLocaleString(),
+      status: h.status,
+      comments: h.comments,
+      category: getCategoryName(h.category),
+      location: getLocationName(h.location),
+    })) || [];
 
   // DEBUG PANEL: Show state at the top for troubleshooting
   return (
@@ -354,25 +422,18 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
       {/* Debug panel removed for production UI */}
       <div className="technician-dashboard container-fluid p-0">
         <div className="technician-dashboard-main row m-0">
-          <div className="technicianinsident-tickets-creator col-12 d-flex align-items-center mb-3">
-            <span className="technicianinsident-svr-desk">Dashboard</span>
-            <IoIosArrowForward className="mx-2" />
-            <span className="technicianinsident-created-ticket">
-              Incident Update
-            </span>
-          </div>
+         
 
           <div className="technician-main-content col-12">
             <div className="row">
-              <div className="col-12 mb-3">
-                <AffectedUserDetails
+              <div className="col-12 section-gap">
+                <AffectedUserDetail
                   formData={formData}
                   setFormData={setFormData}
-                  handleInputChange={handleInputChange}
                 />
               </div>
 
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
@@ -384,18 +445,18 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
                   updatedOn={incidentDetailsWithNames.updatedOn}
                   comments={incidentDetailsWithNames.comments}
                   historyData={historyDataWithNames}
-                  users={usersState.allUsers || []}
+                  users={usersState.users || []}
                 />
+                <br/>
               </div>
               {currentIncident && (
-                <div className="col-12 mb-3">
+                <div className="col-12 section-gap">
                   <UpdateStatus
                     incidentData={{
                       regNo: currentIncident.incident_number,
                       updateBy: currentIncident.update_by,
                       category: currentIncident.category,
                       location: currentIncident.location,
-                      urgentNotificationTo: currentIncident.urgent_notification_to,
                       description: currentIncident.description,
                       priority: currentIncident.priority,
                       status: currentIncident.status,
@@ -403,7 +464,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
                     }}
                     incident={currentIncident}
                     onStatusChange={handleUpdateStatusChange}
-                    usersDataset={usersState.allUsers || []}
+                    usersDataset={usersState.users || []}
                     categoryDataset={categoryState.categoryItems || []}
                     locationDataset={locationState.list || []}
                     loggedInUser={loggedInUser}
@@ -411,7 +472,7 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
                 </div>
               )}
 
-              <div className="col-12 d-flex justify-content-between">
+              <div className={`col-12 d-flex ${isPopup ? 'justify-content-end' : 'justify-content-between'}`}>
                 {!isPopup && (
                   <button
                     className="technician-details-back-btn"
@@ -444,4 +505,3 @@ const TechnicianInsident = ({ incidentData, isPopup, loggedInUser }) => {
 };
 
 export default TechnicianInsident;
-

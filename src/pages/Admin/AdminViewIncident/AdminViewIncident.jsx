@@ -6,9 +6,9 @@ import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
 import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory";
 import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedUserDetail";
 import { fetchIncidentByIdRequest, updateIncidentRequest } from '../../../redux/incident/incidentSlice';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
-import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
+import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
+import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
+import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
 
 const AdminViewIncident = () => {
   const { incidentId } = useParams();
@@ -17,16 +17,22 @@ const AdminViewIncident = () => {
   
   // Redux state
   const { currentIncident, loading, error } = useSelector((state) => state.incident);
+  const { allUsers } = useSelector((state) => state.sltusers);
+  const { categoryItems } = useSelector((state) => state.categories);
+  const { locations } = useSelector((state) => state.location);
   
   // Local state
   const [statusUpdate, setStatusUpdate] = useState('');
   const [comments, setComments] = useState('');
 
-  // Fetch incident details on component mount
+  // Fetch incident details and other data on component mount
   useEffect(() => {
     if (incidentId) {
       dispatch(fetchIncidentByIdRequest(incidentId));
     }
+    dispatch(fetchAllUsersRequest());
+    dispatch(fetchCategoryItemsRequest());
+    dispatch(fetchLocationsRequest());
   }, [dispatch, incidentId]);
 
   // Set initial status when incident loads
@@ -49,29 +55,18 @@ const AdminViewIncident = () => {
   };
 
   const getCategoryName = (categoryNumber) => {
-    for (const parent of sDesk_t2_category_dataset) {
-      for (const subcategory of parent.subcategories) {
-        const item = subcategory.items.find(item => item.grandchild_category_number === categoryNumber);
-        if (item) return item.grandchild_category_name;
-      }
-    }
-    return categoryNumber;
+    const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
+    return category ? category.grandchild_category_name : categoryNumber;
   };
 
   const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
-    return user ? user.user_name : serviceNumber;
+    const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
+    return user ? (user.display_name || user.user_name || user.name) : serviceNumber;
   };
 
   const getLocationName = (locationNumber) => {
-    for (const district of sDesk_t2_location_dataset) {
-      for (const sublocation of district.sublocations) {
-        if (sublocation.loc_number === locationNumber) {
-          return sublocation.loc_name;
-        }
-      }
-    }
-    return locationNumber;
+    const location = locations.find(loc => loc.loc_number === locationNumber || loc.id === locationNumber);
+    return location ? (location.name || location.loc_name) : locationNumber;
   };
 
   if (loading) {
@@ -170,7 +165,7 @@ const AdminViewIncident = () => {
         </div>
 
         <AffectedUserDetail incident={currentIncident} />
-        <IncidentHistory incident={currentIncident} />
+        <IncidentHistory incident={currentIncident} users={allUsers} />
 
         <div className="update-section">
           <UpdateStatus 
@@ -178,6 +173,9 @@ const AdminViewIncident = () => {
             onStatusChange={setStatusUpdate}
             comments={comments}
             onCommentsChange={setComments}
+            usersDataset={allUsers}
+            categoryDataset={categoryItems}
+            locationDataset={locations}
           />
           <div className="update-actions">
             <button 

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
 import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
+import socket from '../../utils/socket';
 
 const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) => {
   const dispatch = useDispatch();
@@ -13,15 +14,18 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
     id: '',
     name: '',
     email: '',
+    contactNumber: '',
     teamName: loggedInUser?.teamName || '', // take from logged user
     role: 'technician',
     tier: '1',
     active: true,
+    teamId:loggedInUser?.teamId|| '',
     categories: [
       loggedInUser?.cat1,
       loggedInUser?.cat2,
       loggedInUser?.cat3,
       loggedInUser?.cat4
+
     ].filter(Boolean), // take from logged user
   });
 
@@ -56,6 +60,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
         name: sltUser.display_name || '',
         email: sltUser.email || '',
         id: sltUser.serviceNum || '',
+        contactNumber: sltUser.contactNumber || '',
       }));
     }
   }, [sltUser]);
@@ -89,6 +94,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
         id: '',
         name: '',
         email: '',
+        teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
         role: 'technician',
         tier: '1',
@@ -129,49 +135,61 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
     }
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    const newErrors = {};
-    if (!formData.id) newErrors.id = 'Service Number is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.name) newErrors.name = 'Name is required';
-    if (!formData.teamName) newErrors.teamName = 'Team is required';
-    if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
 
-    const payload = {
-      serviceNum: formData.id,
-      email: formData.email,
-      name: formData.name,
-      team: formData.teamName,
-      tier: Number(formData.tier),
-      active: formData.active,
-      cat1: formData.categories[0] || '',
-      cat2: formData.categories[1] || '',
-      cat3: formData.categories[2] || '',
-      cat4: formData.categories[3] || '',
-      level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
-      rr: 1,
-      designation: 'Technician',
-      contactNumber: '0000000000',
-      teamLevel: 'Default',
-      teamLeader: formData.teamLeader ?? false,
-      assignAfterSignOff: formData.assignAfterSignOff ?? false,
-      permanentMember: formData.permanentMember ?? false,
-      subrootUser: formData.subrootUser ?? false,
-      isEdit,
-    };
-    onSubmit(payload);
+const selectedCategories = formData.categories || [];
+const handleSubmit = e => {
+  e.preventDefault();
+  const newErrors = {};
+  if (!formData.id) newErrors.id = 'Service Number is required';
+  if (!formData.email) newErrors.email = 'Email is required';
+  if (!formData.name) newErrors.name = 'Name is required';
+  if (!formData.teamName) newErrors.teamName = 'Team is required';
+  if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
+  const payload = {
+    serviceNum: formData.id,
+    email: formData.email,
+    name: formData.name,
+    teamId: formData.teamId,
+    team: formData.teamName,
+    tier: Number(formData.tier),
+    active: formData.active,
+    cat1: formData.categories[0] || '',
+    cat2: formData.categories[1] || '',
+    cat3: formData.categories[2] || '',
+    cat4: formData.categories[3] || '',
+    level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
+    rr: 1,
+    designation: 'Technician',
+    contactNumber: formData.contactNumber,
+    teamLevel: 'Default',
+    teamLeader: formData.teamLeader ?? false,
+    assignAfterSignOff: formData.assignAfterSignOff ?? false,
+    permanentMember: formData.permanentMember ?? false,
+    subrootUser: formData.subrootUser ?? false,
+    isEdit,
   };
+
+  // If editing and changing active status to false
+  if (isEdit && editUser?.active && !formData.active) {
+    socket.emit('admin-deactivate-technician', {
+      serviceNum: formData.id,
+      message: 'You have been deactivated by admin'
+    });
+  }
+
+  onSubmit(payload);
+};
 
   const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
-  useEffect(() => {
-    if (sltUserError?.includes('not found')) {
-      console.warn('SLT User not found for this service number. User can enter details manually.');
-    }
-  }, [sltUserError]);
+useEffect(() => {
+  if (sltUserError?.includes('not found')) {
+    setErrors(prev => ({ ...prev, id: 'User not found. Please enter manually.' }));
+  }
+}, [sltUserError]);
 
   return (
     <div className="AdminAddUser-modal">
@@ -196,11 +214,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                   required
                   readOnly={isEdit}
                 />
-                {sltUserLoading && <span>Loading...</span>}
-                {sltUserError && <span className="error-message">{sltUserError}</span>}
-                {showUserNotFound && (
-                  <span className="error-message">User not found in SLT Users. Please enter manually.</span>
-                )}
+                
               </div>
               <div>
                 <label>Name:</label>
@@ -226,6 +240,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) =>
                   readOnly={isEdit}
                 />
               </div>
+             
               <div>
                 <label>Team:</label>
                 <input

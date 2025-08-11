@@ -10,6 +10,15 @@ const initialState: IncidentState = {
   categories: [], // Add this line
   incidentHistory: [], // Add incident history
   currentTechnician: null, // Add current technician
+  dashboardStats: {
+    statusCounts: {},
+    priorityCounts: {},
+    todayStats: {},
+  },
+  mainCategories: [],
+  categoryItems: [],
+  users: [],
+  locations: [],
   loading: false,
   error: null,
 };
@@ -18,6 +27,18 @@ const incidentSlice = createSlice({
   name: "incident",
   initialState,
   reducers: {
+    fetchDashboardStatsRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchDashboardStatsSuccess(state, action) {
+      state.loading = false;
+      state.dashboardStats = action.payload;
+    },
+    fetchDashboardStatsFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
     // Categories
     fetchCategoriesRequest(state) {
       state.loading = true;
@@ -107,7 +128,6 @@ const incidentSlice = createSlice({
     },
     getAssignedToMeSuccess(state, action) {
       state.loading = false;
-      console.log('[Reducer] getAssignedToMeSuccess: payload =', action.payload);
       state.assignedToMe = Array.isArray(action.payload)
         ? action.payload
         : action.payload?.data || [];
@@ -220,10 +240,89 @@ const incidentSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+
+    // Fetch admin team data (combined action)
+    fetchAdminTeamDataRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchAdminTeamDataSuccess(state, action) {
+      state.loading = false;
+      const { incidents, mainCategories, categoryItems, users, locations } =
+        action.payload;
+      state.incidents = incidents || [];
+      state.mainCategories = mainCategories || [];
+      state.categoryItems = categoryItems || [];
+      state.users = users || [];
+      state.locations = locations || [];
+    },
+    fetchAdminTeamDataFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch main categories
+    fetchMainCategoriesRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchMainCategoriesSuccess(state, action) {
+      state.loading = false;
+      state.mainCategories = action.payload;
+    },
+    fetchMainCategoriesFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch category items
+    fetchCategoryItemsRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchCategoryItemsSuccess(state, action) {
+      state.loading = false;
+      state.categoryItems = action.payload;
+    },
+    fetchCategoryItemsFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch all users
+    fetchAllUsersRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchAllUsersSuccess(state, action) {
+      state.loading = false;
+      state.users = action.payload;
+    },
+    fetchAllUsersFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Fetch all locations
+    fetchAllLocationsRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchAllLocationsSuccess(state, action) {
+      state.loading = false;
+      state.locations = action.payload;
+    },
+    fetchAllLocationsFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
 export const {
+  fetchDashboardStatsRequest,
+  fetchDashboardStatsSuccess,
+  fetchDashboardStatsFailure,
   fetchCategoriesRequest,
   fetchCategoriesSuccess,
   fetchCategoriesFailure,
@@ -262,6 +361,21 @@ export const {
   fetchCurrentTechnicianRequest,
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
+  fetchAdminTeamDataRequest,
+  fetchAdminTeamDataSuccess,
+  fetchAdminTeamDataFailure,
+  fetchMainCategoriesRequest,
+  fetchMainCategoriesSuccess,
+  fetchMainCategoriesFailure,
+  fetchCategoryItemsRequest,
+  fetchCategoryItemsSuccess,
+  fetchCategoryItemsFailure,
+  fetchAllUsersRequest,
+  fetchAllUsersSuccess,
+  fetchAllUsersFailure,
+  fetchAllLocationsRequest,
+  fetchAllLocationsSuccess,
+  fetchAllLocationsFailure,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage
