@@ -314,7 +314,7 @@ const TechnicianMyAssignedIncidents = () => {
                     </div>
                 </div>
 
-                {/* Search & Filter Bar */}
+                {/* Search & Filter Bar - moved above the table for all screen sizes */}
                 <div className="TechnicianMyAssignedIncidents-showSearchBar flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full">
                     <div className="TechnicianMyAssignedIncidents-showSearchBar-Show flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
                         <div className="flex flex-col sm:flex-row gap-2 sm:items-center w-full sm:w-auto">
