@@ -106,6 +106,18 @@ const ManageTeamAdmin = () => {
       const response = await fetchUserByServiceNum(value);
       const user = response.data;
       if (user) {
+        // Check if user is already an admin in slt_users table
+        if (user.role && user.role.toLowerCase() === "admin") {
+          setForm((prev) => ({
+            ...prev,
+            userName: "",
+            designation: "admin",
+            email: "",
+            contactNumber: "",
+          }));
+          setSubmitError("This user cannot be added because he is already an admin.");
+          return;
+        }
         setForm((prev) => ({
           ...prev,
           userName: user.display_name || "",
@@ -122,7 +134,7 @@ const ManageTeamAdmin = () => {
           email: "",
           contactNumber: "",
         }));
-        setSubmitError("User not found in database.");
+        setSubmitError("Invalid service number.");
       }
     } catch (error) {
       setForm((prev) => ({
@@ -132,7 +144,7 @@ const ManageTeamAdmin = () => {
         email: "",
         contactNumber: "",
       }));
-      setSubmitError("User not found in database.");
+      setSubmitError("Invalid service number.");
     }
   };
 
@@ -451,8 +463,7 @@ const ManageTeamAdmin = () => {
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
-                    onChange={handleChange}
-                   
+                    readOnly
                   />
                 </div>
                 <div className="form-group">

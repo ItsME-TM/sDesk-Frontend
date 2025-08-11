@@ -26,7 +26,7 @@ function MainDashboard() {
           technicianId: user.id,
         })
       );
-    } else if (userType === "Admin" && user?.teamName) {
+    } else if (userType === "admin" && user?.teamName) {
       dispatch(
         fetchDashboardStatsRequest({
           userParentCategory,

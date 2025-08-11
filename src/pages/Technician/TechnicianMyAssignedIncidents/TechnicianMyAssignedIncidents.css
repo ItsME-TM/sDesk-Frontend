@@ -259,8 +259,7 @@
   }
   
 
-@media (max-width: 991.98px) {
-  .TechnicianMyAssignedIncidents-main-content {
+ .TechnicianMyAssignedIncidents-main-content {
     height: auto;
     min-height: 100vh;
     padding: 0 5px;

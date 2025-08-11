@@ -118,12 +118,19 @@ const AdminReportedMyIncidents = () => {
 
   const renderTableRows = () => {
     return currentRows.map((row, idx) => (
-      <tr
-        key={idx}
-        onClick={() => handleRowClick(row.refNo)}
-        style={{ cursor: "pointer" }}
-      >
-        <td className="AdminReportedMyIncidents-refno">{row.refNo}</td>
+      <tr key={idx}>
+        <td className="AdminReportedMyIncidents-refno">
+          <a
+            href="#"
+            onClick={e => {
+              e.preventDefault();
+              handleRowClick(row.refNo);
+            }}
+            style={{ color: '#222', textDecoration: 'none', cursor: 'pointer' }}
+          >
+            {row.refNo}
+          </a>
+        </td>
         <td>{row.category}</td>
         <td className="AdminReportedMyIncidents-status-text">{row.status}</td>
         <td>{row.priority}</td>
@@ -231,15 +238,11 @@ const AdminReportedMyIncidents = () => {
           >
             X
           </button>
-          <div className="AdminMyReportedUpdate-tickets-creator">
-            <span className="AdminMyReportedUpdate-svr-desk">Incidents</span>
-            <IoIosArrowForward />
-            <span className="AdminMyReportedUpdate-created-ticket">
-              Reported My Update
-            </span>
-          </div>
+           <br/>
+           <br/>
           <div className="AdminMyReportedUpdate-content2">
             <AffectedUserDetail formData={formData} />
+            <br/>
             <IncidentHistory
               refNo={incidentDetails.refNo}
               category={incidentDetails.category}
