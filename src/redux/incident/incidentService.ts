@@ -1,11 +1,11 @@
-import axios from "axios";
+import apiClient from "../../api/axiosInstance";
 import { Incident } from "./incidentTypes";
 import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 // Get all incidents
 export const fetchAllIncidents = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/incident/all-teams"), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, "/incident/all-teams"));
   } catch (error) {
     throw error;
   }
@@ -14,16 +14,25 @@ export const fetchAllIncidents = async () => {
 // Create incident
 export const createIncident = async (data: Partial<Incident>) => {
   try {
-    return await axios.post(buildUrl(API_BASE, "/incident/create-incident"), data, { withCredentials: true });
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/create-incident"),
+      data
+    );
   } catch (error) {
     throw error;
   }
 };
 
 // Update incident
-export const updateIncident = async (incident_number: string, data: Partial<Incident>) => {
+export const updateIncident = async (
+  incident_number: string,
+  data: Partial<Incident>
+) => {
   try {
-    return await axios.put(buildUrl(API_BASE, `/incident/${incident_number}`), data, { withCredentials: true });
+    return await apiClient.put(
+      buildUrl(API_BASE, `/incident/${incident_number}`),
+      data
+    );
   } catch (error) {
     throw error;
   }
@@ -32,7 +41,9 @@ export const updateIncident = async (incident_number: string, data: Partial<Inci
 // Get incident by number
 export const getIncidentByNumber = async (incident_number: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/incident/${incident_number}`), { withCredentials: true });
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/${incident_number}`)
+    );
   } catch (error) {
     throw error;
   }
@@ -41,7 +52,9 @@ export const getIncidentByNumber = async (incident_number: string) => {
 // Get incidents assigned to me
 export const getIncidentsAssignedToMe = async (serviceNum: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/incident/assigned-to-me/${serviceNum}`), { withCredentials: true });
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/assigned-to-me/${serviceNum}`)
+    );
   } catch (error) {
     throw error;
   }
@@ -50,7 +63,9 @@ export const getIncidentsAssignedToMe = async (serviceNum: string) => {
 // Get incidents assigned by me
 export const getIncidentsAssignedByMe = async (serviceNum: string) => {
   try {
-    const response = await axios.get(buildUrl(API_BASE, `/incident/assigned-by-me/${serviceNum}`), { withCredentials: true });
+    const response = await apiClient.get(
+      buildUrl(API_BASE, `/incident/assigned-by-me/${serviceNum}`)
+    );
     return response;
   } catch (error) {
     throw error;
@@ -60,7 +75,9 @@ export const getIncidentsAssignedByMe = async (serviceNum: string) => {
 // Get team incidents
 export const getTeamIncidents = async (teamLead: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/incident/team-incidents/${teamLead}`), { withCredentials: true });
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/team-incidents/${teamLead}`)
+    );
   } catch (error) {
     throw error;
   }
@@ -69,7 +86,9 @@ export const getTeamIncidents = async (teamLead: string) => {
 // Get team incidents by technician service number
 export const getTeamIncidentsByServiceNum = async (serviceNum: string) => {
   try {
-    const response = await axios.get(buildUrl(API_BASE, `/incident/team-incidents/${serviceNum}`), { withCredentials: true });
+    const response = await apiClient.get(
+      buildUrl(API_BASE, `/incident/team-incidents/${serviceNum}`)
+    );
     return response;
   } catch (error) {
     throw error;
@@ -79,7 +98,9 @@ export const getTeamIncidentsByServiceNum = async (serviceNum: string) => {
 // Get incident history
 export const getIncidentHistory = async (incident_number: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/incident/${incident_number}/history`), { withCredentials: true });
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/${incident_number}/history`)
+    );
   } catch (error) {
     throw error;
   }
@@ -88,7 +109,7 @@ export const getIncidentHistory = async (incident_number: string) => {
 // Get current technician data
 export const getCurrentTechnician = async (serviceNum: string) => {
   try {
-    return await axios.get(buildUrl(API_BASE, `/technician/${serviceNum}`), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, `/technician/${serviceNum}`));
   } catch (error) {
     throw error;
   }
@@ -96,7 +117,7 @@ export const getCurrentTechnician = async (serviceNum: string) => {
 // Fetch main categories
 export const fetchMainCategories = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, "/categories/main"));
   } catch (error) {
     throw error;
   }
@@ -105,7 +126,7 @@ export const fetchMainCategories = async () => {
 // Fetch category items
 export const fetchCategoryItems = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, "/categories/item"));
   } catch (error) {
     throw error;
   }
@@ -114,7 +135,7 @@ export const fetchCategoryItems = async () => {
 // Fetch all users
 export const fetchAllUsers = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, "/sltusers"));
   } catch (error) {
     throw error;
   }
@@ -123,7 +144,7 @@ export const fetchAllUsers = async () => {
 // Fetch all locations
 export const fetchAllLocations = async () => {
   try {
-    return await axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true });
+    return await apiClient.get(buildUrl(API_BASE, "/locations"));
   } catch (error) {
     throw error;
   }
@@ -132,10 +153,10 @@ export const fetchAllLocations = async () => {
 export const fetchDashboardStats = async (userParentCategory?: string) => {
   try {
     const params = userParentCategory ? { userParentCategory } : {};
-    return await axios.get(buildUrl(API_BASE, "/incident/dashboard-stats"), {
-      params,
-      withCredentials: true
-    });
+    return await apiClient.get(
+      buildUrl(API_BASE, "/incident/dashboard-stats"),
+      { params }
+    );
   } catch (error) {
     throw error;
   }
@@ -149,13 +170,13 @@ export const fetchAdminTeamData = async () => {
       mainCategoriesResponse,
       categoryItemsResponse,
       usersResponse,
-      locationsResponse
+      locationsResponse,
     ] = await Promise.all([
-      axios.get(buildUrl(API_BASE, "/incident/all-teams"), { withCredentials: true }),
-      axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true }),
-      axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true }),
-      axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true }),
-      axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true })
+      apiClient.get(buildUrl(API_BASE, "/incident/all-teams")),
+      apiClient.get(buildUrl(API_BASE, "/categories/main")),
+      apiClient.get(buildUrl(API_BASE, "/categories/item")),
+      apiClient.get(buildUrl(API_BASE, "/sltusers")),
+      apiClient.get(buildUrl(API_BASE, "/locations")),
     ]);
 
     return {
@@ -163,7 +184,7 @@ export const fetchAdminTeamData = async () => {
       mainCategories: mainCategoriesResponse.data,
       categoryItems: categoryItemsResponse.data,
       users: usersResponse.data,
-      locations: locationsResponse.data
+      locations: locationsResponse.data,
     };
   } catch (error) {
     throw error;
