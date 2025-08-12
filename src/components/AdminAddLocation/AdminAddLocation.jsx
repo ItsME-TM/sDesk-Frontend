@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import "./AdminAddLocation.css";
 import { IoIosClose } from "react-icons/io";
 import Select from "react-select";
+import { useSelector } from "react-redux";
 
 const regionOptions = [
   { value: "Metro", label: "Metro" },
@@ -29,6 +30,7 @@ const AdminAddLocation = ({
   isEdit = false,
   editLocation = null,
 }) => {
+  const { locations } = useSelector((state) => state.location);
   const [formData, setFormData] = useState({
     locationCode: "",
     locationName: "",
@@ -72,8 +74,15 @@ const AdminAddLocation = ({
     const newErrors = {};
 
     // Validate required fields
-    if (!formData.locationCode)
+    if (!formData.locationCode) {
       newErrors.locationCode = "Please Enter the Location code";
+    } else if (!isEdit && locations.some(loc => loc.locationCode === formData.locationCode)) {
+      newErrors.locationCode = "This location code is already in use. Please use a different code.";
+    } else if (isEdit && editLocation?.locationCode !== formData.locationCode && 
+               locations.some(loc => loc.locationCode === formData.locationCode)) {
+      newErrors.locationCode = "This location code is already in use. Please use a different code.";
+    }
+    
     if (!formData.locationName)
       newErrors.locationName = "Location Name is required";
     if (!formData.region) newErrors.region = "Region is required";
