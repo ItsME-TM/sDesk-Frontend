@@ -81,22 +81,41 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.edit-btn {
-  background-color: #ffc107;
-  color: #212529;
+
+/* Icon-only buttons for edit/delete */
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+  font-size: 1rem;
   margin-right: 0.5rem;
 }
 
-.edit-btn:hover {
+/* Reduce icon size inside button */
+.icon-btn i {
+  font-size: 1rem;
+}
+
+.icon-btn.edit {
+  background-color: #ffc107;
+  color: #212529;
+}
+.icon-btn.edit:hover {
   background-color: #e0a800;
 }
 
-.delete-btn {
+.icon-btn.delete {
   background-color: #dc3545;
   color: #fff;
 }
-
-.delete-btn:hover {
+.icon-btn.delete:hover {
   background-color: #c82333;
 }
 
