@@ -1,4 +1,4 @@
-import axios from 'axios';
+import apiClient from "../../api/axiosInstance";
 import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 export const lookupUserByServiceNum = async (serviceNum: string) => {
@@ -7,11 +7,14 @@ export const lookupUserByServiceNum = async (serviceNum: string) => {
       withCredentials: true,
       timeout: 15000, // 15 seconds timeout
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
     };
-    const response = await axios.get(buildUrl(API_BASE, `/sltusers/serviceNum/${serviceNum}`), config);
+    const response = await apiClient.get(
+      buildUrl(API_BASE, `/sltusers/serviceNum/${serviceNum}`),
+      config
+    );
     return response;
   } catch (error: any) {
     // Re-throw the error for saga to handle
