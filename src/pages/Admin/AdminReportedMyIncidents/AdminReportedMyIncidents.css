@@ -147,6 +147,11 @@
 .AdminReportedMyIncidents-table td {
     white-space: nowrap;
 }
+.AdminReportedMyIncidents-no-data{
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
 
 .AdminReportedMyIncidents-table td:nth-child(2),
 .AdminReportedMyIncidents-table td:nth-child(3),
