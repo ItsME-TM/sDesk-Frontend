@@ -25,6 +25,7 @@ const UpdateStatus = ({
   const [selectedLocation, setSelectedLocation] = useState({ name: incidentData.location || "", number: "" });
 
   const [fileName, setFileName] = useState("No file chosen");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [updatedBy, setUpdatedBy] = useState("");
   const [transferTo, setTransferTo] = useState("");
   const [description, setDescription] = useState("");
@@ -51,9 +52,10 @@ const UpdateStatus = ({
       description,
       priority,
       status,
+      selectedFile,
     };
     onStatusChange(data);
-  }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status]);
+  }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status, selectedFile]);
 
   useEffect(() => {
     if ((loggedInUser && loggedInUser.userName) || loggedInUser.name) {
@@ -159,7 +161,42 @@ const UpdateStatus = ({
 
           <Form.Group controlId="formFile" className="mb-3">
             <Form.Label>Attachment</Form.Label>
-            <Form.Control type="file" onChange={(e) => setFileName(e.target.files[0] ? e.target.files[0].name : "No file chosen")} />
+            <Form.Control 
+              type="file" 
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  // Validate file size (1MB = 1048576 bytes)
+                  if (file.size > 1048576) {
+                    alert('File size must be less than 1MB');
+                    e.target.value = '';
+                    setFileName("No file chosen");
+                    setSelectedFile(null);
+                    return;
+                  }
+                  
+                  // Validate file type
+                  const allowedTypes = ['application/pdf', 'image/png', 'image/jpg', 'image/jpeg'];
+                  if (!allowedTypes.includes(file.type)) {
+                    alert('Only PDF, PNG, JPG, and JPEG files are allowed');
+                    e.target.value = '';
+                    setFileName("No file chosen");
+                    setSelectedFile(null);
+                    return;
+                  }
+                  
+                  setFileName(file.name);
+                  setSelectedFile(file);
+                } else {
+                  setFileName("No file chosen");
+                  setSelectedFile(null);
+                }
+              }}
+            />
+            {fileName !== "No file chosen" && (
+              <small className="text-muted">Selected: {fileName}</small>
+            )}
           </Form.Group>
         </Form>
       </Card.Body>
@@ -178,4 +215,3 @@ const UpdateStatus = ({
 };
 
 export default UpdateStatus;
-

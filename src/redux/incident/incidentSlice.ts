@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { Incident, IncidentState } from "./incidentTypes";
+import { Incident, IncidentState, UploadedAttachment } from "./incidentTypes";
 
 const initialState: IncidentState = {
   incidents: [],
@@ -19,6 +19,7 @@ const initialState: IncidentState = {
   categoryItems: [],
   users: [],
   locations: [],
+  uploadedAttachment: null, // Add uploaded attachment state
   loading: false,
   error: null,
 };
@@ -107,6 +108,31 @@ const incidentSlice = createSlice({
       }
     },
     updateIncidentFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Update incident with attachment
+    updateIncidentWithAttachmentRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    updateIncidentWithAttachmentSuccess(state, action) {
+      state.loading = false;
+      const updatedIncident = action.payload;
+      state.incidents = state.incidents.map((incident) =>
+        incident.incident_number === updatedIncident.incident_number
+          ? updatedIncident
+          : incident
+      );
+      if (
+        state.currentIncident?.incident_number ===
+        updatedIncident.incident_number
+      ) {
+        state.currentIncident = updatedIncident;
+      }
+    },
+    updateIncidentWithAttachmentFailure(state, action) {
       state.loading = false;
       state.error = action.payload;
     }, // Get incident by number
@@ -316,6 +342,26 @@ const incidentSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+
+    // Upload attachment
+    uploadAttachmentRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    uploadAttachmentSuccess(state, action) {
+      state.loading = false;
+      // Store uploaded file info if needed
+      state.uploadedAttachment = action.payload;
+    },
+    uploadAttachmentFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    // Clear uploaded attachment
+    clearUploadedAttachment(state) {
+      state.uploadedAttachment = null;
+    },
   },
 });
 
@@ -335,6 +381,9 @@ export const {
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,
+  updateIncidentWithAttachmentRequest,
+  updateIncidentWithAttachmentSuccess,
+  updateIncidentWithAttachmentFailure,
   getIncidentByNumberRequest,
   getIncidentByNumberSuccess,
   getIncidentByNumberFailure,
@@ -376,6 +425,10 @@ export const {
   fetchAllLocationsRequest,
   fetchAllLocationsSuccess,
   fetchAllLocationsFailure,
+  uploadAttachmentRequest,
+  uploadAttachmentSuccess,
+  uploadAttachmentFailure,
+  clearUploadedAttachment,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage

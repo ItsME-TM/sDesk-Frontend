@@ -9,11 +9,12 @@ import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
   clearError,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.incident);
+  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -88,37 +89,8 @@ const UserAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) {
-        return;
-    }
-
-    const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/pdf',
-        'application/msword', // .doc
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-        'application/vnd.ms-excel', // .xls
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-        'application/vnd.ms-powerpoint', // .ppt
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-        'text/plain', // .txt
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
-        e.target.value = ""; // Clear the input
-        return;
-    }
-
-    if (file.size > 50 * 1024 * 1024) { // 50 MB limit
-        alert("File size exceeds 50MB. Please choose a smaller file.");
-        e.target.value = ""; // Clear the input
-        return;
-    }
     setSelectedFile(file);
   };
 
@@ -174,6 +146,8 @@ const UserAddIncident = () => {
       description: formData.description,
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
+      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
+      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
     dispatch(createIncidentRequest(incidentData));

@@ -144,6 +144,8 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
       )}
 
       <div className="content-area flex-grow-1 overflow-auto p-md-4 p-2">
+     <br/>
+     <br/>
         <div className="container-fluid">
           <div className="row g-4">
             <div className="col-12">

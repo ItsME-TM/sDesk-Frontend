@@ -10,6 +10,7 @@ import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedU
 import {
   getIncidentByNumberRequest,
   fetchIncidentHistoryRequest,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice";
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
@@ -226,34 +227,36 @@ const TechnicianInsident = ({
   // --- FIX: Track update request and fetch history only after update is successful ---
   const [pendingHistoryIncidentNo, setPendingHistoryIncidentNo] =
     useState(null);
-  const handleUpdateClick = () => {
+  const handleUpdateClick = async () => {
     const currentIncident = isPopup
       ? incidentData
       : incidentState.currentIncident;
     if (!currentIncident) return;
 
-    // Prepare data for update
-    const updatePayload = {
-      incident_number: currentIncident.incident_number,
-      data: {
-        category: updateStatusData.category || currentIncident.category,
-        location: updateStatusData.location || currentIncident.location,
-        priority: updateStatusData.priority || currentIncident.priority,
-        status: updateStatusData.status || currentIncident.status,
-        handler: updateStatusData.transferTo || currentIncident.handler,
-        description:
-          updateStatusData.description || currentIncident.description,
-        update_by: updateStatusData.updatedBy || currentIncident.update_by,
-        // Add this line to support auto-assign Tier2
-        automaticallyAssignForTier2:
-          updateStatusData.transferTo === "tier2-auto",
-      },
-    };
+    // Create FormData for multipart form submission
+    const formData = new FormData();
+    
+    // Add incident data
+    if (updateStatusData.category) formData.append('category', updateStatusData.category);
+    if (updateStatusData.location) formData.append('location', updateStatusData.location);
+    if (updateStatusData.priority) formData.append('priority', updateStatusData.priority);
+    if (updateStatusData.status) formData.append('status', updateStatusData.status);
+    if (updateStatusData.transferTo) formData.append('handler', updateStatusData.transferTo);
+    if (updateStatusData.description) formData.append('description', updateStatusData.description);
+    if (updateStatusData.updatedBy) formData.append('update_by', updateStatusData.updatedBy);
+    
+    // Add attachment if present
+    if (updateStatusData.selectedFile) {
+      formData.append('file', updateStatusData.selectedFile);
+    }
 
-    // Dispatch Redux action to update incident
+    // Dispatch Redux action to update incident with attachment
     dispatch({
-      type: "incident/updateIncidentRequest",
-      payload: updatePayload,
+      type: "incident/updateIncidentWithAttachmentRequest",
+      payload: {
+        incident_number: currentIncident.incident_number,
+        formData: formData,
+      },
     });
 
     // Track if the update was a transfer
@@ -403,6 +406,8 @@ const TechnicianInsident = ({
       comments: h.comments,
       category: getCategoryName(h.category),
       location: getLocationName(h.location),
+      attachment: h.attachment,
+      attachmentOriginalName: h.attachmentOriginalName,
     })) || [];
 
   // DEBUG PANEL: Show state at the top for troubleshooting
