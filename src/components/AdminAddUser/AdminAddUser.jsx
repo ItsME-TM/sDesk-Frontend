@@ -10,10 +10,8 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
   const showSubmitUserExists =
     addTechnicianError &&
     (
-      addTechnicianError.toLowerCase().includes('already exists') ||
-      addTechnicianError.toLowerCase().includes('conflict') ||
-      addTechnicianError.toLowerCase().includes('technician already') ||
-      addTechnicianError.toLowerCase().includes('409')
+      addTechnicianError.toLowerCase().includes('technician already') 
+      
     );
   const dispatch = useDispatch();
 
@@ -24,7 +22,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     name: '',
     email: '',
     contactNumber: '',
-    teamName: loggedInUser?.teamName || '', // take from logged user
+    teamName: loggedInUser?.teamName || '', 
     role: 'technician',
     tier: '1',
     active: true,
@@ -35,7 +33,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       loggedInUser?.cat3,
       loggedInUser?.cat4
 
-    ].filter(Boolean), // take from logged user
+    ].filter(Boolean), 
   });
 
   const [errors, setErrors] = useState({});
@@ -54,16 +52,21 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
 
   // Debounce service number input
-  useEffect(() => {
+ useEffect(() => {
+  // Only fetch if formData.id is non-empty and we're NOT in edit mode
+  if (!isEdit && formData.id && formData.id.trim()) {
     const handler = setTimeout(() => {
-      if (formData.id && formData.id.trim()) {
-        dispatch(fetchUserByServiceNumberRequest(formData.id.trim()));
-      } else {
-        dispatch(clearUser());
-      }
-    }, 400); // 400ms debounce
+      dispatch(fetchUserByServiceNumberRequest(formData.id.trim()));
+    }, 400);
     return () => clearTimeout(handler);
-  }, [formData.id, dispatch]);
+  } else {
+    // Clear SLT user only when not editing and id is empty
+    if (!isEdit) {
+      dispatch(clearUser());
+    }
+  }
+}, [formData.id, dispatch, isEdit]);
+
 
   // When SLT user is fetched
   useEffect(() => {
@@ -84,7 +87,6 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     }
   }, [sltUser]);
 
-  // If editing a user, populate only editable fields (teamName still comes from admin)
   useEffect(() => {
     if (isEdit && editUser) {
       setFormData(prev => ({
@@ -115,8 +117,11 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         categories: [],
       });
       setErrors({});
-    }
-  }, [isEdit, loggedInUser, onClose]);
+   dispatch(clearUser());  
+  }
+}, [isEdit, loggedInUser, dispatch]);
+
+  
 
   // Always set teamName from admin/cookie when adding or editing
   useEffect(() => {
@@ -138,13 +143,21 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
   const handleCategoryChange = e => {
     const value = e.target.value;
-    setFormData(prev => {
-      const selected = new Set(prev.categories);
-      if (selected.has(value)) selected.delete(value);
-      else if (selected.size < 4) selected.add(value);
-      return { ...prev, categories: Array.from(selected) };
-    });
-    if (errors.categories) {
+    const selected = new Set(formData.categories);
+  
+    if (selected.has(value)) {
+      selected.delete(value);
+    } else {
+      if (selected.size < 4) {
+        selected.add(value);
+      } else {
+        setErrors(prev => ({ ...prev, categories: 'Can assign only up to 4 categories' }));
+      }
+    }
+  
+    setFormData(prev => ({ ...prev, categories: Array.from(selected) }));
+  
+    if (errors.categories && selected.size > 0 && selected.size <= 4) {
       setErrors(prev => ({ ...prev, categories: undefined }));
     }
   };
@@ -161,7 +174,11 @@ const handleSubmit = e => {
   if (!emailToUse) newErrors.email = 'Email is required';
   if (!nameToUse) newErrors.name = 'Name is required';
   if (!formData.teamName) newErrors.teamName = 'Team is required';
-  if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
+  if (formData.categories.length === 0) {
+    newErrors.categories = 'Select at least one category';
+  } else if (formData.categories.length > 4) {
+    newErrors.categories = 'Can assign only up to 4 categories';
+  }
   setErrors(newErrors);
   if (Object.keys(newErrors).length > 0) return;
 
@@ -235,10 +252,10 @@ useEffect(() => {
                 />
                 {/* Show 'User Found' or 'User Not Found' message */}
                 {!isEdit && sltUser && !sltUserLoading && !sltUserError && (
-                  <span className="success-message" style={{ color: 'green', marginLeft: 8 }}>User Found</span>
+                  <span className="success-message message-margin">User Found</span>
                 )}
                 {!isEdit && showUserNotFound && (
-                  <span className="error-message" style={{ color: 'red', marginLeft: 8 }}>User Not Found</span>
+                  <span className="error-message message-margin">User Not Found</span>
                 )}
               </div>
               <div>
@@ -302,6 +319,7 @@ useEffect(() => {
             </div>
             <div className="form-right">
               <label>Categories :</label>
+              {errors.categories && <span className="error-message">{errors.categories}</span>}
               <div className="checkbox-list">
                 {filteredSubCategories.map(item => (
                   <label key={item.id} className="checkbox-item">
@@ -318,7 +336,7 @@ useEffect(() => {
               <div className="AdminAddUser-form-submit">
                 <button type="submit">{isEdit ? 'Save' : 'Add'}</button>
                 {showSubmitUserExists && (
-                  <span className="error-message" style={{ color: 'red', marginLeft: 8 }}>Technician already exists</span>
+                  <span className="error-message message-margin">Technician already exists</span>
                 )}
               </div>
             </div>
