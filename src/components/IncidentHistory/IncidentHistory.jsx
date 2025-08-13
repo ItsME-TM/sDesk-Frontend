@@ -126,6 +126,14 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                 <div className="me-2"><strong>Category:</strong> {getCategoryName(category)}</div>
                 <div className="me-2"><strong>Location:</strong> {getLocationName(location)}</div>
                 <div><strong>Priority:</strong> {priority}</div>
+                {attachment && (
+                    <div>
+                        <strong>Attachment:</strong>
+                        <a href={`data:application/octet-stream;base64,${attachment}`} download>
+                            Download Attachment
+                        </a>
+                    </div>
+                )}
             </Card.Footer>
         </Card>
     );

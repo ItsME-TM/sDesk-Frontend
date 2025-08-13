@@ -1,6 +1,7 @@
+/* eslint-disable no-undef */
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {  useNavigate, useParams } from "react-router-dom";
 import "./TechnicianInsident.css";
 import { IoIosArrowForward } from "react-icons/io";
 import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
@@ -14,7 +15,7 @@ import {
 import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice";
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
 import {
-  fetchUserByServiceNumberRequest,
+  
   fetchAllUsersRequest,
 } from "../../../redux/sltusers/sltusersSlice";
 
@@ -24,7 +25,6 @@ const TechnicianInsident = ({
   loggedInUser,
   affectedUserDetails,
 }) => {
-  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { refNo: paramsRefNo } = useParams();
@@ -46,10 +46,6 @@ const TechnicianInsident = ({
     email: "",
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   // Auto-fill Name, Designation, Email when Service No changes
   useEffect(() => {
@@ -131,7 +127,7 @@ const TechnicianInsident = ({
     if (!usersState.users || usersState.users.length === 0) {
       dispatch(fetchAllUsersRequest());
     }
-  }, [dispatch, usersState.allUsers]);
+  }, [dispatch, usersState.allUsers, usersState.users]);
 
   // Fetch incident and user details using Redux
   useEffect(() => {
@@ -164,7 +160,7 @@ const TechnicianInsident = ({
       dispatch(getIncidentByNumberRequest({ incident_number: currentRefNo }));
       dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
     }
-  }, [currentRefNo, dispatch]); // Remove incidentData and isPopup from deps to prevent loops
+  }, [affectedUserDetails?.designation, affectedUserDetails?.email, affectedUserDetails?.name, currentRefNo, dispatch, incidentData, isPopup]); // Remove incidentData and isPopup from deps to prevent loops
 
   // Update local state when Redux state changes
   useEffect(() => {
@@ -319,14 +315,7 @@ const TechnicianInsident = ({
         }
       }, 1500);
     }
-  }, [
-    incidentState,
-    isPopup,
-    incidentData,
-    incidentState.currentIncident,
-    dispatch,
-    pendingHistoryIncidentNo,
-  ]);
+  }, [incidentState, isPopup, incidentData, incidentState.currentIncident, dispatch, pendingHistoryIncidentNo, lastUpdateWasTransfer]);
 
   const handleBackClick = () => {
     navigate("/technician/TechnicianAssignedIncidents");
@@ -439,6 +428,66 @@ const TechnicianInsident = ({
               </div>
 
               <div className="col-12 section-gap">
+                {/* Display Incident Details here */}
+                <div className="incident-details-section">
+                  <h3>Incident Details</h3>
+                  <div className="incident-info">
+                    <div className="info-row">
+                      <span className="label">Incident Number:</span>
+                      <span className="value">{currentIncident.incident_number}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Reporter:</span>
+                      // eslint-disable-next-line no-undef
+                      <span className="value">{getUserName(currentIncident.informant)}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Assigned To:</span>
+                      // eslint-disable-next-line no-undef
+                      <span className="value">{getUserName(currentIncident.handler)}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Category:</span>
+                      <span className="value">{getCategoryName(currentIncident.category)}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Location:</span>
+                      <span className="value">{getLocationName(currentIncident.location)}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Priority:</span>
+                      <span className="value">{currentIncident.priority}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Status:</span>
+                      <span className="value">{currentIncident.status}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Description:</span>
+                      <span className="value">{currentIncident.description}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Attachment:</span>
+                      <span className="value">
+                        {currentIncident.Attachment ? (
+                          <a
+                            href={`data:application/octet-stream;base64,${currentIncident.Attachment}`}
+                            download
+                          >
+                            Download Attachment
+                          </a>
+                        ) : (
+                          "No attachment"
+                        )}
+                      </span>
+                    </div>
+                    <div className="info-row">
+                      <span className="label">Created At:</span>
+                      <span className="value">{new Date(currentIncident.created_at).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <br/>
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
