@@ -38,6 +38,26 @@ export const updateIncident = async (
   }
 };
 
+// Update incident with attachment
+export const updateIncidentWithAttachment = async (
+  incident_number: string,
+  formData: FormData
+) => {
+  try {
+    return await apiClient.put(
+      buildUrl(API_BASE, `/incident/${incident_number}/with-attachment`),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get incident by number
 export const getIncidentByNumber = async (incident_number: string) => {
   try {
@@ -145,6 +165,40 @@ export const fetchAllUsers = async () => {
 export const fetchAllLocations = async () => {
   try {
     return await apiClient.get(buildUrl(API_BASE, "/locations"));
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Upload attachment
+export const uploadAttachment = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('attachment', file);
+    
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/upload-attachment"),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Download attachment
+export const downloadAttachment = async (filename: string) => {
+  try {
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/download-attachment/${filename}`),
+      {
+        responseType: 'blob', // Important for file downloads
+      }
+    );
   } catch (error) {
     throw error;
   }

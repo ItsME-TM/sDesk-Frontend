@@ -3,6 +3,7 @@ import {
   fetchAllIncidents,
   createIncident,
   updateIncident,
+  updateIncidentWithAttachment,
   getIncidentByNumber,
   getIncidentsAssignedToMe,
   getIncidentsAssignedByMe,
@@ -16,6 +17,7 @@ import {
   fetchAllLocations,
   fetchAdminTeamData,
   fetchDashboardStats,
+  uploadAttachment,
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -30,6 +32,9 @@ import {
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,
+  updateIncidentWithAttachmentRequest,
+  updateIncidentWithAttachmentSuccess,
+  updateIncidentWithAttachmentFailure,
   getIncidentByNumberRequest,
   getIncidentByNumberSuccess,
   getIncidentByNumberFailure,
@@ -66,6 +71,9 @@ import {
   fetchAllLocationsRequest,
   fetchAllLocationsSuccess,
   fetchAllLocationsFailure,
+  uploadAttachmentRequest,
+  uploadAttachmentSuccess,
+  uploadAttachmentFailure,
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -110,6 +118,22 @@ function* handleUpdateIncident(action) {
       error.message ||
       "Unknown error occurred";
     yield put(updateIncidentFailure(errorMessage));
+  }
+}
+
+function* handleUpdateIncidentWithAttachment(action) {
+  try {
+    const { incident_number, formData } = action.payload;
+    const response = yield call(updateIncidentWithAttachment, incident_number, formData);
+    yield put(updateIncidentWithAttachmentSuccess(response.data));
+    // Optionally refetch all incidents
+    yield put(fetchAllIncidentsRequest());
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(updateIncidentWithAttachmentFailure(errorMessage));
   }
 }
 
@@ -273,6 +297,7 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
   yield takeLatest(createIncidentRequest.type, handleCreateIncident);
   yield takeLatest(updateIncidentRequest.type, handleUpdateIncident);
+  yield takeLatest(updateIncidentWithAttachmentRequest.type, handleUpdateIncidentWithAttachment);
   yield takeLatest(getIncidentByNumberRequest.type, handleGetIncidentByNumber);
   yield takeLatest(getAssignedToMeRequest.type, handleGetAssignedToMe);
   // Also listen for the alias action type to support both usages
@@ -288,4 +313,18 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
+  yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
+}
+
+function* handleUploadAttachment(action: any) {
+  try {
+    const response = yield call(uploadAttachment, action.payload);
+    yield put(uploadAttachmentSuccess(response.data));
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to upload attachment";
+    yield put(uploadAttachmentFailure(errorMessage));
+  }
 }

@@ -1,9 +1,10 @@
-
 import React from 'react';
-import { Card, Table, Badge } from 'react-bootstrap';
+import { Card, Table, Badge, Button } from 'react-bootstrap';
 import { CiLink } from "react-icons/ci";
+import { FaDownload } from "react-icons/fa";
 import { useSelector } from 'react-redux';
 import './IncidentHistory.css';
+import { downloadAttachment } from '../../redux/incident/incidentService';
 
 // Helper function to format date as 'YYYY-MM-DD HH:mm:ss'
 const formatDateTime = (dateString) => {
@@ -47,6 +48,26 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
         return <Badge bg={variant}>{status}</Badge>;
     };
 
+    const handleDownloadAttachment = async (filename, originalName) => {
+        try {
+            const response = await downloadAttachment(filename);
+            
+            // Create blob link for download
+            const blob = new Blob([response.data], { type: response.headers['content-type'] });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = originalName || filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            alert('Failed to download attachment. Please try again.');
+            console.error('Download error:', error);
+        }
+    };
+
     return (
         <Card className="incident-history-card-modern shadow-sm">
             <Card.Header as="h5" className="bg-light text-dark d-flex justify-content-between align-items-center">
@@ -62,6 +83,7 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                 <th>Updated On</th>
                                 <th>Status</th>
                                 <th className="comments-column">Comments</th>
+                                <th>Attachment</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -73,11 +95,26 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                         <td>{formatDateTime(entry.updatedOn)}</td>
                                         <td>{getStatusBadge(entry.status)}</td>
                                         <td className="comments-column">{entry.comments}</td>
+                                        <td>
+                                            {entry.attachment && entry.attachment.trim() !== '' ? (
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => handleDownloadAttachment(entry.attachment, entry.attachmentOriginalName)}
+                                                    className="d-flex align-items-center"
+                                                >
+                                                    <FaDownload className="me-1" />
+                                                    {entry.attachmentOriginalName || entry.attachment}
+                                                </Button>
+                                            ) : (
+                                                <span className="text-muted">No attachment</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5" className="text-center text-muted py-4">No history available</td>
+                                    <td colSpan="6" className="text-center text-muted py-4">No history available</td>
                                 </tr>
                             )}
                         </tbody>

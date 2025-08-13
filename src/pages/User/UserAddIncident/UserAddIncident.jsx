@@ -9,11 +9,12 @@ import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
   clearError,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.incident);
+  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -88,9 +89,36 @@ const UserAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setSelectedFile(file);
+    
+    if (!file) return;
+
+    // File type validation
+    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
+      e.target.value = '';
+      return;
+    }
+
+    // File size validation (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      alert('File size must be less than 1MB.');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      // Upload file immediately
+      dispatch(uploadAttachmentRequest(file));
+      setSelectedFile(file);
+    } catch (error) {
+      alert('Failed to upload file. Please try again.');
+      e.target.value = '';
+    }
   };
 
   const handleRemoveFile = () => {
@@ -145,6 +173,8 @@ const UserAddIncident = () => {
       description: formData.description,
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
+      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
+      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
     dispatch(createIncidentRequest(incidentData));
