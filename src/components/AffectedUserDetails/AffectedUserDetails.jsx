@@ -42,6 +42,14 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
         } else {
             // Clear previous lookup results if service number is too short
             dispatch(clearLookupUser());
+            // Clear user-related fields
+            setFormData(prevData => ({
+                ...prevData,
+                name: '',
+                email: '',
+                designation: '',
+                tpNumber: '',
+            }));
         }
     };
 
@@ -57,6 +65,13 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
             }));
         }
     }, [user, setFormData]);
+
+    // Clear lookup user data on component unmount
+    useEffect(() => {
+        return () => {
+            dispatch(clearLookupUser());
+        };
+    }, [dispatch]);
 
     return (
         <div className="AddInicident-content2-UserDetails">
@@ -78,40 +93,15 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
                             onChange={handleServiceNoChange}
                             required
                         />
-                        {loading && (
-                            <div className="lookup-status loading">
-                                🔍 Looking up user...
-                            </div>
-                        )}
-                        {error && (
-                            <div className="lookup-status error">
-                                {error.includes('User not found') ? (
-                                    <>
-                                        👤 {error}
-                                        <div style={{ fontSize: '12px', marginTop: '4px', color: '#666' }}>
-                                            Please check the service number and try again
-                                        </div>
-                                    </>
-                                ) : error.includes('Cannot connect to server') ? (
-                                    <>
-                                        🌐 {error}
-                                        <div style={{ fontSize: '12px', marginTop: '4px' }}>
-                                            Please ensure the backend server is running on port 8000
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>❌ {error}</>
-                                )}
-                            </div>
-                        )}
-                        {user && (
+                        {user ? (
                             <div className="lookup-status success">
-                                ✅ User found: {user.display_name || user.name || 'Unknown'}
-                                <div style={{ fontSize: '12px', marginTop: '4px', color: '#666' }}>
-                                    Service No: {user.serviceNum} | Role: {user.role}
-                                </div>
+                                ✅ User Found
                             </div>
-                        )}
+                        ) : (!loading && !user && error && error.includes('User not found') && formData.serviceNo && formData.serviceNo.trim().length >= 3) ? (
+                            <div className="lookup-status error">
+                                ❌ User Not Found
+                            </div>
+                        ) : null}
                     </div>
                 </div>
                 <div className="AddInicident-content2-UserDetails-UserInfo-Cube2">

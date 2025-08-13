@@ -25,7 +25,6 @@ const UserLayout = () => {
 
     useEffect(() => {
         if (user && role !== 'user') {
-            console.log('Unauthorized access attempt by user:', user);
             dispatch(logoutRequest()); 
             navigate('/login', { replace: true }); 
         }

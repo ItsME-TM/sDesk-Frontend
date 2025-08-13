@@ -132,9 +132,9 @@ export const fetchAllLocations = async () => {
 export const fetchDashboardStats = async (userParentCategory?: string) => {
   try {
     const params = userParentCategory ? { userParentCategory } : {};
-    return await axios.get(`${API_BASE}/incident/dashboard-stats`, { 
+    return await axios.get(buildUrl(API_BASE, "/incident/dashboard-stats"), {
       params,
-      withCredentials: true 
+      withCredentials: true
     });
   } catch (error) {
     throw error;

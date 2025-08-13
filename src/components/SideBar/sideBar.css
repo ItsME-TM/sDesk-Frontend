@@ -170,41 +170,26 @@
 /* Tablet devices */
 @media (min-width: 769px) and (max-width: 1024px) {
   .SideBar-sidebar-container {
-    position: fixed;
+    position: relative;
     top: 0;
-    left: -350px; /* Hidden off-screen by default */
+    left: 0; /* Always visible on tablet */
     width: 350px;
     max-width: 350px;
     height: 100vh;
     background-color: #131212;
-    transition: left 0.3s ease; /* Smooth slide animation */
     z-index: 1000;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
-    touch-action: none;
-    overscroll-behavior: contain;
     overflow-x: hidden; /* Prevent horizontal scrolling */
     display: flex; /* Ensure the container is displayed */
     flex-direction: column;
   }
 
   .SideBar-sidebar-container.open {
-    left: 0; /* Slide in when open */
+    left: 0; /* Always visible */
     overflow-x: hidden;
-    overscroll-behavior: contain;
-    touch-action: none;
   }
 
   .SideBar-close-btn {
-    display: block;
-    background: none;
-    border: none;
-    color: #fff;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    z-index: 1100;
-    cursor: pointer;
-    font-size: 20px;
+    display: none; /* Hide close button on tablet */
   }
 
   .SideBar-sdeskTitle {
@@ -250,12 +235,17 @@
 /* Specific handling for medium tablets around 912px width */
 @media (min-width: 900px) and (max-width: 950px) {
   .SideBar-sidebar-container {
+    position: relative;
     width: 300px;
-    left: -300px;
+    left: 0; /* Always visible */
   }
 
   .SideBar-sidebar-container.open {
     left: 0;
+  }
+
+  .SideBar-close-btn {
+    display: none; /* Hide close button */
   }
 
   .SideBar-sdeskTitle {

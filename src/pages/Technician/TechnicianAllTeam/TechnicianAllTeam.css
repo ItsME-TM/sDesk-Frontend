@@ -45,25 +45,35 @@
 .TechnicianAllTeam-TitleBar-buttons-ExportData {
     display: flex;
     align-items: center;
-    border-radius: 5px;
-    border: 2px solid #ffffff;
-    gap: 5px;
-    font-weight: 600;
-    background-color: #b10e0e;
-    color: aliceblue;
-    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    gap: 7px;
+    font-weight: 700;
+    background-color: #d32f2f;
+    color: #fff;
+    padding: 10px 22px;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(211,47,47,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
     cursor: pointer;
+}
+.TechnicianAllTeam-TitleBar-buttons-ExportData:hover,
+.TechnicianAllTeam-TitleBar-buttons-ExportData:focus {
+    background-color: #b71c1c;
+    box-shadow: 0 4px 16px rgba(211,47,47,0.15);
+    outline: none;
 }
 
 .TechnicianAllTeam-showSearchBar {
     display: flex;
     flex-direction: row;
-    height: 40px;
-    max-height: 40px;
+    flex-wrap: wrap;
     align-items: center;
     width: 100%;
     background-color: rgb(255, 255, 255);
     justify-content: space-between;
+    min-height: 40px;
+    row-gap: 8px;
 }
 
 .TechnicianAllTeam-showSearchBar-Show {
@@ -104,19 +114,83 @@
     align-items: center;
     gap: 10px;
     margin: 0px 20px 0px 0px;
+  
+    border-radius: 6px;
+    padding: 4px 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    width: auto;
+    flex-shrink: 0;
 }
 
 .TechnicianAllTeam-showSearchBar-SearchBar-input {
     display: flex;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
+    padding: 10px 14px;
+    border: 1.5px solid #bdbdbd;
     width: 210px;
-    font-size: 13px;
-    height: 25px;
-    border-radius: 5px;
+    font-size: 15px;
+    height: 36px;
+    border-radius: 6px;
     min-width: 150px;
-    /* Touch-friendly minimum target size */
-    min-height: 32px;
+    min-height: 36px;
+ 
+    transition: border 0.2s;
+}
+.TechnicianAllTeam-showSearchBar-SearchBar-input:focus {
+    border: 1.5px solid #1976d2;
+    outline: none;
+}
+/* Responsive: Make Export and Search bar/buttons more touch-friendly and visually clear on mobile */
+@media (max-width: 768px) {
+    .TechnicianAllTeam-TitleBar-buttons-ExportData {
+        padding: 10px 10px;
+        font-size: 13px;
+        min-width: 120px;
+    }
+    .TechnicianAllTeam-showSearchBar {
+        flex-direction: column;
+        align-items: stretch;
+        row-gap: 10px;
+    }
+    .TechnicianAllTeam-showSearchBar-SearchBar {
+        padding: 6px 6px;
+        gap: 8px;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    .TechnicianAllTeam-showSearchBar-SearchBar-input {
+        font-size: 13px;
+        padding: 8px 10px;
+        min-width: 100px;
+        width: 100%;
+        height: 32px;
+    }
+}
+@media (max-width: 480px) {
+    .TechnicianAllTeam-TitleBar-buttons-ExportData {
+        padding: 8px 6px;
+        font-size: 12px;
+        min-width: 90px;
+    }
+    .TechnicianAllTeam-showSearchBar {
+        flex-direction: column;
+        align-items: stretch;
+        row-gap: 8px;
+    }
+    .TechnicianAllTeam-showSearchBar-SearchBar {
+        padding: 4px 2px;
+        gap: 6px;
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    .TechnicianAllTeam-showSearchBar-SearchBar-input {
+        font-size: 12px;
+        padding: 6px 6px;
+        min-width: 60px;
+        width: 100%;
+        height: 28px;
+    }
 }
 
 .TechnicianAllTeam-table {
@@ -199,8 +273,12 @@
 
 .TechnicianAllTeam-table tbody tr:hover {
     background-color: #e8f4f8;
-}
-
+/* --- Layout for popup content (default) --- */
+.TechnicianMyReportedUpdate-content2 {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}  }
 .TechnicianAllTeam-table tbody tr:active {
     background-color: #d1ecf1;
 }
@@ -274,283 +352,3 @@
     font-weight: bold;
     margin-right: 10px; 
   }
-
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.popup-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 900px;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-.popup-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-/* Tablet styles (768px - 1024px) */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .TechnicianAllTeam-TitleBar-NameAndIcon {
-        font-size: 18px;
-        margin: 10px 0px 10px 15px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show {
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 0px 0px 0px 15px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show-select {
-        width: 75px;
-        margin-right: 10px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show-select2 {
-        width: 95px;
-        margin-right: 10px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-SearchBar-input {
-        width: 180px;
-    }
-
-    .TechnicianAllTeam-table {
-        padding: 10px 15px 0px 15px;
-    }
-
-    .TechnicianAllTeam-content3 {
-        padding: 20px 25px 12px 15px;
-    }
-}
-
-/* Mobile and small tablet styles (768px and below) */
-@media (max-width: 768px) {
-    .TechnicianAllTeam-showSearchBar {
-        flex-direction: column;
-        height: auto;
-        padding: 15px 10px;
-        gap: 15px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin: 0;
-        width: 100%;
-        justify-content: flex-start;
-        align-items: center;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show-select,
-    .TechnicianAllTeam-showSearchBar-Show-select2 {
-        width: auto;
-        min-width: 80px;
-        margin-right: 10px;
-        flex: 0 0 auto;
-    }
-
-    .TechnicianAllTeam-showSearchBar-SearchBar {
-        width: 100%;
-        margin: 0;
-        justify-content: center;
-    }
-
-    .TechnicianAllTeam-showSearchBar-SearchBar-input {
-        width: 100%;
-        max-width: 300px;
-        min-width: 200px;
-    }
-
-    .TechnicianAllTeam-table {
-        padding: 5px;
-    }
-
-    .TechnicianAllTeam-table-wrapper {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .TechnicianAllTeam-table table {
-        min-width: 650px;
-    }
-
-    .TechnicianAllTeam-content3 {
-        flex-direction: column;
-        height: auto;
-        padding: 15px 10px;
-        gap: 10px;
-    }
-
-    .TechnicianAllTeam-content3-team-pagination-buttons {
-        margin-top: 0;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .TechnicianAllTeam-content3-team-pagination-buttons button {
-        min-width: 35px;
-        padding: 4px 10px;
-    }
-}
-
-/* Small mobile styles (480px and below) */
-@media (max-width: 480px) {
-    .TechnicianAllTeam-TitleBar {
-        flex-direction: column;
-        height: auto;
-        padding: 15px 10px;
-        gap: 10px;
-    }
-
-    .TechnicianAllTeam-TitleBar-NameAndIcon {
-        margin: 0;
-        justify-content: center;
-        font-size: 16px;
-        text-align: center;
-    }
-
-    .TechnicianAllTeam-table
-    {
-    margin-top: 60px;
-        }
-    .TechnicianAllTeam-TitleBar-buttons {
-        margin: 0;
-        justify-content: center;
-    }
-
-    .TechnicianAllTeam-TitleBar-buttons-ExportData {
-        padding: 8px 12px;
-        font-size: 12px;
-    }
-
-    .TechnicianAllTeam-showSearchBar {
-        padding: 10px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show {
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show-select,
-    .TechnicianAllTeam-showSearchBar-Show-select2 {
-        width: auto;
-        margin-right: 0;
-        margin-bottom: 0;
-        min-height: 40px;
-        font-size: 14px;
-        flex: 1 1 0;
-    }
-
-    .TechnicianAllTeam-showSearchBar-Show > span {
-        white-space: nowrap;
-        font-size: 13px;
-    }
-
-    .TechnicianAllTeam-showSearchBar-SearchBar-input {
-        min-width: unset;
-        min-height: 40px;
-        font-size: 14px;
-    }
-
-    .TechnicianAllTeam-table th,
-    .TechnicianAllTeam-table td {
-        font-size: 10px;
-        padding: 6px 4px;
-        min-height: 36px;
-    }
-
-    .TechnicianAllTeam-table table {
-        min-width: 600px;
-    }
-
-    .TechnicianAllTeam-table-wrapper {
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .TechnicianAllTeam-content3 {
-        padding: 10px;
-        font-size: 11px;
-    }
-
-    .TechnicianAllTeam-content3-team-pagination-buttons button {
-        min-width: 30px;
-        padding: 3px 6px;
-        font-size: 11px;
-    }
-
-    .TechnicianAllTeam-tickets-creator {
-        padding: 8px;
-        font-size: 12px;
-    }
-}
-
-.TechnicianMyReportedUpdate-content2 {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-}
-
-/* Tablet popup styles */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .popup-content {
-        width: 90%;
-        max-width: 800px;
-        padding: 20px;
-    }
-}
-
-/* Mobile popup styles */
-@media (max-width: 768px) {
-    .TechnicianMyReportedUpdate-content2 {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    /* Remove popup-content height for tablet/mobile, only set for mobile below */
-}
-
-@media (max-width: 480px) {
-    .popup-content {
-        width: 90%;
-        max-height: 65vh !important;
-        padding: 6px;
-        margin-top: -200px;
-    }
-
-    .popup-close {
-        top: 5px;
-        right: 5px;
-        font-size: 20px;
-    }
-
-    .TechnicianMyReportedUpdate-content2 {
-        gap: 10px;
-    }
-}
