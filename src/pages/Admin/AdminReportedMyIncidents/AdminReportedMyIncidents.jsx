@@ -354,7 +354,17 @@ const AdminReportedMyIncidents = () => {
                 <th>Priority</th>
               </tr>
             </thead>
-            <tbody>{renderTableRows()}</tbody>
+            <tbody>
+              {filteredData.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="AdminReportedMyIncidents-no-data">
+                    No incidents found matching the criteria.
+                  </td>
+                </tr>
+              ) : (
+                renderTableRows()
+              )}
+              </tbody>
           </table>
         </div>
         <div className="AdminReportedMyIncidents-content3">

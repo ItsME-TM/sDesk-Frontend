@@ -1,22 +1,10 @@
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-
-// Create a custom axios instance with CORS configuration
-const axiosInstance = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
+import apiClient from "../../api/axiosInstance";
 
 export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
   const url = `/auth/login`;
 
   try {
-    const response = await axiosInstance.post(url, {
+    const response = await apiClient.post(url, {
       code,
       state,
       redirect_uri,
@@ -31,7 +19,7 @@ export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
 
 export const logout = async () => {
   try {
-    return await axiosInstance.post(`/auth/logout`, {});
+    return await apiClient.post(`/auth/logout`, {});
   } catch (error) {
     throw error;
   }
@@ -39,7 +27,7 @@ export const logout = async () => {
 
 export const fetchLoggedUser = async () => {
   try {
-    return await axiosInstance.get(`/auth/logged-user`);
+    return await apiClient.get(`/auth/logged-user`);
   } catch (error) {
     throw error;
   }
@@ -47,7 +35,7 @@ export const fetchLoggedUser = async () => {
 
 export const refreshToken = async () => {
   try {
-    return await axiosInstance.post(`/auth/refresh-token`, {});
+    return await apiClient.post(`/auth/refresh-token`, {});
   } catch (error) {
     throw error;
   }

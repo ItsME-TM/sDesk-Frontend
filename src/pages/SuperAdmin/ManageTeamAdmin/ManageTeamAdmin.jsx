@@ -106,18 +106,6 @@ const ManageTeamAdmin = () => {
       const response = await fetchUserByServiceNum(value);
       const user = response.data;
       if (user) {
-        // Check if user is already an admin in slt_users table
-        if (user.role && user.role.toLowerCase() === "admin") {
-          setForm((prev) => ({
-            ...prev,
-            userName: "",
-            designation: "admin",
-            email: "",
-            contactNumber: "",
-          }));
-          setSubmitError("This user cannot be added because he is already an admin.");
-          return;
-        }
         setForm((prev) => ({
           ...prev,
           userName: user.display_name || "",
@@ -134,7 +122,7 @@ const ManageTeamAdmin = () => {
           email: "",
           contactNumber: "",
         }));
-        setSubmitError("Invalid service number.");
+        setSubmitError("User not found in database.");
       }
     } catch (error) {
       setForm((prev) => ({
@@ -144,7 +132,7 @@ const ManageTeamAdmin = () => {
         email: "",
         contactNumber: "",
       }));
-      setSubmitError("Invalid service number.");
+      setSubmitError("User not found in database.");
     }
   };
 
@@ -411,18 +399,18 @@ const ManageTeamAdmin = () => {
                 <td>{admin.teamName}</td>
                 <td>
                   <button
-                    className="edit-btn"
+                    className="icon-btn edit"
                     title="Edit this admin"
                     onClick={() => handleEditClick(admin)}
                   >
-                    Edit
+                    <i className="fas fa-pen"></i>
                   </button>
                   <button
-                    className="delete-btn"
+                    className="icon-btn delete"
                     title="Delete this admin"
                     onClick={() => handleDeleteClick(admin)}
                   >
-                    Delete
+                    <i className="fas fa-trash"></i>
                   </button>
                 </td>
               </tr>
@@ -463,7 +451,8 @@ const ManageTeamAdmin = () => {
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
-                    readOnly
+                    onChange={handleChange}
+                   
                   />
                 </div>
                 <div className="form-group">
