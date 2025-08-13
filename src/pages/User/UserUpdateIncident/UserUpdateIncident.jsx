@@ -110,7 +110,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         comments: currentIncident.description || 'No comments'
       });
     }
-  }, [currentIncident, allUsers]);
+  }, [currentIncident, allUsers, getUserName]);
 
   const handleBackClick = () => {
     navigate('/user/UserViewIncident');
@@ -150,6 +150,64 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
               <AffectedUserDetail formData={formData} />
             </div>
             <div className="col-12">
+              {/* Display Incident Details here */}
+              <div className="incident-details-section">
+                <h3>Incident Details</h3>
+                <div className="incident-info">
+                  <div className="info-row">
+                    <span className="label">Incident Number:</span>
+                    <span className="value">{incidentDetails.refNo}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Category:</span>
+                    <span className="value">{incidentDetails.category}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Location:</span>
+                    <span className="value">{incidentDetails.location}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Priority:</span>
+                    <span className="value">{incidentDetails.priority}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Status:</span>
+                    <span className="value">{incidentDetails.status}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Assigned To:</span>
+                    <span className="value">{incidentDetails.assignedTo}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Updated By:</span>
+                    <span className="value">{incidentDetails.updateBy}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Updated On:</span>
+                    <span className="value">{incidentDetails.updatedOn}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Comments:</span>
+                    <span className="value">{incidentDetails.comments}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="label">Attachment:</span>
+                    <span className="value">
+                      {incidentData.Attachment ? (
+                        <a
+                          href={`data:application/octet-stream;base64,${incidentData.Attachment}`}
+                          download
+                        >
+                          Download Attachment
+                        </a>
+                      ) : (
+                        "No attachment"
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <br/>
               <IncidentHistory
                 refNo={incidentDetails.refNo}
                 category={incidentDetails.category}
