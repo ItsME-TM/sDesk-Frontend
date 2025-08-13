@@ -98,10 +98,11 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                         <td>
                                             {entry.attachment && entry.attachment.trim() !== '' ? (
                                                 <Button
-                                                    variant="outline-primary"
+                                                    variant="primary"
                                                     size="sm"
                                                     onClick={() => handleDownloadAttachment(entry.attachment, entry.attachmentOriginalName)}
                                                     className="d-flex align-items-center"
+                                                    style={{ backgroundColor: '#007bff', color: '#fff', border: 'none' }}
                                                 >
                                                     <FaDownload className="me-1" />
                                                     {entry.attachmentOriginalName || entry.attachment}
