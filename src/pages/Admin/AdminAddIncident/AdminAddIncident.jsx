@@ -97,7 +97,6 @@ const AdminAddIncident = () => {
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
-<<<<<<< HEAD
     
     if (!file) return;
 
@@ -126,38 +125,6 @@ const AdminAddIncident = () => {
       alert('Failed to upload file. Please try again.');
       e.target.value = '';
     }
-=======
-    if (!file) {
-        return;
-    }
-
-    const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/pdf',
-        'application/msword', // .doc
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-        'application/vnd.ms-excel', // .xls
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-        'application/vnd.ms-powerpoint', // .ppt
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-        'text/plain', // .txt
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
-        e.target.value = ""; // Clear the input
-        return;
-    }
-
-    if (file.size > 50 * 1024 * 1024) { // 50 MB limit
-        alert("File size exceeds 50MB. Please choose a smaller file.");
-        e.target.value = ""; // Clear the input
-        return;
-    }
-    setSelectedFile(file);
->>>>>>> main
   };
 
   const handleRemoveFile = () => {
