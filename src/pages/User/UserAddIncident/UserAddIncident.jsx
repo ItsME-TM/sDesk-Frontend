@@ -9,11 +9,12 @@ import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
   clearError,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.incident);
+  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -88,7 +89,7 @@ const UserAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
   };
@@ -145,6 +146,8 @@ const UserAddIncident = () => {
       description: formData.description,
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
+      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
+      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
     dispatch(createIncidentRequest(incidentData));

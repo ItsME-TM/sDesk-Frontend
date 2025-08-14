@@ -42,6 +42,16 @@ export interface IncidentHistory {
   comments: string;
   category?: string;
   location?: string;
+  attachment?: string; // Server filename
+  attachmentOriginalName?: string; // Original filename for display
+}
+
+export interface UploadedAttachment {
+  success: boolean;
+  filename: string;
+  originalName: string;
+  size: number;
+  path: string;
 }
 
 export interface DashboardStats {
@@ -71,6 +81,7 @@ export interface IncidentState {
   categoryItems: any[];
   users: any[];
   locations: any[];
+  uploadedAttachment: UploadedAttachment | null; // Add uploaded attachment state
   loading: boolean;
   error: string | null;
 }

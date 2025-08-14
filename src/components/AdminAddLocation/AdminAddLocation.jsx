@@ -3,24 +3,27 @@ import React, { useState, useEffect } from "react";
 import "./AdminAddLocation.css";
 import { IoIosClose } from "react-icons/io";
 import Select from "react-select";
+import { useSelector } from "react-redux";
 
 const regionOptions = [
-  { value: "METRO", label: "Metro" },
+  { value: "Metro", label: "Metro" },
   { value: "R1", label: "R1" },
   { value: "R2", label: "R2" },
   { value: "R3", label: "R3" },
 ];
 
 const provinceOptions = [
-  { value: "Northern", label: "Northern Province" },
-  { value: "North Central", label: "North Central Province" },
-  { value: "North Western", label: "North Western Province" },
-  { value: "Central", label: "Central Province" },
-  { value: "Eastern", label: "Eastern Province" },
-  { value: "Western", label: "Western Province" },
-  { value: "Sabaragamuwa", label: "Sabaragamuwa Province" },
-  { value: "Uva", label: "Uva Province" },
-  { value: "Southern", label: "Southern Province" },
+  { value: "Metro1", label: "Metro1" },
+  { value: "Metro2", label: "Metro2" },
+  { value: "Western Province South", label: "Western Province South" },
+  { value: "Western province North", label: "Western province North" },
+  { value: "Central Province", label: "Central Province" },
+  { value: "Southern Province", label: "Southern Province" },
+  { value: "Eastern Province", label: "Eastern Province" },
+  { value: "Northern Province", label: "Northern Province" },
+  { value: "Uva Province", label: "Uva Province" },
+  { value: "Sabaragamuwa Province", label: "Sabaragamuwa Province" },
+  { value: "North Western", label: "North Western" },
 ];
 
 const AdminAddLocation = ({
@@ -29,6 +32,7 @@ const AdminAddLocation = ({
   isEdit = false,
   editLocation = null,
 }) => {
+  const { locations } = useSelector((state) => state.location);
   const [formData, setFormData] = useState({
     locationCode: "",
     locationName: "",
@@ -47,44 +51,13 @@ const AdminAddLocation = ({
       });
     }
   }, [isEdit, editLocation]);
-  // Location Code validation function
-  const validateLocationCode = (code) => {
-    // Check if code matches LOC_XXX pattern where XXX is 3 digits starting from 001
-    const locationCodePattern = /^LOC_\d{3}$/;
-
-    if (!code) {
-      return "Location Code is required";
-    }
-
-    if (!locationCodePattern.test(code)) {
-      return "Location Code must be in format LOC_XXX (e.g., LOC_001, LOC_002)";
-    }
-
-    // Extract the number part and validate it's >= 001
-    const numberPart = parseInt(code.substring(4));
-    if (numberPart < 1) {
-      return "Location Code number must start from LOC_001 or higher";
-    }
-
-    return null; // No error
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Real-time validation for Location Code
-    if (name === "locationCode") {
-      const codeError = validateLocationCode(value);
-      if (codeError) {
-        setErrors((prev) => ({ ...prev, locationCode: codeError }));
-      } else {
-        setErrors((prev) => ({ ...prev, locationCode: undefined }));
-      }
-    } else {
-      // Clear other field errors when user types
-      if (value && errors[name])
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
+    // Clear field errors when user types
+    if (value && errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
   const handleRegionChange = (selectedOption) => {
@@ -102,13 +75,16 @@ const AdminAddLocation = ({
     e.preventDefault();
     const newErrors = {};
 
-    // Validate Location Code with custom validation
-    const locationCodeError = validateLocationCode(formData.locationCode);
-    if (locationCodeError) {
-      newErrors.locationCode = locationCodeError;
+    // Validate required fields
+    if (!formData.locationCode) {
+      newErrors.locationCode = "Please Enter the Location code";
+    } else if (!isEdit && locations.some(loc => loc.locationCode === formData.locationCode)) {
+      newErrors.locationCode = "This location code is already in use. Please use a different code.";
+    } else if (isEdit && editLocation?.locationCode !== formData.locationCode && 
+               locations.some(loc => loc.locationCode === formData.locationCode)) {
+      newErrors.locationCode = "This location code is already in use. Please use a different code.";
     }
-
-    // Validate other fields
+    
     if (!formData.locationName)
       newErrors.locationName = "Location Name is required";
     if (!formData.region) newErrors.region = "Region is required";
@@ -131,7 +107,7 @@ const AdminAddLocation = ({
         <form onSubmit={handleSubmit} className="AdminAddLocation-form">
           <div className="AdminAddLocation-grid">
             {" "}
-            <div className="AdminAddLocation-field">
+            {/* <div className="AdminAddLocation-field">
               <label>Location Code:</label>
               {errors.locationCode && (
                 <span className="AdminAddLocation-form-error-text">
@@ -149,9 +125,9 @@ const AdminAddLocation = ({
                 }}
               />
               <small className="AdminAddLocation-helper-text">
-                Format: LOC_XXX (e.g., LOC_001, LOC_002, LOC_010)
+                Enter Location Code
               </small>
-            </div>
+            </div> */}
             <div className="AdminAddLocation-field">
               <label>Location Name:</label>
               {errors.locationName && (
