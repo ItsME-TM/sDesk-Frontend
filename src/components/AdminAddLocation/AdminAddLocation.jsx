@@ -13,15 +13,17 @@ const regionOptions = [
 ];
 
 const provinceOptions = [
-  { value: "Northern", label: "Northern Province" },
-  { value: "North Central", label: "North Central Province" },
-  { value: "North Western", label: "North Western Province" },
-  { value: "Central", label: "Central Province" },
-  { value: "Eastern", label: "Eastern Province" },
-  { value: "Western", label: "Western Province" },
-  { value: "Sabaragamuwa", label: "Sabaragamuwa Province" },
-  { value: "Uva", label: "Uva Province" },
-  { value: "Southern", label: "Southern Province" },
+  { value: "Metro1", label: "Metro1" },
+  { value: "Metro2", label: "Metro2" },
+  { value: "Western Province South", label: "Western Province South" },
+  { value: "Western province North", label: "Western province North" },
+  { value: "Central Province", label: "Central Province" },
+  { value: "Southern Province", label: "Southern Province" },
+  { value: "Eastern Province", label: "Eastern Province" },
+  { value: "Northern Province", label: "Northern Province" },
+  { value: "Uva Province", label: "Uva Province" },
+  { value: "Sabaragamuwa Province", label: "Sabaragamuwa Province" },
+  { value: "North Western", label: "North Western" },
 ];
 
 const AdminAddLocation = ({
