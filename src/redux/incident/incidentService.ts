@@ -204,20 +204,13 @@ export const downloadAttachment = async (filename: string) => {
   }
 };
 
-
-export const fetchDashboardStats = async (params?: {
-  userParentCategory?: string;
-  userType?: string;
-  technicianId?: string;
-  teamName?: string;
-}) => {
+export const fetchDashboardStats = async (userParentCategory?: string) => {
   try {
-    const queryParams = params || {};
-    return await axios.get(buildUrl(API_BASE, "/incident/dashboard-stats"), { 
-      params: queryParams,
-      withCredentials: true 
-    });
-
+    const params = userParentCategory ? { userParentCategory } : {};
+    return await apiClient.get(
+      buildUrl(API_BASE, "/incident/dashboard-stats"),
+      { params }
+    );
   } catch (error) {
     throw error;
   }

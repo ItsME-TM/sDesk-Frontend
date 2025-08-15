@@ -281,7 +281,7 @@ function* handleFetchAllLocations() {
 }
 function* handleFetchDashboardStats(action) {
   try {
-    const response = yield call(fetchDashboardStats, action.payload);
+    const response = yield call(fetchDashboardStats, action.payload?.userParentCategory);
     yield put(fetchDashboardStatsSuccess(response.data));
   } catch (error) {
     const errorMessage =
