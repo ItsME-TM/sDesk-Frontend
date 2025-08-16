@@ -23,6 +23,23 @@ export const createIncident = async (data: Partial<Incident>) => {
   }
 };
 
+// Create incident with attachment
+export const createIncidentWithAttachment = async (formData: FormData) => {
+  try {
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/create-incident-with-attachment"),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Update incident
 export const updateIncident = async (
   incident_number: string,

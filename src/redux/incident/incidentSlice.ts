@@ -87,6 +87,23 @@ const incidentSlice = createSlice({
       state.error = action.payload;
     },
 
+    // Create incident with attachment
+    createIncidentWithAttachmentRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    createIncidentWithAttachmentSuccess(state, action) {
+      state.loading = false;
+      state.incidents = [action.payload, ...state.incidents];
+      // Add to both arrays since different users might need to see it in different contexts
+      state.assignedToMe = [action.payload, ...state.assignedToMe];
+      state.assignedByMe = [action.payload, ...state.assignedByMe];
+    },
+    createIncidentWithAttachmentFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
     // Update incident
     updateIncidentRequest(state) {
       state.loading = true;
@@ -378,6 +395,9 @@ export const {
   createIncidentRequest,
   createIncidentSuccess,
   createIncidentFailure,
+  createIncidentWithAttachmentRequest,
+  createIncidentWithAttachmentSuccess,
+  createIncidentWithAttachmentFailure,
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,

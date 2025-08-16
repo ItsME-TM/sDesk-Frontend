@@ -8,13 +8,13 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
+  createIncidentWithAttachmentRequest,
   clearError,
-  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
-  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
+  const { loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -111,14 +111,8 @@ const UserAddIncident = () => {
       return;
     }
 
-    try {
-      // Upload file immediately
-      dispatch(uploadAttachmentRequest(file));
-      setSelectedFile(file);
-    } catch (error) {
-      alert('Failed to upload file. Please try again.');
-      e.target.value = '';
-    }
+    // Just store the file without uploading
+    setSelectedFile(file);
   };
 
   const handleRemoveFile = () => {
@@ -173,11 +167,24 @@ const UserAddIncident = () => {
       description: formData.description,
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
-      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
-      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
-    dispatch(createIncidentRequest(incidentData));
+    if (selectedFile) {
+      // Create FormData for multipart request
+      const formDataWithFile = new FormData();
+      Object.keys(incidentData).forEach(key => {
+        if (incidentData[key] !== null) {
+          formDataWithFile.append(key, incidentData[key]);
+        }
+      });
+      formDataWithFile.append('file', selectedFile);
+
+      // Use create incident with attachment
+      dispatch(createIncidentWithAttachmentRequest(formDataWithFile));
+    } else {
+      // Regular incident creation without attachment
+      dispatch(createIncidentRequest(incidentData));
+    }
 
     setFormData({
       serviceNo: "",
