@@ -4,22 +4,6 @@
 
 // Get the API base URL from environment variables
 export const getApiBaseUrl = (): string => {
-    // Check for production environment first
-    if (typeof window !== 'undefined' && window.location) {
-        const hostname = window.location.hostname;
-        
-        // Production URL detection
-        if (hostname.includes('sdesk-backend') || hostname.includes('heroku')) {
-            return 'https://sdesk-backend-t2-host-4d60b916e39b.herokuapp.com';
-        }
-        
-        // Vercel frontend connecting to production backend
-        if (hostname.includes('vercel.app')) {
-            return 'https://sdesk-backend-t2-host-4d60b916e39b.herokuapp.com';
-        }
-    }
-    
-    // Local development - use port 8000 for backend
     return (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:8000";
 };
 
