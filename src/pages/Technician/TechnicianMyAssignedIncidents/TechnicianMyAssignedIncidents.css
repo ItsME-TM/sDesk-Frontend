@@ -279,7 +279,7 @@ pre, code, .debug, [class*="debug"] {
     gap: 10px;
     padding: 0 5px;
   }
-}
+
 
 @media (max-width: 767.98px) {
   .TechnicianMyAssignedIncidents-main-content {
