@@ -26,13 +26,14 @@ export const createIncident = async (data: Partial<Incident>) => {
 export const createIncidentWithAttachment = async (formData: FormData) => {
   try {
     // First try the new endpoint with attachment support
-    return await apiClient.post(
+    return await axios.post(
       buildUrl(API_BASE, "/incident/create-incident-with-attachment"),
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        withCredentials: true
       }
     );
   } catch (error) {
@@ -49,9 +50,10 @@ export const createIncidentWithAttachment = async (formData: FormData) => {
       }
       
       // First create incident without attachment
-      const incidentResponse = await apiClient.post(
+      const incidentResponse = await axios.post(
         buildUrl(API_BASE, "/incident/create-incident"),
-        incidentData
+        incidentData,
+        { withCredentials: true }
       );
       
       // Then upload attachment if exists
@@ -61,13 +63,14 @@ export const createIncidentWithAttachment = async (formData: FormData) => {
           const attachmentFormData = new FormData();
           attachmentFormData.append('attachment', file);
           
-          await apiClient.post(
+          await axios.post(
             buildUrl(API_BASE, "/incident/upload-attachment"),
             attachmentFormData,
             {
               headers: {
                 'Content-Type': 'multipart/form-data',
               },
+              withCredentials: true
             }
           );
         } catch (uploadError) {
@@ -87,9 +90,10 @@ export const updateIncident = async (
   data: Partial<Incident>
 ) => {
   try {
-    return await apiClient.put(
+    return await axios.put(
       buildUrl(API_BASE, `/incident/${incident_number}`),
-      data
+      data,
+      { withCredentials: true }
     );
   } catch (error) {
     throw error;
@@ -102,13 +106,14 @@ export const updateIncidentWithAttachment = async (
   formData: FormData
 ) => {
   try {
-    return await apiClient.put(
+    return await axios.put(
       buildUrl(API_BASE, `/incident/${incident_number}/with-attachment`),
       formData,
       {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        withCredentials: true
       }
     );
   } catch (error) {
@@ -234,12 +239,11 @@ export const fetchAllLocations = async () => {
   }
 };
 
-export const fetchDashboardStats = async (userParentCategory?: string) => {
+export const fetchDashboardStats = async (params = {}) => {
   try {
-    const params = userParentCategory ? { userParentCategory } : {};
-    return await apiClient.get(
+    return await axios.get(
       buildUrl(API_BASE, "/incident/dashboard-stats"),
-      { params }
+      { params, withCredentials: true }
     );
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);

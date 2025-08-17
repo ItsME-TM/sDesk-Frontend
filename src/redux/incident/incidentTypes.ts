@@ -54,6 +54,17 @@ export interface DashboardStats {
   todayStats: {
     [key: string]: number;
   };
+  overallStatusCounts?: {
+    [key: string]: number;
+  };
+  todayStatusCounts?: {
+    [key: string]: number;
+  };
+  totalStatusCounts?: {
+    [key: string]: number;
+  };
+  allIncidents?: any[];
+  todayIncidents?: any[];
 }
 
 

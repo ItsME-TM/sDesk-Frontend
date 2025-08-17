@@ -46,14 +46,42 @@ function MainDashboard() {
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
   ];
 
-  const cardCounts = dashboardStats?.todayStatusCounts || {};
-  const cardSubCounts = dashboardStats?.totalStatusCounts || {};
+  // Determine if user is Super Admin
+  const isSuperAdmin = 
+    userType.toLowerCase().includes("superadmin") ||
+    userType.toLowerCase().includes("super admin") ||
+    userType.toLowerCase() === "superadmin" ||
+    userType.toLowerCase() === "super admin" ||
+    user?.role?.toLowerCase() === "superadmin" ||
+    user?.role?.toLowerCase() === "super admin";
 
-  useEffect(() => {
-    function handleResize() {}
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  let cardCounts = {};
+  let cardSubCounts = {};
+
+  if (isSuperAdmin) {
+    // For Super Admin: card value = today's count, total = all-time count
+    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
+    
+    // Extract today's counts from overallStatusCounts
+    cardCounts = {
+      "Open": totalCounts["Open (Today)"] || 0,
+      "Hold": totalCounts["Hold (Today)"] || 0,
+      "In Progress": totalCounts["In Progress (Today)"] || 0,
+      "Closed": totalCounts["Closed (Today)"] || 0,
+    };
+    
+    // Total counts for all time
+    cardSubCounts = {
+      "Open": totalCounts["Open"] || 0,
+      "Hold": totalCounts["Hold"] || 0,
+      "In Progress": totalCounts["In Progress"] || 0,
+      "Closed": totalCounts["Closed"] || 0,
+    };
+  } else {
+    // For other user types, use existing logic
+    cardCounts = dashboardStats?.todayStatusCounts || {};
+    cardSubCounts = dashboardStats?.totalStatusCounts || {};
+  }
 
   if (loading) {
     return (
@@ -81,9 +109,25 @@ function MainDashboard() {
             className="MainDashboard-retry-button"
             onClick={() => {
               dispatch(fetchMainCategoriesRequest());
-              dispatch(
-                fetchDashboardStatsRequest({ userParentCategory, userType })
-              );
+              if (userType === "Technician" && user?.id) {
+                dispatch(
+                  fetchDashboardStatsRequest({
+                    userParentCategory,
+                    userType,
+                    technicianId: user.id,
+                  })
+                );
+              } else if (userType === "Admin" && user?.teamName) {
+                dispatch(
+                  fetchDashboardStatsRequest({
+                    userParentCategory,
+                    userType,
+                    teamName: user.teamName,
+                  })
+                );
+              } else {
+                dispatch(fetchDashboardStatsRequest({ userParentCategory, userType }));
+              }
             }}
           >
             Retry
@@ -157,7 +201,7 @@ function MainDashboard() {
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                Unresolved (Today)
+                High Priority (Today)
               </span>
               <span className="MainDashboard-summary-value">
                 {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
