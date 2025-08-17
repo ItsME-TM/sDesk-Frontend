@@ -248,7 +248,7 @@ const TechnicianInsident = ({
     if (updateStatusData.priority) formData.append('priority', updateStatusData.priority);
     if (updateStatusData.status) formData.append('status', updateStatusData.status);
     
-    // Handle transfer logic
+    // Handle transfer logics
     if (updateStatusData.transferTo) {
       if (updateStatusData.transferTo === 'tier2-auto') {
         // Set the automaticallyAssignForTier2 flag for backend
