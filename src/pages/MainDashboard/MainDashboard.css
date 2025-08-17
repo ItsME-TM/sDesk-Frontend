@@ -414,12 +414,12 @@
   }
 
   .MainDashboard-colored-card {
-    width: 35px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
   }
 
   .MainDashboard-card-icon {
-    font-size: 12px;
+    font-size: 24px;
   }
 }
 

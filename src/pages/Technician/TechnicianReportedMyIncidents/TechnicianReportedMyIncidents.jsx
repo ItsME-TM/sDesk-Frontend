@@ -103,19 +103,12 @@ const TechnicianReportedMyIncidents = () => {
 
   const renderTableRows = () => {
     return currentRows.map((row, idx) => (
-      <tr key={idx}>
-        <td className='TechnicianReportedMyIncidents-refno'>
-          <a
-            href="#"
-            onClick={e => {
-              e.preventDefault();
-              handleRowClick(row.refNo);
-            }}
-            style={{ color: '#222', textDecoration: 'none', cursor: 'pointer' }}
-          >
-            {row.refNo}
-          </a>
-        </td>
+      <tr
+        key={idx}
+        onClick={() => handleRowClick(row.refNo)}
+        style={{ cursor: 'pointer' }}
+      >
+        <td className='TechnicianReportedMyIncidents-refno'>{row.refNo}</td>
         <td>{row.category}</td>
         <td className='TechnicianReportedMyIncidents-status-text'>{row.status}</td>
         <td>{row.priority}</td>
@@ -169,7 +162,7 @@ const TechnicianReportedMyIncidents = () => {
 
     const formData = {
         serviceNo: user.serviceNum,
-        tpNumber: user.tp_number || user.tpNumber || user.contactNumber ||  '',
+        tpNumber: user.tp_number || user.tpNumber || '',
         name: user.user_name || user.name || user.email,
         designation: user.designation || user.role || '',
         email: user.email,
@@ -187,9 +180,11 @@ const TechnicianReportedMyIncidents = () => {
         <div className="popup-overlay">
             <div className="popup-content">
                 <button className="popup-close" onClick={() => setIsPopupVisible(false)}>X</button>
-                
-                <br/>
-                <br/>
+                <div className="TechnicianMyReportedUpdate-tickets-creator">
+                    <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
+                    <IoIosArrowForward />
+                    <span className="TechnicianMyReportedUpdate-created-ticket">Reported My Update</span>
+                </div>
                 <div className="TechnicianMyReportedUpdate-content2">
                     <AffectedUserDetail formData={formData} />
                     <IncidentHistory

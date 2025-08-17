@@ -12,8 +12,10 @@ const PrivateRoute = () => {
   useEffect(() => {
     if (!authInitialized && !loading) {
       if (hasJwtCookie) {
+        console.log('[PrivateRoute] Cookie present - dispatch fetchLoggedUserRequest');
         dispatch(fetchLoggedUserRequest());
       } else {
+        console.log('[PrivateRoute] No JWT cookie - dispatch refreshTokenRequest');
         dispatch(refreshTokenRequest());
       }
     }
@@ -26,6 +28,7 @@ const PrivateRoute = () => {
 
   // ❌ After initialization, if no user or not logged in —> redirect
   if (!user || !isLoggedIn) {
+    console.log('[PrivateRoute] Redirecting - user:', user, 'isLoggedIn:', isLoggedIn);
     return <Navigate to="/login" replace />;
   }
 

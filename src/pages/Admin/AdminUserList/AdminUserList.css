@@ -170,12 +170,6 @@
   .AdminUserList-table-delete-btn:hover {
     color: #a71d2a;
   }
-  .AdminUserList-table-logout-btn{
-    color: #dc3545;
-  }
-  .AdminUserList-table-logout-btn:hover{
-     color: #a71d2a;
-  }
   .AdminUserList-table-service-btn {
     background: none;
     border: none;

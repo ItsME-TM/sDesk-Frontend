@@ -13,27 +13,6 @@
   background: #fff;
 }
 
-.incident-history-card-modern {
-    border: none;
-    border-radius: 0.75rem;
-}
-
-.incident-history-table-modern th,
-.incident-history-table-modern td {
-    padding: 1rem 1.5rem;
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-.incident-history-table-modern .comments-column {
-    white-space: pre-wrap;
-    min-width: 300px;
-}
-
-.incident-history-card-modern .card-footer div {
-    margin: 0.25rem 0.5rem;
-}
-
 @media (max-width: 992px) {
   .incident-history-container {
     width: 95%;

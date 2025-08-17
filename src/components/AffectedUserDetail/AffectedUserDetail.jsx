@@ -1,17 +1,15 @@
 import React from 'react';
-import { Card, Table } from 'react-bootstrap';
 import './AffectedUserDetail.css';
 
 const AffectedUserDetail = ({ formData }) => {
     return (
-        <Card className="affected-user-card-modern shadow-sm mb-4">
-            <Card.Header as="h5" className="bg-light text-dark">
-                Affected User Details
-            </Card.Header>
-            <Card.Body>
-                <div className="table-responsive">
-                    <Table hover striped bordered className="affected-user-table-modern">
-                        <thead className="table-light">
+        <div className="container mt-4">
+            <div className="affected-user-card card">
+                <div className="card-body">
+                    <h5 className="card-title">Affected User Details</h5>
+                    <br />
+                    <table className="affected-user-table table">
+                        <thead>
                             <tr>
                                 <th>Service No</th>
                                 <th>TP Number</th>
@@ -22,17 +20,25 @@ const AffectedUserDetail = ({ formData }) => {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{formData.serviceNo}</td>
+                                <td>
+                                    <input
+                                        type="text"
+                                       
+                                        name="serviceNo"
+                                        value={formData.serviceNo}
+                                        readOnly
+                                    />
+                                </td>
                                 <td>{formData.tpNumber}</td>
                                 <td>{formData.name}</td>
                                 <td>{formData.designation}</td>
                                 <td>{formData.email}</td>
                             </tr>
                         </tbody>
-                    </Table>
+                    </table>
                 </div>
-            </Card.Body>
-        </Card>
+            </div>
+        </div>
     );
 };
 

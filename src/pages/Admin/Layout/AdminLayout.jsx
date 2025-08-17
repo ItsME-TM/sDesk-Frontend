@@ -25,6 +25,7 @@ const AdminLayout = () => {
 
     useEffect(() => {
         if (user && role !== 'admin'){
+            console.log('Unauthorized access attempt by user:', user);
             dispatch(logoutRequest());
             navigate('/login', { replace: true });
 

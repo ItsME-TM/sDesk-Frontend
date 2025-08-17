@@ -32,20 +32,24 @@ function* handleFetchTeamAdmins() {
 
 function* handleCreateTeamAdmin(action) {
   try {
+    console.log('handleCreateTeamAdmin called with payload:', action.payload);
     const { teamId, serviceNumber, ...rest } = action.payload;
     const response = yield call(createTeamAdmin, { ...rest, teamId, serviceNumber });
     yield put(createTeamAdminSuccess(response.data));    // Update user role in slt_users table
     if (serviceNumber) {
+      console.log('Dispatching updateUserRoleRequest with:', { serviceNum: serviceNumber, role: 'admin' });
       yield put({
         type: 'sltusers/updateUserRoleRequest',
         payload: { serviceNum: serviceNumber, role: 'admin' }
       });
     } else {
+      console.log('No serviceNumber provided, skipping user role update');
     }
     
     // Optionally, refetch the list to ensure sync
     yield put(fetchTeamAdminsRequest());
   } catch (error) {
+    console.error('handleCreateTeamAdmin error:', error);
     yield put(createTeamAdminFailure(error.message));
   }
 }

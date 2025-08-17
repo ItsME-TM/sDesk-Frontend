@@ -20,8 +20,10 @@ const AdminLocation = () => {
     error = null,
   } = useSelector((state) => state.location || {});
 
+  console.log("🔍 AdminLocation - Redux state:", { locations, loading, error });
 
   useEffect(() => {
+    console.log("🚀 Fetching locations on mount...");
     dispatch(fetchLocationsRequest());
   }, [dispatch]);
 
@@ -32,17 +34,20 @@ const AdminLocation = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const handleEdit = (location) => {
+    console.log("✏️ Edit location:", location);
     setEditLocation(location);
     setIsEditLocationOpen(true);
   };
 
   const handleDelete = (location) => {
+    console.log("🗑️ Delete location:", location);
     setDeleteTarget(location);
     setIsDeletePopupOpen(true);
   };
 
   const confirmDelete = () => {
     if (deleteTarget) {
+      console.log("✅ Confirming delete for:", deleteTarget);
       dispatch(deleteLocationRequest(deleteTarget.id));
     }
     setIsDeletePopupOpen(false);
@@ -54,11 +59,13 @@ const AdminLocation = () => {
   };
 
   const handleAddLocationSubmit = (newLocation) => {
+    console.log("➕ Submitting new location:", newLocation);
     dispatch(createLocationRequest(newLocation));
     setIsAddLocationOpen(false);
   };
 
   const handleEditLocationSubmit = (updatedLocation) => {
+    console.log("✏️ Submitting updated location:", updatedLocation);
     dispatch(
       updateLocationRequest({
         id: editLocation.id,
@@ -71,6 +78,7 @@ const AdminLocation = () => {
   if (loading) return <div>Loading locations...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  console.log("🎨 Rendering table with", locations.length, "locations");
 
   return (
     <div className="AdminLocation-main-content">
@@ -96,7 +104,7 @@ const AdminLocation = () => {
           <table>
             <thead>
               <tr>
-               {/* <th>Location Code</th> */}
+                <th>Location Code</th>
                 <th>Location Name</th>
                 <th>Region</th>
                 <th>Province</th>
@@ -107,7 +115,7 @@ const AdminLocation = () => {
               {locations.length > 0 ? (
                 locations.map((location) => (
                   <tr key={location.id}>
-                   {/* <td>{location.locationCode}</td> */}
+                    <td>{location.locationCode}</td>
                     <td>{location.locationName}</td>
                     <td>{location.region}</td>
                     <td>{location.province}</td>

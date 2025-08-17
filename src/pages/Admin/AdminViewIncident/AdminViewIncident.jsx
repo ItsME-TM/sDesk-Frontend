@@ -158,21 +158,6 @@ const AdminViewIncident = () => {
               <span className="value">{currentIncident.description}</span>
             </div>
             <div className="info-row">
-              <span className="label">Attachment:</span>
-              <span className="value">
-                {currentIncident.Attachment ? (
-                  <a
-                    href={`data:application/octet-stream;base64,${currentIncident.Attachment}`}
-                    download
-                  >
-                    Download Attachment
-                  </a>
-                ) : (
-                  "No attachment"
-                )}
-              </span>
-            </div>
-            <div className="info-row">
               <span className="label">Created At:</span>
               <span className="value">{new Date(currentIncident.created_at).toLocaleString()}</span>
             </div>
@@ -180,7 +165,7 @@ const AdminViewIncident = () => {
         </div>
 
         <AffectedUserDetail incident={currentIncident} />
-        <IncidentHistory incident={currentIncident} users={allUsers} attachment={currentIncident.Attachment} />
+        <IncidentHistory incident={currentIncident} users={allUsers} />
 
         <div className="update-section">
           <UpdateStatus 

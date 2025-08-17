@@ -73,7 +73,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
             if (!formData.sub || !uuidRegex.test(formData.sub)) {
                 newErrors.sub = 'Sub Category is invalid (not a valid ID)';
             }
-
         }
 
         setErrors(newErrors);
@@ -191,7 +190,6 @@ const AdminAddCategory = ({ onSubmit, onClose, isEdit = false, editCategory = nu
             }
         }
     }, [mainCategoryError, mainCategorySuccess, categoryError, subCategorySuccess, subCategoryError, categoryItemSuccess, categoryItemError]);
-
 
     return (
         <div className="AdminAddCategory-modal" role="dialog" aria-labelledby="category-form-title" aria-modal="true">

@@ -48,11 +48,14 @@ const authSlice = createSlice({
     logoutFailure(state, action: PayloadAction<string>) {
       state.loading = false;
       state.error = action.payload;
-    },    fetchLoggedUserRequest(state) {
+    },
+    fetchLoggedUserRequest(state) {
+      console.log('[AuthSlice] fetchLoggedUserRequest called');
       state.loading = true;
       state.error = null;
     },
  fetchLoggedUserSuccess(state, action: PayloadAction<User>) {
+  console.log('[authSlice] ✅ user fetched:', action.payload); // <- Add this
   state.user = action.payload;
   state.loading = false;
   state.authInitialized = true;

@@ -1,12 +1,13 @@
-import apiClient from "../../api/axiosInstance";
+import axios from "axios";
 import { Incident } from "./incidentTypes";
 import { buildUrl, API_BASE } from "../../utils/apiUtils";
 
 // Get all incidents
 export const fetchAllIncidents = async () => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, "/incident/all-teams"));
+    return await axios.get(buildUrl(API_BASE, "/incident/all-teams"), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching all incidents:", error);
     throw error;
   }
 };
@@ -14,46 +15,19 @@ export const fetchAllIncidents = async () => {
 // Create incident
 export const createIncident = async (data: Partial<Incident>) => {
   try {
-    return await apiClient.post(
-      buildUrl(API_BASE, "/incident/create-incident"),
-      data
-    );
+    return await axios.post(buildUrl(API_BASE, "/incident/create-incident"), data, { withCredentials: true });
   } catch (error) {
+    console.error("Error creating incident:", error);
     throw error;
   }
 };
 
 // Update incident
-export const updateIncident = async (
-  incident_number: string,
-  data: Partial<Incident>
-) => {
+export const updateIncident = async (incident_number: string, data: Partial<Incident>) => {
   try {
-    return await apiClient.put(
-      buildUrl(API_BASE, `/incident/${incident_number}`),
-      data
-    );
+    return await axios.put(buildUrl(API_BASE, `/incident/${incident_number}`), data, { withCredentials: true });
   } catch (error) {
-    throw error;
-  }
-};
-
-// Update incident with attachment
-export const updateIncidentWithAttachment = async (
-  incident_number: string,
-  formData: FormData
-) => {
-  try {
-    return await apiClient.put(
-      buildUrl(API_BASE, `/incident/${incident_number}/with-attachment`),
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-  } catch (error) {
+    console.error(`Error updating incident ${incident_number}:`, error);
     throw error;
   }
 };
@@ -61,10 +35,9 @@ export const updateIncidentWithAttachment = async (
 // Get incident by number
 export const getIncidentByNumber = async (incident_number: string) => {
   try {
-    return await apiClient.get(
-      buildUrl(API_BASE, `/incident/${incident_number}`)
-    );
+    return await axios.get(buildUrl(API_BASE, `/incident/${incident_number}`), { withCredentials: true });
   } catch (error) {
+    console.error(`Error fetching incident ${incident_number}:`, error);
     throw error;
   }
 };
@@ -72,10 +45,9 @@ export const getIncidentByNumber = async (incident_number: string) => {
 // Get incidents assigned to me
 export const getIncidentsAssignedToMe = async (serviceNum: string) => {
   try {
-    return await apiClient.get(
-      buildUrl(API_BASE, `/incident/assigned-to-me/${serviceNum}`)
-    );
+    return await axios.get(buildUrl(API_BASE, `/incident/assigned-to-me/${serviceNum}`), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching assigned to me incidents:", error);
     throw error;
   }
 };
@@ -83,11 +55,15 @@ export const getIncidentsAssignedToMe = async (serviceNum: string) => {
 // Get incidents assigned by me
 export const getIncidentsAssignedByMe = async (serviceNum: string) => {
   try {
-    const response = await apiClient.get(
-      buildUrl(API_BASE, `/incident/assigned-by-me/${serviceNum}`)
-    );
+    console.log('🌐 Incident Service: getIncidentsAssignedByMe called with serviceNum:', serviceNum);
+    console.log('🌐 Incident Service: API URL:', buildUrl(API_BASE, `/incident/assigned-by-me/${serviceNum}`));
+    const response = await axios.get(buildUrl(API_BASE, `/incident/assigned-by-me/${serviceNum}`), { withCredentials: true });
+    console.log('✅ Incident Service: Request successful');
+    console.log('✅ Incident Service: Response status:', response.status);
+    console.log('✅ Incident Service: Response data:', response.data);
     return response;
   } catch (error) {
+    console.error("❌ Incident Service: Error fetching assigned by me incidents:", error);
     throw error;
   }
 };
@@ -95,10 +71,9 @@ export const getIncidentsAssignedByMe = async (serviceNum: string) => {
 // Get team incidents
 export const getTeamIncidents = async (teamLead: string) => {
   try {
-    return await apiClient.get(
-      buildUrl(API_BASE, `/incident/team-incidents/${teamLead}`)
-    );
+    return await axios.get(buildUrl(API_BASE, `/incident/team-incidents/${teamLead}`), { withCredentials: true });
   } catch (error) {
+    console.error(`Error fetching team incidents for ${teamLead}:`, error);
     throw error;
   }
 };
@@ -106,11 +81,12 @@ export const getTeamIncidents = async (teamLead: string) => {
 // Get team incidents by technician service number
 export const getTeamIncidentsByServiceNum = async (serviceNum: string) => {
   try {
-    const response = await apiClient.get(
-      buildUrl(API_BASE, `/incident/team-incidents/${serviceNum}`)
-    );
+    console.log('🌐 Incident Service: getTeamIncidentsByServiceNum called with serviceNum:', serviceNum);
+    const response = await axios.get(buildUrl(API_BASE, `/incident/team-incidents/${serviceNum}`), { withCredentials: true });
+    console.log('✅ Incident Service: Team incidents response:', response.data);
     return response;
   } catch (error) {
+    console.error(`Error fetching team incidents for service number ${serviceNum}:`, error);
     throw error;
   }
 };
@@ -118,10 +94,9 @@ export const getTeamIncidentsByServiceNum = async (serviceNum: string) => {
 // Get incident history
 export const getIncidentHistory = async (incident_number: string) => {
   try {
-    return await apiClient.get(
-      buildUrl(API_BASE, `/incident/${incident_number}/history`)
-    );
+    return await axios.get(buildUrl(API_BASE, `/incident/${incident_number}/history`), { withCredentials: true });
   } catch (error) {
+    console.error(`Error fetching incident history for ${incident_number}:`, error);
     throw error;
   }
 };
@@ -129,16 +104,18 @@ export const getIncidentHistory = async (incident_number: string) => {
 // Get current technician data
 export const getCurrentTechnician = async (serviceNum: string) => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, `/technician/${serviceNum}`));
+    return await axios.get(buildUrl(API_BASE, `/technician/${serviceNum}`), { withCredentials: true });
   } catch (error) {
+    console.error(`Error fetching technician data for ${serviceNum}:`, error);
     throw error;
   }
 };
 // Fetch main categories
 export const fetchMainCategories = async () => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, "/categories/main"));
+    return await axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching main categories:", error);
     throw error;
   }
 };
@@ -146,8 +123,9 @@ export const fetchMainCategories = async () => {
 // Fetch category items
 export const fetchCategoryItems = async () => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, "/categories/item"));
+    return await axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching category items:", error);
     throw error;
   }
 };
@@ -155,8 +133,9 @@ export const fetchCategoryItems = async () => {
 // Fetch all users
 export const fetchAllUsers = async () => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, "/sltusers"));
+    return await axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching all users:", error);
     throw error;
   }
 };
@@ -164,46 +143,12 @@ export const fetchAllUsers = async () => {
 // Fetch all locations
 export const fetchAllLocations = async () => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, "/locations"));
+    return await axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true });
   } catch (error) {
+    console.error("Error fetching all locations:", error);
     throw error;
   }
 };
-
-// Upload attachment
-export const uploadAttachment = async (file: File) => {
-  try {
-    const formData = new FormData();
-    formData.append('attachment', file);
-    
-    return await apiClient.post(
-      buildUrl(API_BASE, "/incident/upload-attachment"),
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Download attachment
-export const downloadAttachment = async (filename: string) => {
-  try {
-    return await apiClient.get(
-      buildUrl(API_BASE, `/incident/download-attachment/${filename}`),
-      {
-        responseType: 'blob', // Important for file downloads
-      }
-    );
-  } catch (error) {
-    throw error;
-  }
-};
-
 
 export const fetchDashboardStats = async (params?: {
   userParentCategory?: string;
@@ -217,8 +162,8 @@ export const fetchDashboardStats = async (params?: {
       params: queryParams,
       withCredentials: true 
     });
-
   } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
     throw error;
   }
 };
@@ -231,13 +176,13 @@ export const fetchAdminTeamData = async () => {
       mainCategoriesResponse,
       categoryItemsResponse,
       usersResponse,
-      locationsResponse,
+      locationsResponse
     ] = await Promise.all([
-      apiClient.get(buildUrl(API_BASE, "/incident/all-teams")),
-      apiClient.get(buildUrl(API_BASE, "/categories/main")),
-      apiClient.get(buildUrl(API_BASE, "/categories/item")),
-      apiClient.get(buildUrl(API_BASE, "/sltusers")),
-      apiClient.get(buildUrl(API_BASE, "/locations")),
+      axios.get(buildUrl(API_BASE, "/incident/all-teams"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/categories/main"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/categories/item"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/sltusers"), { withCredentials: true }),
+      axios.get(buildUrl(API_BASE, "/locations"), { withCredentials: true })
     ]);
 
     return {
@@ -245,9 +190,10 @@ export const fetchAdminTeamData = async () => {
       mainCategories: mainCategoriesResponse.data,
       categoryItems: categoryItemsResponse.data,
       users: usersResponse.data,
-      locations: locationsResponse.data,
+      locations: locationsResponse.data
     };
   } catch (error) {
+    console.error("Error fetching admin team data:", error);
     throw error;
   }
 };

@@ -103,7 +103,11 @@ const TechnicianMyReportedUpdate = () => {
 
   return (
     <div className="TechnicianMyReportedUpdate-main-content">
-
+      <div className="TechnicianMyReportedUpdate-tickets-creator">
+        <span className="TechnicianMyReportedUpdate-svr-desk">Incidents</span>
+        <IoIosArrowForward />
+        <span className="TechnicianMyReportedUpdate-created-ticket">Reported My Update</span>
+      </div>
 
       <div className="TechnicianMyReportedUpdate-content2">
         <AffectedUserDetail formData={formData} />

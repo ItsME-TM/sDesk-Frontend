@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
-import "./AdminUserList.css";
-import { FaHouseUser, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
-import { IoIosAddCircleOutline } from "react-icons/io";
-import { TiExportOutline } from "react-icons/ti";
-import { useSelector, useDispatch } from "react-redux";
-import socket from "../../../utils/socket.js";
+import React, { useEffect, useState, useMemo } from 'react';
+import './AdminUserList.css';
+import { FaHouseUser, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
+import { IoIosAddCircleOutline } from 'react-icons/io';
+import { TiExportOutline } from 'react-icons/ti';
+import { useSelector, useDispatch } from 'react-redux';
 
 import {
   fetchTechniciansRequest,
@@ -12,102 +11,66 @@ import {
   createTechnicianRequest,
   deleteTechnicianRequest,
   updateTechnicianRequest,
-  forceLogoutTechnicianRequest,
-  updateTechnicianOnlineStatus,
+} from '../../../redux/technicians/technicianSlice';
 
-} from "../../../redux/technicians/technicianSlice";
-
-import { fetchSubCategoriesRequest } from "../../../redux/categories/categorySlice";
-import AdminAddUser from "../../../components/AdminAddUser/AdminAddUser";
-import ConfirmPopup from "../../../components/ConfirmPopup/ConfirmPopup";
-import { updateUserRoleById } from "../../../redux/sltusers/sltusersService";
+import { fetchSubCategoriesRequest } from '../../../redux/categories/categorySlice';
+import AdminAddUser from '../../../components/AdminAddUser/AdminAddUser';
+import ConfirmPopup from '../../../components/ConfirmPopup/ConfirmPopup';
+import { updateUserRoleById } from '../../../redux/sltusers/sltusersService';
 
 function AdminUserList() {
   const dispatch = useDispatch();
-  // Use Redux state for technicians
-  const technicians = useSelector(
-    (state) => state.technicians.technicians ?? []
-  );
 
-  const subCategories = useSelector(
-    (state) => state.categories?.subCategories ?? []
-  );
-  const mainCategories = useSelector(
-    (state) => state.categories?.mainCategories ?? []
-  );
+  const technicians = useSelector((state) => state.technicians?.technicians ?? []);
+  const subCategories = useSelector((state) => state.categories?.subCategories ?? []);
+  const mainCategories = useSelector((state) => state.categories?.mainCategories ?? []);
 
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
-  const [selectShowOption, setSelectShowOption] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectShowOption, setSelectShowOption] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
 
   useEffect(() => {
+    console.log('Selection changed:', selectShowOption);
     dispatch(fetchSubCategoriesRequest());
-    dispatch({ type: "category/fetchMainCategoriesRequest" });
+    dispatch({ type: 'category/fetchMainCategoriesRequest' });
 
-    if (selectShowOption === "Active") {
+    if (selectShowOption === 'Active') {
       dispatch(fetchActiveTechniciansRequest());
     } else {
       dispatch(fetchTechniciansRequest());
     }
-
-    const handleStatusChange = ({ serviceNum, active }) => {
-      // 1. Update the online flag in Redux
-      dispatch(updateTechnicianOnlineStatus({ serviceNum, active }));
-
-      // 2. Optionally refetch list so we don't rely on old cached data
-      dispatch(fetchTechniciansRequest());
-    };
-
-    socket.on("technician_status_changed", handleStatusChange);
-
-    return () => {
-      socket.off("technician_status_changed", handleStatusChange);
-    };
   }, [dispatch, selectShowOption]);
 
- 
   const getTeamName = (teamId) => {
     const main = mainCategories.find((m) => m.id === teamId);
-    return main ? main.name : teamId || "Unknown";
-  };
-  const getTeamId = (teamId) => {
-    const main = mainCategories.find((m) => m.id === teamId);
-    return main ? main.name : teamId || "Unknown";
+    return main ? main.name : teamId || 'Unknown';
   };
 
   const getSubCategoryName = (subCatId) => {
     const sub = subCategories.find((s) => s.id === subCatId);
-    return sub ? sub.name : subCatId || "Unknown";
+    return sub ? sub.name : subCatId || 'Unknown';
   };
-  const admin = useSelector((state) => state.auth?.user);
-  const adminTeamName = admin?.teamName;
 
   const users = useMemo(
     () =>
-      technicians
-        .filter((user) => user.team === adminTeamName)
-
-        .map((user) => ({
-          email: user.email,
-          serviceNum: user.serviceNumber || user.serviceNum || "",
-          name: user.name,
-          team: getTeamName(user.team),
-          teamId: getTeamId(user.teamId),
-          cat1: getSubCategoryName(user.cat1),
-          cat2: getSubCategoryName(user.cat2),
-          cat3: getSubCategoryName(user.cat3),
-          cat4: getSubCategoryName(user.cat4),
-          active: Boolean(user.active),
-          isOnline: user.active,
-          level: user.level || "",
-          id: user.id,
-        })),
-    [technicians, mainCategories, subCategories, onlineTechnicians]
+      technicians.map((user) => ({
+        email: user.email,
+        serviceNum: user.serviceNumber || user.serviceNum || '',
+        name: user.name,
+        team: getTeamName(user.team),
+        cat1: getSubCategoryName(user.cat1),
+        cat2: getSubCategoryName(user.cat2),
+        cat3: getSubCategoryName(user.cat3),
+        cat4: getSubCategoryName(user.cat4),
+        active: user.active ? 'True' : 'False',
+        level: user.level || '',
+        id: user.id,
+      })),
+    [technicians, mainCategories, subCategories]
   );
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
@@ -115,10 +78,7 @@ function AdminUserList() {
 
   const handleEdit = (serviceNumber) => {
     const user = technicians.find(
-      (u) =>
-        u.serviceNumber === serviceNumber ||
-        u.serviceNum === serviceNumber ||
-        u.id === serviceNumber
+      (u) => u.serviceNumber === serviceNumber || u.serviceNum === serviceNumber || u.id === serviceNumber
     );
     if (user) {
       setEditUser(user);
@@ -130,10 +90,12 @@ function AdminUserList() {
     if (editUser) {
       try {
         await updateUserRoleById(editUser.serviceNum, newRole);
-     
+        console.log('Successfully updated SLT user role');
       } catch (err) {
+        console.warn('Failed to update SLT user role:', err);
+        // Continue with technician update even if role update fails
       }
-
+      
       const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
       dispatch(
         updateTechnicianRequest({
@@ -143,34 +105,18 @@ function AdminUserList() {
           team: updatedFields.teamName || updatedFields.team,
           active: updatedFields.active,
           tier: Number(updatedFields.tier),
-          teamId: updatedFields.teamId || updatedFields.teamId,
-          level: updatedFields.tier === "1" ? "Tier1" : "Tier2",
-          cat1: cat1 || "",
-          cat2: cat2 || "",
-          cat3: cat3 || "",
-          cat4: cat4 || "",
+          teamLevel: updatedFields.tier === '1' ? 'Tier1' : 'Tier2',
+          level: updatedFields.tier === '1' ? 'Tier1' : 'Tier2',
+          cat1: cat1 || '',
+          cat2: cat2 || '',
+          cat3: cat3 || '',
+          cat4: cat4 || '',
           rr: 1,
-          designation: "Technician",
-          contactNumber: updatedFields.contactNumber,
+          designation: 'Technician',
+          contactNumber: '0000000000',
           id: editUser.id,
         })
       );
-      const handleDeactivate = (serviceNum) => {
-        // Dispatch Redux action that calls backend to force logout + send message
-        dispatch(forceLogoutTechnicianRequest(serviceNum));
-      };
-      // NEW: If technician is being deactivated and is currently online, force logout
-      if (
-        updatedFields.active === false &&
-        onlineTechnicians.has(editUser.serviceNum)
-      ) {
-        dispatch(
-          forceLogoutTechnicianRequest({
-            serviceNum: editUser.serviceNum,
-            socket,
-          })
-        );
-      }
     }
     setIsEditUserOpen(false);
     setEditUser(null);
@@ -178,10 +124,7 @@ function AdminUserList() {
 
   const handleDelete = (serviceNumber) => {
     const user = technicians.find(
-      (u) =>
-        u.serviceNumber === serviceNumber ||
-        u.serviceNum === serviceNumber ||
-        u.id === serviceNumber
+      (u) => u.serviceNumber === serviceNumber || u.serviceNum === serviceNumber || u.id === serviceNumber
     );
     if (user) {
       setUserToDelete(user);
@@ -192,24 +135,22 @@ function AdminUserList() {
   const confirmDelete = async () => {
     if (userToDelete) {
       try {
-        const sltServiceNum =
-          userToDelete.serviceNum || userToDelete.serviceNumber;
+        // Always use serviceNum or serviceNumber for SLT user role update
+        const sltServiceNum = userToDelete.serviceNum || userToDelete.serviceNumber;
         if (sltServiceNum) {
-          await updateUserRoleById(sltServiceNum, "user");
-          console.log("Successfully updated SLT user role to user");
+          await updateUserRoleById(sltServiceNum, 'user');
+          console.log('Successfully updated SLT user role to user');
+        } else {
+          console.warn('No serviceNum found for SLT user role update');
         }
       } catch (err) {
-        console.warn("Failed to update SLT user role to user:", err);
+        console.warn('Failed to update SLT user role to user:', err);
+        // Continue with technician deletion even if role update fails
       }
-      dispatch(
-        deleteTechnicianRequest(
-          userToDelete.serviceNum ||
-            userToDelete.serviceNumber ||
-            userToDelete.id
-        )
-      );
+      dispatch(deleteTechnicianRequest(userToDelete.serviceNum || userToDelete.serviceNumber || userToDelete.id));
       setIsDeletePopupOpen(false);
       setUserToDelete(null);
+     
     }
   };
 
@@ -222,7 +163,7 @@ function AdminUserList() {
 
   return (
     <div className="AdminUserList-main-content">
-      <div className="AdminUserList-direction-bar">User {">"} User List</div>
+      <div className="AdminUserList-direction-bar">User {'>'} User List</div>
 
       <div className="AdminUserList-content2">
         <div className="AdminUserList-TitleBar">
@@ -230,10 +171,7 @@ function AdminUserList() {
             <FaHouseUser /> Technicians List
           </div>
           <div className="AdminUserList-TitleBar-buttons">
-            <button
-              onClick={handleAddUser}
-              className="AdminUserList-TitleBar-buttons-AddUser"
-            >
+            <button onClick={handleAddUser} className="AdminUserList-TitleBar-buttons-AddUser">
               <IoIosAddCircleOutline /> Add Technician
             </button>
             <button className="AdminUserList-TitleBar-buttons-ExportData">
@@ -245,11 +183,7 @@ function AdminUserList() {
         <div className="AdminUserList-showSearchBar">
           <div className="AdminUserList-showSearchBar-Show">
             Show
-            <select
-              value={selectShowOption}
-              onChange={handleChange}
-              className="AdminUserList-showSearchBar-Show-select"
-            >
+            <select value={selectShowOption} onChange={handleChange} className="AdminUserList-showSearchBar-Show-select">
               <option value="All">All</option>
               <option value="Active">Active</option>
             </select>
@@ -275,80 +209,42 @@ function AdminUserList() {
                 <th>Team</th>
                 <th>Active</th>
                 <th>Level</th>
-                <th>Actions</th>
+                <th>Option</th>
               </tr>
             </thead>
             <tbody>
               {users.length > 0 ? (
                 users
                   .filter((user) => {
-                    if (selectShowOption === "Active")
-                      return user.active === true;
+                    if (selectShowOption === 'Active') return user.active === 'True';
                     return true;
                   })
                   .filter(
                     (user) =>
-                      user.email
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.team
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
+                      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      user.team.toLowerCase().includes(searchQuery.toLowerCase())
                   )
                   .map((user) => (
                     <tr key={user.serviceNum}>
                       <td>{user.serviceNum}</td>
                       <td>{user.name}</td>
                       <td>{user.team}</td>
-                      <td>
-                        <span
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            backgroundColor: user.isOnline
-                              ? "#2de37d"
-                              : "#ff4d4d",
-                            borderRadius: "50%",
-                            display: "inline-block",
-                            marginRight: "5px",
-                          }}
-                        />
-                        {user.active ? "True" : "False"}
-                      </td>{" "}
+                      <td>{user.active}</td>
                       <td>{user.level}</td>
                       <td>
-                        <button
-                          className="AdminUserList-table-edit-btn"
-                          onClick={() => handleEdit(user.serviceNum)}
-                        >
+                        <button className="AdminUserList-table-edit-btn" onClick={() => handleEdit(user.serviceNum)}>
                           <FaEdit />
                         </button>
-                        <button
-                          className="AdminUserList-table-delete-btn"
-                          onClick={() => handleDelete(user.serviceNum)}
-                        >
+                        <button className="AdminUserList-table-delete-btn" onClick={() => handleDelete(user.serviceNum)}>
                           <FaTrash />
                         </button>
-                        {user.active === "True" && (
-                          <button
-                            className="AdminUserList-table-logout-btn"
-                            onClick={() =>
-                              handleDeactivate(technician.serviceNum)
-                            }
-                            title="Force Logout"
-                          >
-                            Logout
-                          </button>
-                        )}
                       </td>
                     </tr>
                   ))
               ) : (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
+                  <td colSpan="6" style={{ textAlign: 'center' }}>
                     No users found
                   </td>
                 </tr>
@@ -363,10 +259,15 @@ function AdminUserList() {
           onClose={() => setIsAddUserOpen(false)}
           onSubmit={async (newUser) => {
             if (!newUser.isEdit) {
+              // Try to update SLT user role first
               if (newUser.serviceNum) {
                 try {
-                  await updateUserRoleById(newUser.serviceNum, "technician");
-                } catch (err) {}
+                  await updateUserRoleById(newUser.serviceNum, 'technician');
+                  console.log('Successfully updated SLT user role to technician');
+                } catch (err) {
+                  console.warn('Failed to update SLT user role (this may be normal if user does not exist in SLT Users table):', err);
+                  // Continue with technician creation even if role update fails
+                }
               }
 
               const [cat1, cat2, cat3, cat4] = newUser.categories || [];
@@ -378,15 +279,15 @@ function AdminUserList() {
                   team: newUser.teamName || newUser.team,
                   active: newUser.active,
                   tier: Number(newUser.tier),
-                  level: Number(newUser.tier) === 1 ? "Tier1" : "Tier2",
-                  teamId: newUser.teamId,
-                  cat1: newUser.cat1 || "",
-                  cat2: newUser.cat2 || "",
-                  cat3: newUser.cat3 || "",
-                  cat4: newUser.cat4 || "",
+                  level: Number(newUser.tier) === 1 ? 'Tier1' : 'Tier2',
+                  teamLevel: 'Default',
+                  cat1: cat1 || '',
+                  cat2: cat2 || '',
+                  cat3: cat3 || '',
+                  cat4: cat4 || '',
                   rr: 1,
-                  designation: "Technician",
-                  contactNumber: newUser.contactNumber,
+                  designation: 'Technician',
+                  contactNumber: '0000000000',
                   teamLeader: newUser.teamLeader ?? false,
                   assignAfterSignOff: newUser.assignAfterSignOff ?? false,
                   permanentMember: newUser.permanentMember ?? false,
@@ -408,19 +309,7 @@ function AdminUserList() {
           onSubmit={async (updatedUser) => {
             if (updatedUser.isEdit) {
               const serviceNum =
-                updatedUser.serviceNum ||
-                updatedUser.serviceNumber ||
-                editUser.serviceNum ||
-                editUser.serviceNumber;
-
-              if (editUser.active && !updatedUser.active) {
-                // Emit socket event to notify technician
-                socket.emit("technician-deactivated", {
-                  serviceNum,
-                  message: "Your account has been deactivated by admin",
-                });
-              }
-
+                updatedUser.serviceNum || updatedUser.serviceNumber || editUser.serviceNum || editUser.serviceNumber;
               dispatch(updateTechnicianRequest({ ...updatedUser, serviceNum }));
               dispatch(fetchTechniciansRequest());
             }

@@ -5,7 +5,6 @@ import CategoryDropdown from "../CategoryDropdown/CategoryDropDown";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
 import "./IncidentDetails.css";
 import { fetchCategoriesRequest } from "../../redux/categories/categorySlice";
-import { uploadAttachmentRequest } from "../../redux/incident/incidentSlice";
 
 const IncidentDetails = ({
   userData,

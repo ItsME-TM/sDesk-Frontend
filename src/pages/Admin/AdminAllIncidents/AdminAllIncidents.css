@@ -1,17 +1,9 @@
-/* Clean base styles */
-* {
-    box-sizing: border-box;
-}
-
 .AdminAllIncidents-main-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     height: 100vh;
     background-color: #ffffff;
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
 }
 
 .AdminAllIncidents-direction-bar {
@@ -67,8 +59,6 @@
     font-weight: 600;
     background-color: #b10e0e;
     color: aliceblue;
-    padding: 8px 16px;
-    cursor: pointer;
 }
 
 .AdminAllIncidents-showSearchBar {
@@ -80,7 +70,6 @@
     width: 100%;
     background-color: rgb(255, 255, 255);
     justify-content: space-between;
-    padding: 0 20px;
 }
 
 .AdminAllIncidents-showSearchBar-Show {
@@ -99,7 +88,6 @@
     height: 25px;
     border-radius: 5px;
     margin-right: 20px;
-    background-color: white;
 }
 
 .AdminAllIncidents-showSearchBar-Show-select2 {
@@ -110,7 +98,6 @@
     height: 25px;
     border-radius: 5px;
     margin-right: 20px;
-    background-color: white;
 }
 
 .AdminAllIncidents-showSearchBar-SearchBar {
@@ -129,7 +116,6 @@
     font-size: 13px;
     height: 25px;
     border-radius: 5px;
-    background-color: white;
 }
 
 .AdminAllIncidents-table {
@@ -138,15 +124,12 @@
     padding: 10px 20px 0px 20px;
     max-height: 80%;
     overflow-y: auto;
-    overflow-x: auto;
-    width: 100%;
 }
 
 .AdminAllIncidents-table table {
     border-collapse: collapse;
     background-color: #f8f9fa;
     width: 100%;
-    min-width: 700px;
 }
 
 .AdminAllIncidents-table th,
@@ -173,22 +156,6 @@
     white-space: normal;
     min-width: 100px;
 }
-
-/* Status badges styling */
-.status-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-open { background: #fef3c7; color: #92400e; }
-.status-closed { background: #d1fae5; color: #065f46; }
-.status-pending { background: #dbeafe; color: #1e40af; }
-.status-in-progress { background: #e0e7ff; color: #3730a3; }
 
 .AdminAllIncidents-content3 {
     display: flex;
@@ -233,222 +200,4 @@
 .AdminAllIncidents-content3-team-pagination-buttons span {
     padding: 5px 10px;
     color: #666;
-}
-
-/* Tablet Responsive - 768px and below */
-@media (max-width: 768px) {
-    .AdminAllIncidents-TitleBar {
-        flex-direction: column;
-        height: auto;
-        padding: 10px 0;
-    }
-    
-    .AdminAllIncidents-TitleBar-NameAndIcon {
-        margin: 10px 20px;
-        justify-content: center;
-    }
-    
-    .AdminAllIncidents-TitleBar-buttons {
-        margin: 10px 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .AdminAllIncidents-showSearchBar {
-        flex-direction: column;
-        height: auto;
-        max-height: none;
-        padding: 15px 0;
-        gap: 15px;
-        overflow: visible;
-    }
-    
-    .AdminAllIncidents-showSearchBar-Show {
-        margin: 0 20px;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .AdminAllIncidents-showSearchBar-Show-select,
-    .AdminAllIncidents-showSearchBar-Show-select2 {
-        width: 140px;
-        margin-right: 0;
-        font-size: 13px;
-        height: 30px;
-    }
-    
-    .AdminAllIncidents-showSearchBar-SearchBar {
-        margin: 0 20px;
-        justify-content: center;
-        width: calc(100% - 40px);
-    }
-    
-    .AdminAllIncidents-showSearchBar-SearchBar-input {
-        width: 100%;
-        max-width: 350px;
-        font-size: 13px;
-        height: 30px;
-        padding: 6px 10px;
-    }
-    
-    .AdminAllIncidents-table {
-        padding: 10px;
-        overflow-x: auto;
-    }
-    
-    .AdminAllIncidents-table table {
-        min-width: 600px;
-    }
-    
-    .AdminAllIncidents-content3 {
-        padding: 15px 20px;
-        flex-direction: column;
-        gap: 10px;
-        max-height: none;
-    }
-    
-    .AdminAllIncidents-content3-team-pagination-buttons {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-}
-
-/* Mobile Responsive - 320px and below */
-@media (max-width: 320px) {
-    .AdminAllIncidents-main-content {
-        overflow-x: hidden;
-    }
-    
-    .AdminAllIncidents-content2 {
-        overflow: visible;
-    }
-    
-    .AdminAllIncidents-direction-bar {
-        padding-left: 20px;
-        font-size: 13px;
-    }
-    
-    .AdminAllIncidents-TitleBar {
-        flex-direction: column;
-        height: auto;
-        padding: 10px 0;
-    }
-    
-    .AdminAllIncidents-TitleBar-NameAndIcon {
-        margin: 10px 20px;
-        font-size: 18px;
-        justify-content: center;
-    }
-    
-    .AdminAllIncidents-TitleBar-buttons {
-        margin: 10px 20px;
-        font-size: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .AdminAllIncidents-TitleBar-buttons-ExportData {
-        padding: 8px 12px;
-        font-size: 11px;
-    }
-    
-    .AdminAllIncidents-showSearchBar {
-        flex-direction: column;
-        height: auto;
-        max-height: none;
-        padding: 15px 0;
-        gap: 15px;
-        overflow: visible;
-        z-index: 10;
-    }
-    
-    .AdminAllIncidents-showSearchBar-Show {
-        margin: 0 20px;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        width: calc(100% - 40px);
-    }
-    
-    .AdminAllIncidents-showSearchBar-Show-select,
-    .AdminAllIncidents-showSearchBar-Show-select2 {
-        width: 100%;
-        max-width: 280px;
-        margin-right: 0;
-        font-size: 12px;
-        height: 30px;
-    }
-    
-    .AdminAllIncidents-showSearchBar-SearchBar {
-        margin: 0 20px;
-        width: calc(100% - 40px);
-        justify-content: center;
-    }
-    
-    .AdminAllIncidents-showSearchBar-SearchBar-input {
-        width: 100%;
-        max-width: 280px;
-        font-size: 12px;
-        height: 30px;
-        padding: 6px 10px;
-    }
-    
-    .AdminAllIncidents-table {
-        padding: 5px;
-        margin-top: 10px;
-        max-height: 70vh;
-        min-height: 50vh;
-        height: auto;
-        flex-grow: 1;
-        overflow-y: auto;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-        border: none;
-        position: relative;
-    }
-    
-    .AdminAllIncidents-table table {
-        min-width: 600px;
-        font-size: 10px;
-    }
-    
-    .AdminAllIncidents-table th,
-    .AdminAllIncidents-table td {
-        padding: 4px;
-        font-size: 10px;
-    }
-    
-    .AdminAllIncidents-table .status-badge {
-        font-size: 6px;
-        padding: 1px 2px;
-        display: inline-block;
-        border-radius: 8px;
-    }
-    
-    .AdminAllIncidents-content3 {
-        padding: 20px;
-        font-size: 10px;
-        flex-direction: column;
-        gap: 10px;
-        max-height: none;
-    }
-    
-    .AdminAllIncidents-content3-team-pagination-buttons {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .AdminAllIncidents-content3-team-pagination-buttons button {
-        padding: 1px 6px;
-        min-width: 25px;
-        font-size: 10px;
-    }
-    
-    .AdminAllIncidents-content3-team-pagination-buttons span {
-        padding: 3px 6px;
-        font-size: 10px;
-    }
 }

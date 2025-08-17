@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Card, Form, Row, Col, Button } from 'react-bootstrap';
+import "./UpdateStatus.css";
 import { FaPlusSquare } from "react-icons/fa";
 import CategoryDropdown from "../CategoryDropdown/CategoryDropDown";
 import LocationDropdown from "../LocationDropdown/LocationDropdown";
-import './UpdateStatus.css';
 
 const UpdateStatus = ({
   incidentData,
@@ -12,7 +11,7 @@ const UpdateStatus = ({
   locationDataset,
   incident,
   onStatusChange,
-  loggedInUser,
+  loggedInUser, // <-- add this prop
 }) => {
   const [isCategoryPopupOpen, setIsCategoryPopupOpen] = useState(false);
   const [isLocationPopupOpen, setIsLocationPopupOpen] = useState(false);
@@ -21,11 +20,17 @@ const UpdateStatus = ({
 
   const [technicians, setTechnicians] = useState([]);
 
-  const [selectedCategory, setSelectedCategory] = useState({ name: incidentData.category || "", number: "" });
-  const [selectedLocation, setSelectedLocation] = useState({ name: incidentData.location || "", number: "" });
+  const [selectedCategory, setSelectedCategory] = useState({
+    name: incidentData.category || "",
+    number: "",
+  });
+
+  const [selectedLocation, setSelectedLocation] = useState({
+    name: incidentData.location || "",
+    number: "",
+  });
 
   const [fileName, setFileName] = useState("No file chosen");
-  const [selectedFile, setSelectedFile] = useState(null);
   const [updatedBy, setUpdatedBy] = useState("");
   const [transferTo, setTransferTo] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +48,17 @@ const UpdateStatus = ({
     setIsLocationPopupOpen(false);
   };
 
-  useEffect(() => {
+  const handleClearCategory = () => {
+    setSelectedCategory({ name: "", number: "" });
+    setIsCategoryPopupOpen(false);
+  };
+
+  const handleClearLocation = () => {
+    setSelectedLocation({ name: "", number: "" });
+    setIsLocationPopupOpen(false);
+  };
+
+  const updateStatusData = () => {
     const data = {
       updatedBy,
       category: selectedCategory.number,
@@ -52,165 +67,327 @@ const UpdateStatus = ({
       description,
       priority,
       status,
-      selectedFile,
     };
     onStatusChange(data);
-  }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status, selectedFile]);
+  };
 
   useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (
+        categoryPopupRef.current &&
+        !categoryPopupRef.current.contains(e.target)
+      ) {
+        setIsCategoryPopupOpen(false);
+      }
+      if (
+        locationPopupRef.current &&
+        !locationPopupRef.current.contains(e.target)
+      ) {
+        setIsLocationPopupOpen(false);
+      }
+    };
+
+    if (isCategoryPopupOpen || isLocationPopupOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isCategoryPopupOpen, isLocationPopupOpen]);
+
+  useEffect(() => {
+    updateStatusData();
+  }, [
+    updatedBy,
+    selectedCategory,
+    selectedLocation,
+    transferTo,
+    description,
+    priority,
+    status,
+  ]);
+
+  useEffect(() => {
+    // Always set Update By to the currently logged-in user's name
     if ((loggedInUser && loggedInUser.userName) || loggedInUser.name) {
       setUpdatedBy(loggedInUser.userName || loggedInUser.name);
     } else {
       setUpdatedBy("");
     }
-
-    if (incident && usersDataset.length > 0 && categoryDataset.length > 0 && locationDataset.length > 0) {
+    // Set other fields if incident exists
+    if (
+      incident &&
+      usersDataset.length > 0 &&
+      categoryDataset.length > 0 &&
+      locationDataset.length > 0
+    ) {
+      // Set Status
       setStatus(incident.status || "");
+
+      // Set Priority
       setPriority(incident.priority || "");
+
+      // Set Description
       setDescription(incident.description || "");
 
+      // Set Transfer To (handler)
       if (incident.handler) {
-        const handlerUser = usersDataset.find((user) => user.service_number === incident.handler);
-        setTransferTo(handlerUser ? handlerUser.service_number : incident.handler);
+        const handlerUser = usersDataset.find(
+          (user) => user.service_number === incident.handler
+        );
+        setTransferTo(
+          handlerUser ? handlerUser.service_number : incident.handler
+        ); // Keep service_number for transferTo
       }
 
-      const filteredTechnicians = usersDataset.filter((user) => user.role === "technician");
+      // Load technicians
+      const filteredTechnicians = usersDataset.filter(
+        (user) => user.role === "technician"
+      );
       setTechnicians(filteredTechnicians);
 
-      const categoryItem = categoryDataset.find((item) => item.grandchild_category_number === incident.category);
-      setSelectedCategory({ name: categoryItem ? categoryItem.grandchild_category_name : incidentData.category || "", number: categoryItem ? categoryItem.grandchild_category_number : "" });
+      // Set category name
+      const categoryItem = categoryDataset.find(
+        (item) => item.grandchild_category_number === incident.category
+      );
+      setSelectedCategory({
+        name: categoryItem
+          ? categoryItem.grandchild_category_name
+          : incidentData.category || "",
+        number: categoryItem ? categoryItem.grandchild_category_number : "",
+      });
 
-      const locationItem = locationDataset.find((item) => item.loc_number === incident.location);
-      setSelectedLocation({ name: locationItem ? locationItem.loc_name : incidentData.location || "", number: locationItem ? locationItem.loc_number : "" });
+      // Set location name
+      const locationItem = locationDataset.find(
+        (item) => item.loc_number === incident.location
+      );
+      setSelectedLocation({
+        name: locationItem
+          ? locationItem.loc_name
+          : incidentData.location || "",
+        number: locationItem ? locationItem.loc_number : "",
+      });
     }
-  }, [incident, usersDataset, categoryDataset, locationDataset, incidentData, loggedInUser]);
+  }, [
+    incident,
+    usersDataset,
+    categoryDataset,
+    locationDataset,
+    incidentData,
+    loggedInUser,
+  ]);
 
   return (
-    <Card className="update-status-card-modern shadow-sm">
-      <Card.Header as="h5" className="bg-light text-dark">
-        Update Status - <span className="fw-bold text-primary">{incidentData.regNo}</span>
-      </Card.Header>
-      <Card.Body>
-        <Form>
-          <Row className="mb-3">
-            <Form.Group as={Col} md="3" controlId="updateBy">
-              <Form.Label>Update By</Form.Label>
-              <Form.Control type="text" value={updatedBy} readOnly />
-            </Form.Group>
+    <div className="update-status-container">
+      <div className="update-status-card card">
+        <div className="card-body">
+          <h5 className="update-status-title">
+            Update Status - <span>{incidentData.regNo}</span>
+          </h5>
 
-            <Form.Group as={Col} md="3" controlId="category">
-              <Form.Label>
-                <FaPlusSquare onClick={() => setIsCategoryPopupOpen(true)} className="me-1 clickable-icon" />
+          <div className="form-row">
+            <div className="form-group col-md-3">
+              <label htmlFor="updateBy">Update By</label>
+              <input
+                type="text"
+                className="form-control"
+                id="updateBy"
+                value={updatedBy}
+                style={{ fontSize: "12px" }}
+                readOnly
+              />
+            </div>
+
+            <div className="form-group col-md-3">
+              <label htmlFor="category">
+                <FaPlusSquare
+                  onClick={() => setIsCategoryPopupOpen(true)}
+                  style={{ cursor: "pointer" }}
+                />{" "}
                 Category
-              </Form.Label>
-              <Form.Control type="text" value={selectedCategory.name} readOnly onClick={() => setIsCategoryPopupOpen(true)} />
-            </Form.Group>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="category"
+                value={selectedCategory.name}
+                readOnly
+                onClick={() => setIsCategoryPopupOpen(true)}
+                style={{ fontSize: "12px" }}
+              />
+            </div>
 
-            <Form.Group as={Col} md="2" controlId="location">
-              <Form.Label>
-                <FaPlusSquare onClick={() => setIsLocationPopupOpen(true)} className="me-1 clickable-icon" />
+            <div className="form-group col-md-2">
+              <label htmlFor="location">
+                <FaPlusSquare
+                  onClick={() => setIsLocationPopupOpen(true)}
+                  style={{ cursor: "pointer" }}
+                />{" "}
                 Location
-              </Form.Label>
-              <Form.Control type="text" value={selectedLocation.name} readOnly onClick={() => setIsLocationPopupOpen(true)} />
-            </Form.Group>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="location"
+                value={selectedLocation.name}
+                readOnly
+                onClick={() => setIsLocationPopupOpen(true)}
+                style={{ fontSize: "12px" }}
+              />
+            </div>
 
-            <Form.Group as={Col} md="4" controlId="transferTo">
-              <Form.Label>Transfer Incident</Form.Label>
-              <Form.Select value={transferTo} onChange={(e) => setTransferTo(e.target.value)}>
+            <div className="form-group col-md-2">
+              <label htmlFor="transferTo">Transfer Incident</label>
+              <select
+                className="form-control"
+                id="transferTo"
+                value={transferTo}
+                onChange={(e) => {
+                  setTransferTo(e.target.value);
+                  updateStatusData();
+                }}
+              >
                 <option value="">Select One</option>
-                <option value="tier2-auto">Automatically Assign For Tier2</option>
+                <option value="tier2-auto">
+                  Automatically Assign For Tier2
+                </option>
                 {technicians.map((technician) => (
-                  <option key={technician.service_number} value={technician.service_number}>
+                  <option
+                    key={technician.service_number}
+                    value={technician.service_number}
+                  >
                     {technician.display_name || technician.user_name}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
-          </Row>
+              </select>
+              {transferTo === "tier2-auto" && (
+                <div
+                  style={{
+                    color: "#007bff",
+                    fontWeight: "bold",
+                    marginTop: "5px",
+                    fontSize: "13px",
+                  }}
+                >
+                  Automatically Assign For Tier2
+                </div>
+              )}
+            </div>
+          </div>
 
-          <Row className="mb-3">
-            <Form.Group as={Col} md="6" controlId="description">
-              <Form.Label className="d-flex align-items-center">
-                Description <span className="text-danger ms-1">*</span>
-                <Form.Check type="checkbox" className="ms-3" label="Notify User" checked={notifyUser} onChange={(e) => setNotifyUser(e.target.checked)} />
-              </Form.Label>
-              <Form.Control as="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-            </Form.Group>
+          <div className="form-row">
+            <div className="form-group col-md-6">
+              <label
+                htmlFor="description"
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
+                Description <span className="required">*</span>
+                <input
+                  type="checkbox"
+                  style={{ marginLeft: "10px", marginRight: "5px" }}
+                  checked={notifyUser}
+                  onChange={(e) => setNotifyUser(e.target.checked)}
+                />
+                <span className="notify-user">NotifyUser</span>
+              </label>
+              <textarea
+                className="form-control"
+                id="description"
+                rows="3"
+                value={description}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  updateStatusData();
+                }}
+              ></textarea>
+            </div>
 
-            <Form.Group as={Col} md="3" controlId="priority">
-              <Form.Label>Priority</Form.Label>
-              <Form.Select value={priority} onChange={(e) => setPriority(e.target.value)}>
+            <div className="form-group col-md-3">
+              <label htmlFor="priority">Priority</label>
+              <select
+                className="form-control"
+                id="priority"
+                value={priority}
+                onChange={(e) => {
+                  setPriority(e.target.value);
+                  updateStatusData();
+                }}
+              >
                 <option value="">Select One</option>
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-              </Form.Select>
-            </Form.Group>
+                <option value="Critical" className="priority-critical">
+                  Critical
+                </option>
+                <option value="High" className="priority-high">
+                  High
+                </option>
+                <option value="Medium" className="priority-medium">
+                  Medium
+                </option>
+              </select>
+            </div>
 
-            <Form.Group as={Col} md="3" controlId="status">
-              <Form.Label>Status</Form.Label>
-              <Form.Select value={status} onChange={(e) => setStatus(e.target.value)}>
+            <div className="form-group col-md-3">
+              <label htmlFor="status">Status</label>
+              <select
+                className="form-control"
+                id="status"
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  updateStatusData();
+                }}
+              >
                 <option value="">Select One</option>
                 <option value="Open">Open</option>
                 <option value="Hold">Hold</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Closed">Closed</option>
-              </Form.Select>
-            </Form.Group>
-          </Row>
+              </select>
+            </div>
 
-          <Form.Group controlId="formFile" className="mb-3">
-            <Form.Label>Attachment</Form.Label>
-            <Form.Control 
-              type="file" 
-              accept=".pdf,.png,.jpg,.jpeg"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  // Validate file size (1MB = 1048576 bytes)
-                  if (file.size > 1048576) {
-                    alert('File size must be less than 1MB');
-                    e.target.value = '';
-                    setFileName("No file chosen");
-                    setSelectedFile(null);
-                    return;
-                  }
-                  
-                  // Validate file type
-                  const allowedTypes = ['application/pdf', 'image/png', 'image/jpg', 'image/jpeg'];
-                  if (!allowedTypes.includes(file.type)) {
-                    alert('Only PDF, PNG, JPG, and JPEG files are allowed');
-                    e.target.value = '';
-                    setFileName("No file chosen");
-                    setSelectedFile(null);
-                    return;
-                  }
-                  
-                  setFileName(file.name);
-                  setSelectedFile(file);
-                } else {
-                  setFileName("No file chosen");
-                  setSelectedFile(null);
-                }
-              }}
-            />
-            {fileName !== "No file chosen" && (
-              <small className="text-muted">Selected: {fileName}</small>
-            )}
-          </Form.Group>
-        </Form>
-      </Card.Body>
+            <div className="file-upload-container col-md-12 mt-3">
+              <label htmlFor="fileInput">Attachment</label>
+              <div className="file-upload-controls">
+                <input
+                  type="file"
+                  id="fileInput"
+                  className="file-input"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    setFileName(file ? file.name : "No file chosen");
+                  }}
+                />
+                <label htmlFor="fileInput" className="choose-file-button">
+                  Choose File
+                </label>
+                <span id="fileName" className="file-name">
+                  {fileName}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       {isCategoryPopupOpen && (
         <div ref={categoryPopupRef}>
-          <CategoryDropdown onSelect={handleCategorySelect} onClose={() => setIsCategoryPopupOpen(false)} categoryDataset={categoryDataset} />
+          <CategoryDropdown
+            onSelect={handleCategorySelect}
+            onClose={() => setIsCategoryPopupOpen(false)}
+            categoryDataset={categoryDataset}
+          />
         </div>
       )}
       {isLocationPopupOpen && (
         <div ref={locationPopupRef}>
-          <LocationDropdown onSelect={handleLocationSelect} onClose={() => setIsLocationPopupOpen(false)} locationDataset={locationDataset} />
+          <LocationDropdown
+            onSelect={handleLocationSelect}
+            onClose={() => setIsLocationPopupOpen(false)}
+            locationDataset={locationDataset}
+          />
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

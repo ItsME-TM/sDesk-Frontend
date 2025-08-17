@@ -10,8 +10,8 @@ import {
   getIncidentByNumberRequest
 } from '../../../redux/incident/incidentSlice';
 import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
-import { FaTimes } from 'react-icons/fa';
 
+// Accept loggedInUser as a prop
 const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
   const { incidentHistory, loading: loadingHistory, error: errorHistory, currentIncident } = useSelector(state => state.incident);
   const { allUsers } = useSelector(state => state.sltusers);
 
+  // Set formData to loggedInUser if available, else fallback to blank
   const [formData, setFormData] = useState({
     serviceNo: (loggedInUser?.serviceNum || incidentData?.informant || ''),
     tpNumber: loggedInUser?.contactNumber || '',
@@ -49,6 +50,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
   useEffect(() => {
     dispatch(fetchAllUsersRequest());
 
+    // Always set formData to loggedInUser if available (for popup)
     if (loggedInUser) {
       setFormData({
         serviceNo: loggedInUser.serviceNum || incidentData?.informant || '',
@@ -72,6 +74,8 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
       });
     }
 
+    // Incident details
+    console.log('[UserUpdateIncident] incidentData:', incidentData);
     if (incidentData) {
       setIncidentDetails({
         refNo: incidentData.incident_number || incidentData.refNo,
@@ -84,6 +88,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         updatedOn: incidentData.update_on || incidentData.updatedOn,
         comments: incidentData.description || incidentData.comments,
       });
+      // Fetch incident history using redux-saga
       const refNo = String(incidentData.incident_number || incidentData.refNo);
       dispatch(fetchIncidentHistoryRequest({ incident_number: refNo }));
       setIsLoading(false);
@@ -110,133 +115,57 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         comments: currentIncident.description || 'No comments'
       });
     }
-  }, [currentIncident, allUsers, getUserName]);
+  }, [currentIncident, allUsers]);
 
   const handleBackClick = () => {
     navigate('/user/UserViewIncident');
   };
 
+
   if (isLoading || loadingHistory) {
-    return <div className="d-flex justify-content-center align-items-center vh-100">Loading...</div>;
+    return <div className="loading-container">Loading...</div>;
   }
   if (errorHistory) {
-    return <div className="d-flex justify-content-center align-items-center vh-100 text-danger">Error: {errorHistory}</div>;
+    return <div className="loading-container">Error: {errorHistory}</div>;
   }
 
-  const mainContentClass = isPopup 
-    ? "UserUpdateIncident-modal-content" 
-    : "container-fluid vh-100 d-flex flex-column";
-
   return (
-    <div className={mainContentClass}>
+    <div className={isPopup ? "UserUpdateIncident-modal-content" : "UserUpdateIncident-main-content"}>
       {isPopup && (
-        <button className="btn-close-modal" onClick={onClose}>
-          <FaTimes />
-        </button>
+        <button style={{ float: "right" }} onClick={onClose}>Close</button>
       )}
-      
-      {!isPopup && (
-        <div className="direction-bar">
-          <span>Incidents</span>
-          <IoIosArrowForward />
-          <span>My Incidents</span>
-        </div>
-      )}
+      <div className="UserUpdateIncident-direction-bar">
+        <span className="UserUpdateIncident-svr-desk">Incidents</span>
+        <IoIosArrowForward />
+        <span className="UserUpdateIncident-created-ticket">My Incidents</span>
+      </div>
 
-      <div className="content-area flex-grow-1 overflow-auto p-md-4 p-2">
-     <br/>
-     <br/>
-        <div className="container-fluid">
-          <div className="row g-4">
-            <div className="col-12">
-              <AffectedUserDetail formData={formData} />
-            </div>
-            <div className="col-12">
-              {/* Display Incident Details here */}
-              <div className="incident-details-section">
-                <h3>Incident Details</h3>
-                <div className="incident-info">
-                  <div className="info-row">
-                    <span className="label">Incident Number:</span>
-                    <span className="value">{incidentDetails.refNo}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Category:</span>
-                    <span className="value">{incidentDetails.category}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Location:</span>
-                    <span className="value">{incidentDetails.location}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Priority:</span>
-                    <span className="value">{incidentDetails.priority}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Status:</span>
-                    <span className="value">{incidentDetails.status}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Assigned To:</span>
-                    <span className="value">{incidentDetails.assignedTo}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Updated By:</span>
-                    <span className="value">{incidentDetails.updateBy}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Updated On:</span>
-                    <span className="value">{incidentDetails.updatedOn}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Comments:</span>
-                    <span className="value">{incidentDetails.comments}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="label">Attachment:</span>
-                    <span className="value">
-                      {incidentData.Attachment ? (
-                        <a
-                          href={`data:application/octet-stream;base64,${incidentData.Attachment}`}
-                          download
-                        >
-                          Download Attachment
-                        </a>
-                      ) : (
-                        "No attachment"
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <br/>
-              <IncidentHistory
-                refNo={incidentDetails.refNo}
-                category={incidentDetails.category}
-                location={incidentDetails.location}
-                priority={incidentDetails.priority}
-                status={incidentDetails.status}
-                assignedTo={incidentDetails.assignedTo}
-                updateBy={incidentDetails.updateBy}
-                updatedOn={incidentDetails.updatedOn}
-                comments={incidentDetails.comments}
-                historyData={incidentHistory}
-                users={allUsers}
-              />
-            </div>
-          </div>
-        </div>
-        
-        {!isPopup && (
-          <div className="text-end mt-4">
+      <div className="UserUpdateIncident-content2">
+        <AffectedUserDetail formData={formData} />
+        {/* historyData now comes from redux */}
+        <IncidentHistory
+          refNo={incidentDetails.refNo}
+          category={incidentDetails.category}
+          location={incidentDetails.location}
+          priority={incidentDetails.priority}
+          status={incidentDetails.status}
+          assignedTo={incidentDetails.assignedTo}
+          updateBy={incidentDetails.updateBy}
+          updatedOn={incidentDetails.updatedOn}
+          comments={incidentDetails.comments}
+          historyData={incidentHistory}
+          users={allUsers}
+        />
+        <div className="UserUpdateIncident-button-container">
+          {!isPopup && (
             <button
-              className="btn btn-danger"
+              className="UserUpdateIncident-details-back-btn"
               onClick={handleBackClick}
             >
               Go Back
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

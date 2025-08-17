@@ -41,12 +41,13 @@ export default function TopNotificationBar({ user, notificationCount = 0, toggle
     <div className={`TopNotificationBar-top-notification-bar TopNotificationBar--${role || 'default'}`}>
       <div className="TopNotificationBar-notificationIcon-listIcon">
         <FaListAlt
-          size="0.8em"
+          size="1.5em"
           className="TopNotificationBar-list-icon"
+          style={{ display: 'inline-block' }}
           onClick={toggleSidebar}
         />
         <div className="TopNotificationBar-notification-container">
-          <IoIosNotifications size="1.2em" className="TopNotificationBar-notification-icon" />
+          <IoIosNotifications size="1.3em" className="TopNotificationBar-notification-icon" />
           {notificationCount > 0 && (
             <span className="TopNotificationBar-notification-badge">
               {notificationCount > 99 ? '99+' : notificationCount}
@@ -66,9 +67,11 @@ export default function TopNotificationBar({ user, notificationCount = 0, toggle
         <button
           className="TopNotificationBar-logout-btn"
           onClick={handleLogoutClick}
-          title="Logout">
-          <IoExit size="1.2em" className="TopNotificationBar-logout-icon" />
-          <span className="TopNotificationBar-logout-text">Logout</span>
+          title="Logout"
+          style={{ background: 'none', border: 'none', padding: 0, marginLeft: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        >
+          <IoExit size="1.5em" className="TopNotificationBar-logout-icon" />
+          <span className="TopNotificationBar-logout-text" style={{ marginLeft: '4px', fontSize: '1em', color: '#b71c1c' }}>Logout</span>
         </button>
       </div>
       {showConfirm && (

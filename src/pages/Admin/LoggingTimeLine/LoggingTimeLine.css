@@ -1,20 +1,9 @@
-html, body {
-  text-size-adjust: 100%;
-  font-size: 16px;
-  box-sizing: border-box;
-  width: 100vw;
-  overflow-x: hidden;
+.LoggingTimeLine-main-content{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    max-height: 90vh;
 }
-
-.LoggingTimeLine-main-content {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  max-height: 90vh;
-  width: 100%;
-  min-width: 0;
-}
-
 .LoggingTimeLine-direction-bar {
     display: flex;
     align-items: center;
@@ -23,29 +12,26 @@ html, body {
     padding-left: 20px;
     font-size: 15px;
   }
-  .LoggingTimeLine-content2 {
+  .LoggingTimeLine-content2{
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    margin: 2vw 5vw;
-    width: 100%;
-    min-width: 0;
+    margin: 20px 80px 20px 80px;
   }
-  .LoggingTimeLine-graph-title-bar {
+  .LoggingTimeLine-graph-title-bar{
     display: flex;
     flex-direction: row;
     height: 70px;
     width: 100%;
     justify-content: space-between;
     gap: 20px;
-    min-width: 0;
   }
-  .LoggingTimeLine-graph-title-bar-p1 {
+  .LoggingTimeLine-graph-title-bar-p1{
     display: flex;
     margin: 10px 0px 10px 20px;
     align-items: center;
   }
-  .LoggingTimeLine-graph-title-bar-p1-day {
+  .LoggingTimeLine-graph-title-bar-p1-day{
     font-size: 12px;
     font-weight: 600;
     border-radius: 3px;
@@ -57,26 +43,26 @@ html, body {
     cursor: pointer;
     text-decoration: underline;
   }
-  .LoggingTimeLine-graph-title-bar-p1-icon {
+  .LoggingTimeLine-graph-title-bar-p1-icon{
     color: rgb(202, 6, 6);
     cursor: pointer;
   }
-  .LoggingTimeLine-graph-title-bar-p2 {
+  .LoggingTimeLine-graph-title-bar-p2{
     display: flex;
     margin: 10px 0px 10px 0px;
     align-items: center;
   }
-  .LoggingTimeLine-graph-title-bar-p2-graphTitle {
+  .LoggingTimeLine-graph-title-bar-p2-graphTitle{
     font-size: 20px;
   }
-  .LoggingTimeLine-graph-title-bar-p3 {
+  .LoggingTimeLine-graph-title-bar-p3{
     display: flex;
     flex-direction: row;;
     margin: 10px 20px 10px 0px;
     align-items: center;
     gap: 10px;
   }
-  .LoggingTimeLine-graph-title-bar-p3-text-boxes {
+  .LoggingTimeLine-graph-title-bar-p3-text-boxes{
     font-size: 10px;
     font-weight: 600;
     color: rgb(202, 6, 6);
@@ -84,18 +70,18 @@ html, body {
     cursor: pointer;
     
   }
-  .LoggingTimeLine-graph-container {
+  .LoggingTimeLine-graph-container{
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     font-family: Arial, sans-serif;
     overflow: auto;
   }
-  .LoggingTimeLine-graph-container-header {
+  .LoggingTimeLine-graph-container-header{
     display: flex;
     border-bottom: 1px solid #ddd;
   }
-  .LoggingTimeLine-graph-container-header-employeelable {
+  .LoggingTimeLine-graph-container-header-employeelable{
     display: flex;
     width: 192px;
     padding: 10px;
@@ -116,21 +102,21 @@ html, body {
     max-height: 400px;
     overflow-y: scroll;
   }
-  .LoggingTimeLine-graph-container-body-timeline-row {
+  .LoggingTimeLine-graph-container-body-timeline-row{
       display: flex;
       border-bottom: 1px solid #ddd;
   }
-  .LoggingTimeLine-graph-container-body-employeeInfo {
+  .LoggingTimeLine-graph-container-body-employeeInfo{
       width: 192px;
       display: flex;
       padding: 10px;
       border-right: 1px solid #ddd;
   }
-  .LoggingTimeLine-graph-container-body-employeeId {
+  .LoggingTimeLine-graph-container-body-employeeId{
       width: 50px;
       font-size: 10px;
   }
-  .LoggingTimeLine-graph-container-body-employeeName {
+  .LoggingTimeLine-graph-container-body-employeeName{
       font-size: 10px;
       flex: 1;
   }
@@ -158,143 +144,213 @@ html, body {
     justify-content: center;
     border-radius: 3px;
   }
-/* Mobile View (≤768px) */
+ /* Mobile View (≤768px) */
 @media (max-width: 768px) {
   .LoggingTimeLine-main-content {
-    padding: 10px;
-    max-width: 100vw;
-    margin: 0;
-    box-sizing: border-box;
+    padding: 10px; /* Tighten padding to maximize content area */
   }
+
   .LoggingTimeLine-direction-bar {
-    font-size: 12px;
-    padding-left: 10px;
-    min-height: 25px;
+    font-size: 12px; /* Smaller, readable font */
+    padding-left: 10px; /* Reduced padding */
+    min-height: 25px; /* Compact height */
   }
+
   .LoggingTimeLine-content2 {
-    margin: 10px 2vw;
-    max-width: 100vw;
-    width: 100%;
-    box-sizing: border-box;
+    margin: 10px 20px; /* Smaller margins for more space */
   }
+
   .LoggingTimeLine-graph-title-bar {
-    flex-direction: column;
-    height: auto;
-    gap: 10px;
-    padding: 10px 0;
-    align-items: center;
-    max-width: 100vw;
-    width: 100%;
-    margin: 0;
-    box-sizing: border-box;
+    flex-direction: column; /* Stack vertically to avoid crowding */
+    height: auto; /* Natural height */
+    gap: 10px; /* Tight spacing between stacked elements */
+    padding: 10px 0; /* Consistent vertical padding */
+    align-items: center; /* Center elements for clean look */
   }
+
+  .LoggingTimeLine-graph-title-bar-p1 {
+    margin: 0; /* Remove margins for centered stacking */
+    justify-content: center; /* Center the day and icons */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p1-day {
+    font-size: 10px; /* Small but legible */
+    width: 35px;
+    height: 20px;
+    padding: 2px 0; /* Compact padding */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p1-icon {
+    font-size: 16px; /* Smaller icons for touch-friendliness */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p2 {
+    margin: 0; /* No extra margins */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p2-graphTitle {
+    font-size: 16px; /* Reduced title size */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p3 {
+    margin: 0; /* No margins */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    gap: 8px; /* Tight gap between options */
+    justify-content: center; /* Center for aesthetics */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p3-text-boxes {
+    font-size: 9px; /* Small but readable */
+  }
+
   .LoggingTimeLine-graph-container {
-    overflow-x: auto;
-    max-width: 100vw;
-    width: 100%;
-    margin: 0;
-    box-sizing: border-box;
+    overflow-x: auto; /* Enable horizontal scrolling for timeline */
   }
-  .LoggingTimeLine-graph-container-header-employeelable,
-  .LoggingTimeLine-graph-container-body-employeeInfo {
-    width: 100px;
-    padding: 6px;
-    font-size: 11px;
+
+  .LoggingTimeLine-graph-container-header-employeelable {
+    width: 120px; /* Narrower employee column */
+    padding: 8px; /* Reduced padding */
+    font-size: 12px; /* Smaller header text */
   }
+
   .LoggingTimeLine-graph-container-header-timelineHours {
-    height: 28px;
+    height: 30px; /* Shorter header */
   }
+
   .LoggingTimeLine-graph-container-header-timelineHours-hour-label {
-    font-size: 10px;
-    padding: 6px;
+    font-size: 12px; /* Smaller hour labels */
+    padding: 8px; /* Tight padding */
   }
+
   .LoggingTimeLine-graph-container-body {
-    max-height: 220px;
+    max-height: 300px; /* Smaller scrollable area */
   }
+
   .LoggingTimeLine-graph-container-body-timeline-row {
-    min-height: 24px;
+    min-height: 30px; /* Compact row height */
   }
+
+  .LoggingTimeLine-graph-container-body-employeeInfo {
+    width: 120px; /* Match header width */
+    padding: 8px; /* Reduced padding */
+  }
+
   .LoggingTimeLine-graph-container-body-employeeId {
-    width: 36px;
-    font-size: 8px;
+    width: 40px; /* Narrower ID column */
+    font-size: 9px; /* Small text */
   }
+
   .LoggingTimeLine-graph-container-body-employeeName {
-    font-size: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 9px; /* Small text */
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Truncate long names */
   }
+
   .LoggingTimeLine-graph-container-body-timelineBar {
-    height: 24px;
+    height: 30px; /* Shorter timeline bar */
   }
+
   .LoggingTimeLine-graph-container-body-scheduleSlot {
-    height: 12px;
-    font-size: 7px;
-    top: 6px;
-    white-space: nowrap;
+    height: 16px; /* Smaller slot */
+    font-size: 8px; /* Tiny text for time */
+    top: 7px; /* Center vertically in shorter bar */
+    white-space: nowrap; /* Prevent wrapping */
   }
 }
 
 /* Tablet View (769px–1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
   .LoggingTimeLine-main-content {
-    padding: 15px;
-    max-width: 100vw;
-    margin: 0;
-    box-sizing: border-box;
+    padding: 15px; /* Moderate padding */
   }
+
   .LoggingTimeLine-direction-bar {
-    font-size: 14px;
-    padding-left: 15px;
-    min-height: 28px;
+    font-size: 14px; /* Slightly smaller font */
+    padding-left: 15px; /* Moderate padding */
+    min-height: 28px; /* Compact height */
   }
+
   .LoggingTimeLine-content2 {
-    margin: 15px 3vw;
-    max-width: 100vw;
-    width: 100%;
-    box-sizing: border-box;
+    margin: 15px 40px; /* Balanced margins */
   }
+
   .LoggingTimeLine-graph-title-bar {
-    height: 60px;
-    gap: 15px;
-    max-width: 100vw;
-    width: 100%;
-    margin: 0;
-    box-sizing: border-box;
+    height: 60px; /* Slightly shorter */
+    gap: 15px; /* Moderate spacing */
   }
-  .LoggingTimeLine-graph-container-header-employeelable,
-  .LoggingTimeLine-graph-container-body-employeeInfo {
-    width: 120px;
-    padding: 8px;
-    font-size: 12px;
+
+  .LoggingTimeLine-graph-title-bar-p1 {
+    margin: 10px 0 10px 15px; /* Adjusted margins */
   }
+
+  .LoggingTimeLine-graph-title-bar-p1-day {
+    font-size: 11px; /* Slightly smaller */
+    width: 38px;
+    height: 22px;
+  }
+
+  .LoggingTimeLine-graph-title-bar-p1-icon {
+    font-size: 18px; /* Readable icon size */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p2-graphTitle {
+    font-size: 18px; /* Slightly smaller title */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p3 {
+    margin: 10px 15px 10px 0; /* Adjusted margins */
+    gap: 9px; /* Moderate gap */
+  }
+
+  .LoggingTimeLine-graph-title-bar-p3-text-boxes {
+    font-size: 9px; /* Small but clear */
+  }
+
+  .LoggingTimeLine-graph-container-header-employeelable {
+    width: 160px; /* Narrower column */
+    padding: 9px; /* Slightly reduced padding */
+    font-size: 13px; /* Readable header */
+  }
+
   .LoggingTimeLine-graph-container-header-timelineHours {
-    height: 32px;
+    height: 35px; /* Shorter header */
   }
+
   .LoggingTimeLine-graph-container-header-timelineHours-hour-label {
-    font-size: 11px;
-    padding: 8px;
+    font-size: 13px; /* Slightly smaller labels */
+    padding: 9px; /* Moderate padding */
   }
+
   .LoggingTimeLine-graph-container-body {
-    max-height: 280px;
+    max-height: 350px; /* Adjusted scroll area */
   }
+
   .LoggingTimeLine-graph-container-body-timeline-row {
-    min-height: 28px;
+    min-height: 35px; /* Compact row height */
   }
+
+  .LoggingTimeLine-graph-container-body-employeeInfo {
+    width: 160px; /* Match header */
+    padding: 9px; /* Slightly reduced padding */
+  }
+
   .LoggingTimeLine-graph-container-body-employeeId {
-    width: 40px;
-    font-size: 9px;
+    width: 45px; /* Narrower ID column */
+    font-size: 9px; /* Small text */
   }
+
   .LoggingTimeLine-graph-container-body-employeeName {
-    font-size: 9px;
+    font-size: 9px; /* Small text */
   }
+
   .LoggingTimeLine-graph-container-body-timelineBar {
-    height: 28px;
+    height: 35px; /* Shorter bar */
   }
+
   .LoggingTimeLine-graph-container-body-scheduleSlot {
-    height: 14px;
-    font-size: 8px;
-    top: 7px;
-    white-space: nowrap;
+    height: 18px; /* Smaller slot */
+    font-size: 9px; /* Readable time text */
+    top: 8px; /* Center in bar */
   }
 }

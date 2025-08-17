@@ -351,8 +351,15 @@ const TechnicianAllTeam = () => {
           >
             X
           </button>
-         <br/>
-         <br/>
+          <div className="TechnicianMyReportedUpdate-tickets-creator">
+            <span className="TechnicianMyReportedUpdate-svr-desk">
+              Incidents
+            </span>
+            <IoIosArrowForward />
+            <span className="TechnicianMyReportedUpdate-created-ticket">
+              Reported My Update
+            </span>
+          </div>
           <div className="TechnicianMyReportedUpdate-content2">
             <AffectedUserDetail formData={formData} />
             <IncidentHistory
@@ -459,7 +466,7 @@ const TechnicianAllTeam = () => {
         <div className="TechnicianAllTeam-TitleBar">
           <div className="TechnicianAllTeam-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-            Incident History - {user?.team || "Team"} 
+            Incident History - {user?.team || "Team"} - All Team Members
           </div>
           <div className="TechnicianAllTeam-TitleBar-buttons">
             <button className="TechnicianAllTeam-TitleBar-buttons-ExportData">
@@ -470,7 +477,7 @@ const TechnicianAllTeam = () => {
         </div>
         <div className="TechnicianAllTeam-showSearchBar">
           <div className="TechnicianAllTeam-showSearchBar-Show">
-            <span>Entries:</span>
+            Entries:
             <select
               onChange={(e) => setRowsPerPage(Number(e.target.value))}
               value={rowsPerPage}
@@ -482,7 +489,7 @@ const TechnicianAllTeam = () => {
                 </option>
               ))}
             </select>
-            <span>Status:</span>
+            Status:
             <select
               onChange={(e) => setStatusFilter(e.target.value)}
               value={statusFilter}
@@ -494,7 +501,7 @@ const TechnicianAllTeam = () => {
               <option value="In Progress">In Progress</option>
               <option value="Closed">Closed</option>
             </select>
-            <span>Category:</span>
+            Category:
             <select
               onChange={(e) => setCategoryFilter(e.target.value)}
               value={categoryFilter}
@@ -520,21 +527,19 @@ const TechnicianAllTeam = () => {
           </div>
         </div>
         <div className="TechnicianAllTeam-table">
-          <div className="TechnicianAllTeam-table-wrapper">
-            <table className="TechnicianAllTeam-table-table">
-              <thead>
-                <tr>
-                  <th>Ref No</th>
-                  <th>Assigned To</th>
-                  <th>Affected User</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Location</th>
-                </tr>
-              </thead>
-              <tbody>{renderTableRows()}</tbody>
-            </table>
-          </div>
+          <table className="TechnicianAllTeam-table-table">
+            <thead>
+              <tr>
+                <th>Ref No</th>
+                <th>Assigned To</th>
+                <th>Affected User</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>{renderTableRows()}</tbody>
+          </table>
         </div>
         <div className="TechnicianAllTeam-content3">
           <span className="TechnicianAllTeam-content3-team-entry-info">

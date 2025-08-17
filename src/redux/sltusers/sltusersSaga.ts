@@ -30,19 +30,36 @@ function* fetchUserByServiceNumberSaga(action) {
     const response = yield call(sltusersService.fetchUserByServiceNum, serviceNum);
     yield put(fetchUserByServiceNumberSuccess(response.data));
   } catch (error) {
+    console.error('fetchUserByServiceNumberSaga error:', error);
     yield put(fetchUserByServiceNumberFailure(error.message || 'Failed to fetch user by service number'));
   }
 }
 
 function* updateUserRoleSaga(action) {
   try {
+    console.log('updateUserRoleSaga called with payload:', action.payload);
     const { serviceNum, role } = action.payload;
-  
+    console.log('Calling updateUser API with:', { serviceNum, role });
+    console.log('API URL will be:', `http://localhost:8000/sltusers/${serviceNum}`);
+    console.log('Request body will be:', { role });
+    
     const response = yield call(sltusersService.updateUser, serviceNum, { role });
-
+    console.log('updateUser API response:', response.data);
     yield put(updateUserRoleSuccess(response.data));
-
+    console.log('updateUserRoleSuccess dispatched');
   } catch (error) {
+    console.error('updateUserRoleSaga error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        data: error.config?.data
+      }
+    });
     yield put(updateUserRoleFailure(error.message || 'Failed to update user role'));
   }
 }
@@ -52,6 +69,7 @@ function* fetchAllUsersSaga() {
     const response = yield call(sltusersService.fetchAllUsers);
     yield put(fetchAllUsersSuccess(response.data));
   } catch (error) {
+    console.error('fetchAllUsersSaga error:', error);
     yield put(fetchAllUsersFailure(error.message || 'Failed to fetch all users'));
   }
 }

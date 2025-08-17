@@ -3,16 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
 import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
-import socket from '../../utils/socket';
 
-const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addTechnicianError }) => {
-  // Show error if technician already exists (on submit)
-  const showSubmitUserExists =
-    addTechnicianError &&
-    (
-      addTechnicianError.toLowerCase().includes('technician already') 
-      
-    );
+const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null }) => {
   const dispatch = useDispatch();
 
   const loggedInUser = useSelector(state => state.auth?.user);
@@ -21,19 +13,16 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     id: '',
     name: '',
     email: '',
-    contactNumber: '',
-    teamName: loggedInUser?.teamName || '', 
+    teamName: loggedInUser?.teamName || '', // take from logged user
     role: 'technician',
     tier: '1',
     active: true,
-    teamId:loggedInUser?.teamId|| '',
     categories: [
       loggedInUser?.cat1,
       loggedInUser?.cat2,
       loggedInUser?.cat3,
       loggedInUser?.cat4
-
-    ].filter(Boolean), 
+    ].filter(Boolean), // take from logged user
   });
 
   const [errors, setErrors] = useState({});
@@ -50,23 +39,14 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     loggedInUser?.cat4
   ].filter(Boolean).map(cat => ({ id: cat, name: cat }));
 
-
-  // Debounce service number input
- useEffect(() => {
-  // Only fetch if formData.id is non-empty and we're NOT in edit mode
-  if (!isEdit && formData.id && formData.id.trim()) {
-    const handler = setTimeout(() => {
+  // Handle SLT user fetch
+  const handleServiceNumBer = () => {
+    if (formData.id.trim()) {
       dispatch(fetchUserByServiceNumberRequest(formData.id.trim()));
-    }, 400);
-    return () => clearTimeout(handler);
-  } else {
-    // Clear SLT user only when not editing and id is empty
-    if (!isEdit) {
+    } else {
       dispatch(clearUser());
     }
-  }
-}, [formData.id, dispatch, isEdit]);
-
+  };
 
   // When SLT user is fetched
   useEffect(() => {
@@ -76,7 +56,6 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         name: sltUser.display_name || '',
         email: sltUser.email || '',
         id: sltUser.serviceNum || '',
-        contactNumber: sltUser.contactNumber || '',
       }));
     }
   }, [sltUser]);
@@ -87,6 +66,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     }
   }, [sltUser]);
 
+  // If editing a user, populate only editable fields (teamName still comes from admin)
   useEffect(() => {
     if (isEdit && editUser) {
       setFormData(prev => ({
@@ -102,26 +82,21 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     }
   }, [isEdit, editUser]);
 
-  // Reset formData to initial state (with teamName) every time the modal is opened in add mode
+  // Reset formData to initial state (with teamName) when switching to add mode (not edit)
   useEffect(() => {
     if (!isEdit) {
       setFormData({
         id: '',
         name: '',
         email: '',
-        teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
         role: 'technician',
         tier: '1',
         active: true,
         categories: [],
       });
-      setErrors({});
-   dispatch(clearUser());  
-  }
-}, [isEdit, loggedInUser, dispatch]);
-
-  
+    }
+  }, [isEdit, loggedInUser]);
 
   // Always set teamName from admin/cookie when adding or editing
   useEffect(() => {
@@ -143,90 +118,60 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
   const handleCategoryChange = e => {
     const value = e.target.value;
-    const selected = new Set(formData.categories);
-  
-    if (selected.has(value)) {
-      selected.delete(value);
-    } else {
-      if (selected.size < 4) {
-        selected.add(value);
-      } else {
-        setErrors(prev => ({ ...prev, categories: 'Can assign only up to 4 categories' }));
-      }
-    }
-  
-    setFormData(prev => ({ ...prev, categories: Array.from(selected) }));
-  
-    if (errors.categories && selected.size > 0 && selected.size <= 4) {
+    setFormData(prev => {
+      const selected = new Set(prev.categories);
+      if (selected.has(value)) selected.delete(value);
+      else if (selected.size < 4) selected.add(value);
+      return { ...prev, categories: Array.from(selected) };
+    });
+    if (errors.categories) {
       setErrors(prev => ({ ...prev, categories: undefined }));
     }
   };
 
+  const handleSubmit = e => {
+    e.preventDefault();
+    const newErrors = {};
+    if (!formData.id) newErrors.id = 'Service Number is required';
+    if (!formData.email) newErrors.email = 'Email is required';
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.teamName) newErrors.teamName = 'Team is required';
+    if (formData.categories.length === 0) newErrors.categories = 'At least one category is required';
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-const selectedCategories = formData.categories || [];
-const handleSubmit = e => {
-  e.preventDefault();
-  const newErrors = {};
-  // Always validate against the displayed (fetched) values
-  const nameToUse = sltUser ? (sltUser.display_name || '') : formData.name;
-  const emailToUse = sltUser ? (sltUser.email || '') : formData.email;
-  if (!formData.id) newErrors.id = 'Service Number is required';
-  if (!emailToUse) newErrors.email = 'Email is required';
-  if (!nameToUse) newErrors.name = 'Name is required';
-  if (!formData.teamName) newErrors.teamName = 'Team is required';
-  if (formData.categories.length === 0) {
-    newErrors.categories = 'Select at least one category';
-  } else if (formData.categories.length > 4) {
-    newErrors.categories = 'Can assign only up to 4 categories';
-  }
-  setErrors(newErrors);
-  if (Object.keys(newErrors).length > 0) return;
-
-  const payload = {
-    serviceNum: formData.id,
-    email: emailToUse,
-    name: nameToUse,
-    teamId: formData.teamId,
-    team: formData.teamName,
-    tier: Number(formData.tier),
-    active: formData.active,
-    cat1: formData.categories[0] || '',
-    cat2: formData.categories[1] || '',
-    cat3: formData.categories[2] || '',
-    cat4: formData.categories[3] || '',
-    level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
-    rr: 1,
-    designation: 'Technician',
-    contactNumber: formData.contactNumber,
-    teamLevel: 'Default',
-    teamLeader: formData.teamLeader ?? false,
-    assignAfterSignOff: formData.assignAfterSignOff ?? false,
-    permanentMember: formData.permanentMember ?? false,
-    subrootUser: formData.subrootUser ?? false,
-    isEdit,
+    const payload = {
+      serviceNum: formData.id,
+      email: formData.email,
+      name: formData.name,
+      team: formData.teamName,
+      tier: Number(formData.tier),
+      active: formData.active,
+      cat1: formData.categories[0] || '',
+      cat2: formData.categories[1] || '',
+      cat3: formData.categories[2] || '',
+      cat4: formData.categories[3] || '',
+      level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
+      rr: 1,
+      designation: 'Technician',
+      contactNumber: '0000000000',
+      teamLevel: 'Default',
+      teamLeader: formData.teamLeader ?? false,
+      assignAfterSignOff: formData.assignAfterSignOff ?? false,
+      permanentMember: formData.permanentMember ?? false,
+      subrootUser: formData.subrootUser ?? false,
+      isEdit,
+    };
+    onSubmit(payload);
   };
 
-  // If editing and changing active status to false
-  if (isEdit && editUser?.active && !formData.active) {
-    socket.emit('admin-deactivate-technician', {
-      serviceNum: formData.id,
-      message: 'You have been deactivated by admin'
-    });
-  }
+  const showUserNotFound = formData.id && !sltUserLoading && !sltUser && !sltUserError;
 
-  onSubmit(payload);
-};
-
-  const showUserNotFound =
-    formData.id &&
-    !sltUserLoading &&
-    (!sltUser || (sltUserError && sltUserError.toLowerCase().includes('not found')));
-
-useEffect(() => {
-  if (sltUserError?.includes('not found')) {
-    setErrors(prev => ({ ...prev, id: 'User not found. Please enter manually.' }));
-  }
-}, [sltUserError]);
+  useEffect(() => {
+    if (sltUserError?.includes('not found')) {
+      console.warn('SLT User not found for this service number. User can enter details manually.');
+    }
+  }, [sltUserError]);
 
   return (
     <div className="AdminAddUser-modal">
@@ -246,16 +191,15 @@ useEffect(() => {
                   name="id"
                   value={formData.id}
                   onChange={handleChange}
+                  onBlur={handleServiceNumBer}
                   autoComplete="off"
                   required
                   readOnly={isEdit}
                 />
-                {/* Show 'User Found' or 'User Not Found' message */}
-                {!isEdit && sltUser && !sltUserLoading && !sltUserError && (
-                  <span className="success-message message-margin">User Found</span>
-                )}
-                {!isEdit && showUserNotFound && (
-                  <span className="error-message message-margin">User Not Found</span>
+                {sltUserLoading && <span>Loading...</span>}
+                {sltUserError && <span className="error-message">{sltUserError}</span>}
+                {showUserNotFound && (
+                  <span className="error-message">User not found in SLT Users. Please enter manually.</span>
                 )}
               </div>
               <div>
@@ -264,10 +208,10 @@ useEffect(() => {
                 <input
                   type="text"
                   name="name"
-                  value={sltUser ? (sltUser.display_name || '') : formData.name}
+                  value={formData.name}
                   onChange={handleChange}
                   required
-                  readOnly={!!sltUser || isEdit}
+                  readOnly={isEdit}
                 />
               </div>
               <div>
@@ -276,13 +220,12 @@ useEffect(() => {
                 <input
                   type="email"
                   name="email"
-                  value={sltUser ? (sltUser.email || '') : formData.email}
+                  value={formData.email}
                   onChange={handleChange}
                   required
-                  readOnly={!!sltUser || isEdit}
+                  readOnly={isEdit}
                 />
               </div>
-             
               <div>
                 <label>Team:</label>
                 <input
@@ -319,7 +262,6 @@ useEffect(() => {
             </div>
             <div className="form-right">
               <label>Categories :</label>
-              {errors.categories && <span className="error-message">{errors.categories}</span>}
               <div className="checkbox-list">
                 {filteredSubCategories.map(item => (
                   <label key={item.id} className="checkbox-item">
@@ -335,9 +277,6 @@ useEffect(() => {
               </div>
               <div className="AdminAddUser-form-submit">
                 <button type="submit">{isEdit ? 'Save' : 'Add'}</button>
-                {showSubmitUserExists && (
-                  <span className="error-message message-margin">Technician already exists</span>
-                )}
               </div>
             </div>
           </div>
