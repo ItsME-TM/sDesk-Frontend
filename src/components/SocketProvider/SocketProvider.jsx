@@ -7,33 +7,37 @@ import {
   getAssignedByMeRequest,
   fetchAllIncidentsRequest,
 } from "../../redux/incident/incidentSlice.js";
+import { updateTechnician } from "../../redux/technicians/technicianService.js";
+import { fetchTechniciansRequest } from "../../redux/technicians/technicianSlice.js";
 
 const SocketProvider = ({ children }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const [alerts, setAlerts] = useState([]);
 
-  // Function to add new alert
-  const addAlert = (alert) => {
-    const newAlert = {
-      id: Date.now(),
-      ...alert,
-    };
-    setAlerts((prev) => [...prev, newAlert]);
+ 
+  const addAlert = (alert, persistent = false) => {
+    setAlerts((prev) => [
+      ...prev,
+      { id: Date.now(), persistent, ...alert },
+    ]);
   };
 
-  // Function to remove alert
+  // Remove specific alert by ID
   const removeAlert = (alertId) => {
-    setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+    setAlerts((prev) => prev.filter((a) => a.id !== alertId));
   };
 
-  useEffect(() => {
-    if (!user) return; // Only set up socket listeners for logged-in users
+ 
+ // Remove all alerts of a certain type
+  const removeAlertsByType = (type) => {
+    setAlerts((prev) => prev.filter((a) => a.type !== type));
+  };
 
-    console.log(
-      "🔌 [SocketProvider] Setting up socket listeners for user:",
-      user.serviceNum
-    );
+ 
+
+   useEffect(() => {
+    if (!user) return; // Only set up socket listeners for logged-in users
 
     // Send user info to server for targeted notifications
     socket.emit("user_connected", {
@@ -42,10 +46,8 @@ const SocketProvider = ({ children }) => {
       name: user.name,
     });
 
-    // Connection events
+     // Connection events
     const handleConnect = () => {
-      console.log("✅ [Socket] Connected to server:", socket.id);
-      console.log("👤 [Socket] User:", user.name, "| Role:", user.role);
 
       // Re-send user info on reconnection
       socket.emit("user_connected", {
@@ -56,51 +58,27 @@ const SocketProvider = ({ children }) => {
     };
 
     const handleDisconnect = () => {
-      console.log("❌ [Socket] Disconnected from server");
     };
 
-    // General incident creation events (everyone receives these - NO POPUP, only Redux update)
-    const handleIncidentCreated = (data) => {
-      console.log("🆕 [Socket] New incident created (general):", data.incident);
+   // General incident creation events (everyone receives these - NO POPUP, only Redux update)
+    const handleIncidentCreated = () => {
+
 
       // Dispatch different Redux actions based on user role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
-        console.log(
-          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for",
-          user.role,
-          ":",
-          user.serviceNum
-        );
       } else if (user.role === "user") {
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for user:",
-          user.serviceNum
-        );
       } else if (user.role === "technician" || user.role === "teamLeader") {
         dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedToMeRequest for",
-          user.role,
-          ":",
-          user.serviceNum
-        );
       } else {
         // Default fallback for any unrecognized roles - treat as user
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for unknown role",
-          user.role,
-          ":",
-          user.serviceNum
-        );
       }
     };
-
     // Targeted incident assignment (only for assigned handler - SHOW POPUP)
     const handleIncidentAssignedTechnician = (data) => {
-      console.log("🎯 [Socket] Incident assigned to you:", data.incident);
+
 
       // Show popup for assigned handler
       addAlert({
@@ -115,83 +93,43 @@ const SocketProvider = ({ children }) => {
       // Also update Redux state for assigned handler based on their role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
-        console.log(
-          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for assigned",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else if (user.role === "user") {
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for assigned user:",
-          user.serviceNum
-        );
+
       } else if (user.role === "technician" || user.role === "teamLeader") {
         dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedToMeRequest for assigned",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else {
         // Default fallback for any unrecognized roles
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for assigned unknown role",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       }
     };
-
-    // General incident update events (everyone receives these - NO POPUP, only Redux update)
-    const handleIncidentUpdated = (data) => {
-      console.log("🔄 [Socket] Incident updated (general):", data.incident);
+   // General incident update events (everyone receives these - NO POPUP, only Redux update)
+    const handleIncidentUpdated = () => {
 
       // Dispatch different Redux actions based on user role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
-        console.log(
-          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else if (user.role === "user") {
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for user:",
-          user.serviceNum
-        );
+
       } else if (user.role === "technician" || user.role === "teamLeader") {
         dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedToMeRequest for",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else {
         // Default fallback for any unrecognized roles - treat as user
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for unknown role",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       }
     };
 
-    // Targeted incident update notification (only for assigned handler - SHOW POPUP)
+
+       // Targeted incident update notification (only for assigned handler - SHOW POPUP)
     const handleIncidentUpdatedAssigned = (data) => {
-      console.log(
-        "🔄 [Socket] Incident updated - assigned to you:",
-        data.incident
-      );
+
 
       // Show popup for assigned handler
       addAlert({
@@ -206,38 +144,52 @@ const SocketProvider = ({ children }) => {
       // Also update Redux state for assigned handler based on their role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
-        console.log(
-          "🔄 [Socket] Dispatched fetchAllIncidentsRequest for updated assigned",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else if (user.role === "user") {
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for updated assigned user:",
-          user.serviceNum
-        );
+
       } else if (user.role === "technician" || user.role === "teamLeader") {
         dispatch(getAssignedToMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedToMeRequest for updated assigned",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
       } else {
         // Default fallback for any unrecognized roles
         dispatch(getAssignedByMeRequest({ serviceNum: user.serviceNum }));
-        console.log(
-          "🔄 [Socket] Dispatched getAssignedByMeRequest for updated assigned unknown role",
-          user.role,
-          ":",
-          user.serviceNum
-        );
+
+      }
+    };
+    const handleInactiveByAdmin = (data) => {
+      
+      removeAlertsByType("technician_inactive"); // remove any existing
+      addAlert(
+        {
+          type: "technician_inactive",
+          title: "Technician Inactive",
+          message:
+            data.message ||
+            "You have been marked inactive by the admin.",
+        },
+        true // persistent alert
+      );
+      dispatch(updateTechnician({ serviceNum: user.serviceNum, active: false }));
+    };
+
+    const handleTechnicianStatusChanged = ({ serviceNum, active }) => {
+      
+
+      if (user?.role === "admin" || user?.role === "superAdmin") {
+        dispatch(fetchTechniciansRequest());
+      }
+
+      if (String(user?.serviceNum) === String(serviceNum)) {
+        dispatch(updateTechnician({ serviceNum, active }));
+
+        if (active) {
+          removeAlertsByType("technician_inactive");
+        }
       }
     };
 
+    
     // Set up event listeners
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
@@ -245,30 +197,33 @@ const SocketProvider = ({ children }) => {
     socket.on("incident_assigned_technician", handleIncidentAssignedTechnician);
     socket.on("incident_updated", handleIncidentUpdated);
     socket.on("incident_updated_assigned", handleIncidentUpdatedAssigned);
+    socket.on("inactive_by_admin", handleInactiveByAdmin);
+    socket.on("technician_status_changed", handleTechnicianStatusChanged);
 
+    
     // Cleanup
     return () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
       socket.off("incident_created", handleIncidentCreated);
-      socket.off(
-        "incident_assigned_technician",
-        handleIncidentAssignedTechnician
-      );
+      socket.off("incident_assigned_technician", handleIncidentAssignedTechnician);
       socket.off("incident_updated", handleIncidentUpdated);
       socket.off("incident_updated_assigned", handleIncidentUpdatedAssigned);
+      socket.off("inactive_by_admin", handleInactiveByAdmin);
+      socket.off("technician_status_changed", handleTechnicianStatusChanged);
     };
   }, [user, dispatch]);
 
   return (
     <>
       {children}
-      {/* Render alert popups */}
       {alerts.map((alert) => (
         <AlertPopup
           key={alert.id}
           alert={alert}
-          onClose={() => removeAlert(alert.id)}
+          onClose={() => {
+            if (!alert.persistent) removeAlert(alert.id);
+          }}
         />
       ))}
     </>

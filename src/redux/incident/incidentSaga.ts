@@ -3,6 +3,7 @@ import {
   fetchAllIncidents,
   createIncident,
   updateIncident,
+  updateIncidentWithAttachment,
   getIncidentByNumber,
   getIncidentsAssignedToMe,
   getIncidentsAssignedByMe,
@@ -16,6 +17,7 @@ import {
   fetchAllLocations,
   fetchAdminTeamData,
   fetchDashboardStats,
+  uploadAttachment,
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -30,6 +32,9 @@ import {
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,
+  updateIncidentWithAttachmentRequest,
+  updateIncidentWithAttachmentSuccess,
+  updateIncidentWithAttachmentFailure,
   getIncidentByNumberRequest,
   getIncidentByNumberSuccess,
   getIncidentByNumberFailure,
@@ -66,6 +71,9 @@ import {
   fetchAllLocationsRequest,
   fetchAllLocationsSuccess,
   fetchAllLocationsFailure,
+  uploadAttachmentRequest,
+  uploadAttachmentSuccess,
+  uploadAttachmentFailure,
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -73,7 +81,6 @@ function* handleFetchAllIncidents() {
     const response = yield call(fetchAllIncidents);
     yield put(fetchAllIncidentsSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching all incidents:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -84,14 +91,12 @@ function* handleFetchAllIncidents() {
 
 function* handleCreateIncident(action) {
   try {
-    console.log("Creating incident with data:", action.payload);
     const response = yield call(createIncident, action.payload);
     yield put(createIncidentSuccess(response.data));    // Refresh the assigned to me list for the handler
     yield put(getAssignedToMeRequest({ serviceNum: action.payload.handler }));
     // Optionally refetch all incidents
     yield put(fetchAllIncidentsRequest());
   } catch (error) {
-    console.error("Error creating incident:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -102,19 +107,33 @@ function* handleCreateIncident(action) {
 
 function* handleUpdateIncident(action) {
   try {
-    console.log("Updating incident with data:", action.payload);
     const { incident_number, data } = action.payload;
     const response = yield call(updateIncident, incident_number, data);
     yield put(updateIncidentSuccess(response.data));
     // Optionally refetch all incidents
     yield put(fetchAllIncidentsRequest());
   } catch (error) {
-    console.error("Error updating incident:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
       "Unknown error occurred";
     yield put(updateIncidentFailure(errorMessage));
+  }
+}
+
+function* handleUpdateIncidentWithAttachment(action) {
+  try {
+    const { incident_number, formData } = action.payload;
+    const response = yield call(updateIncidentWithAttachment, incident_number, formData);
+    yield put(updateIncidentWithAttachmentSuccess(response.data));
+    // Optionally refetch all incidents
+    yield put(fetchAllIncidentsRequest());
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(updateIncidentWithAttachmentFailure(errorMessage));
   }
 }
 
@@ -130,42 +149,20 @@ function* handleGetIncidentByNumber(action) {
 
 function* handleGetAssignedToMe(action) {
   try {
-    console.log('🚀 Incident Saga: handleGetAssignedToMe called with action:', action);
     const { serviceNum } = action.payload;
-    console.log('🚀 Incident Saga: serviceNum extracted:', serviceNum);
-    console.log('🚀 Incident Saga: About to call getIncidentsAssignedToMe...');
-    
     const response = yield call(getIncidentsAssignedToMe, serviceNum);
-    
-    console.log('✅ Incident Saga: getIncidentsAssignedToMe response:', response);
-    console.log('✅ Incident Saga: response.data:', response.data);
-    console.log('✅ Incident Saga: About to dispatch success...');
-    
     yield put(getAssignedToMeSuccess(response.data));
   } catch (error) {
-    console.error('❌ Incident Saga: Error in handleGetAssignedToMe:', error);
     yield put(getAssignedToMeFailure(error.message));
   }
 }
 
 function* handleGetAssignedByMe(action) {
   try {
-    console.log('🚀 Incident Saga: handleGetAssignedByMe called with action:', action);
     const { serviceNum } = action.payload;
-    console.log('🚀 Incident Saga: serviceNum extracted:', serviceNum);
-    console.log('🚀 Incident Saga: About to call getIncidentsAssignedByMe...');
-    
     const response = yield call(getIncidentsAssignedByMe, serviceNum);
-    
-    console.log('✅ Incident Saga: getIncidentsAssignedByMe response:', response);
-    console.log('✅ Incident Saga: response.data:', response.data);
-    console.log('✅ Incident Saga: About to dispatch success...');
-    
     yield put(getAssignedByMeSuccess(response.data));
-    
-    console.log('✅ Incident Saga: Success action dispatched');
   } catch (error) {
-    console.error('❌ Incident Saga: Error in handleGetAssignedByMe:', error);
     yield put(getAssignedByMeFailure(error.message));
   }
 }
@@ -182,18 +179,10 @@ function* handleGetTeamIncidents(action) {
 
 function* handleGetTeamIncidentsByServiceNum(action) {
   try {
-    console.log('🚀 Incident Saga: handleGetTeamIncidentsByServiceNum called with action:', action);
     const { serviceNum } = action.payload;
-    console.log('🚀 Incident Saga: serviceNum extracted:', serviceNum);
-    
     const response = yield call(getTeamIncidentsByServiceNum, serviceNum);
-    
-    console.log('✅ Incident Saga: getTeamIncidentsByServiceNum response:', response);
-    console.log('✅ Incident Saga: response.data:', response.data);
-    
     yield put(getTeamIncidentsByServiceNumSuccess(response.data));
   } catch (error) {
-    console.error('❌ Incident Saga: Error in handleGetTeamIncidentsByServiceNum:', error);
     yield put(getTeamIncidentsByServiceNumFailure(error.message));
   }
 }
@@ -204,7 +193,6 @@ function* handleFetchIncidentHistory(action) {
     const response = yield call(getIncidentHistory, incident_number);
     yield put(fetchIncidentHistorySuccess(response.data));
   } catch (error) {
-    console.error("Error fetching incident history:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -219,7 +207,6 @@ function* handleFetchCurrentTechnician(action) {
     const response = yield call(getCurrentTechnician, serviceNum);
     yield put(fetchCurrentTechnicianSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching current technician:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -233,7 +220,6 @@ function* handleFetchAdminTeamData() {
     const response = yield call(fetchAdminTeamData);
     yield put(fetchAdminTeamDataSuccess(response));
   } catch (error) {
-    console.error("Error fetching admin team data:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -247,7 +233,6 @@ function* handleFetchMainCategories() {
     const response = yield call(fetchMainCategories);
     yield put(fetchMainCategoriesSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching main categories:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -261,7 +246,6 @@ function* handleFetchCategoryItems() {
     const response = yield call(fetchCategoryItems);
     yield put(fetchCategoryItemsSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching category items:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -275,7 +259,6 @@ function* handleFetchAllUsers() {
     const response = yield call(fetchAllUsers);
     yield put(fetchAllUsersSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching all users:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -289,7 +272,6 @@ function* handleFetchAllLocations() {
     const response = yield call(fetchAllLocations);
     yield put(fetchAllLocationsSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching all locations:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -302,7 +284,6 @@ function* handleFetchDashboardStats(action) {
     const response = yield call(fetchDashboardStats, action.payload);
     yield put(fetchDashboardStatsSuccess(response.data));
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.message ||
@@ -316,6 +297,7 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
   yield takeLatest(createIncidentRequest.type, handleCreateIncident);
   yield takeLatest(updateIncidentRequest.type, handleUpdateIncident);
+  yield takeLatest(updateIncidentWithAttachmentRequest.type, handleUpdateIncidentWithAttachment);
   yield takeLatest(getIncidentByNumberRequest.type, handleGetIncidentByNumber);
   yield takeLatest(getAssignedToMeRequest.type, handleGetAssignedToMe);
   // Also listen for the alias action type to support both usages
@@ -331,5 +313,18 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
+  yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
 }
 
+function* handleUploadAttachment(action: any) {
+  try {
+    const response = yield call(uploadAttachment, action.payload);
+    yield put(uploadAttachmentSuccess(response.data));
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to upload attachment";
+    yield put(uploadAttachmentFailure(errorMessage));
+  }
+}
