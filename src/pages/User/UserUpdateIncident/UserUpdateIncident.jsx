@@ -140,24 +140,34 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         <span className="UserUpdateIncident-created-ticket">My Incidents</span>
       </div>
 
-      <div className="UserUpdateIncident-content2">
-        <AffectedUserDetail formData={formData} />
-        {/* historyData now comes from redux */}
-        <IncidentHistory
-          refNo={incidentDetails.refNo}
-          category={incidentDetails.category}
-          location={incidentDetails.location}
-          priority={incidentDetails.priority}
-          status={incidentDetails.status}
-          assignedTo={incidentDetails.assignedTo}
-          updateBy={incidentDetails.updateBy}
-          updatedOn={incidentDetails.updatedOn}
-          comments={incidentDetails.comments}
-          historyData={incidentHistory}
-          users={allUsers}
-        />
-        <div className="UserUpdateIncident-button-container">
-          {!isPopup && (
+      <div className="content-area flex-grow-1 overflow-auto p-md-4 p-2">
+     <br/>
+     <br/>
+        <div className="container-fluid">
+          <div className="row g-4">
+            <div className="col-12">
+              <AffectedUserDetail formData={formData} />
+            </div>
+            <div className="col-12">
+              <IncidentHistory
+                refNo={incidentDetails.refNo}
+                category={incidentDetails.category}
+                location={incidentDetails.location}
+                priority={incidentDetails.priority}
+                status={incidentDetails.status}
+                assignedTo={incidentDetails.assignedTo}
+                updateBy={incidentDetails.updateBy}
+                updatedOn={incidentDetails.updatedOn}
+                comments={incidentDetails.comments}
+                historyData={incidentHistory}
+                users={allUsers}
+              />
+            </div>
+          </div>
+        </div>
+        
+        {!isPopup && (
+          <div className="text-end mt-4">
             <button
               className="UserUpdateIncident-details-back-btn"
               onClick={handleBackClick}

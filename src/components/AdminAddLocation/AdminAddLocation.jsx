@@ -131,7 +131,7 @@ const AdminAddLocation = ({
         <form onSubmit={handleSubmit} className="AdminAddLocation-form">
           <div className="AdminAddLocation-grid">
             {" "}
-            <div className="AdminAddLocation-field">
+             <div className="AdminAddLocation-field">
               <label>Location Code:</label>
               {errors.locationCode && (
                 <span className="AdminAddLocation-form-error-text">
@@ -151,7 +151,7 @@ const AdminAddLocation = ({
               <small className="AdminAddLocation-helper-text">
                 Format: LOC_XXX (e.g., LOC_001, LOC_002, LOC_010)
               </small>
-            </div>
+            </div> 
             <div className="AdminAddLocation-field">
               <label>Location Name:</label>
               {errors.locationName && (

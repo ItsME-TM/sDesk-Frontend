@@ -22,12 +22,96 @@ export const createIncident = async (data: Partial<Incident>) => {
   }
 };
 
-// Update incident
-export const updateIncident = async (incident_number: string, data: Partial<Incident>) => {
+// Create incident with attachment
+export const createIncidentWithAttachment = async (formData: FormData) => {
   try {
-    return await axios.put(buildUrl(API_BASE, `/incident/${incident_number}`), data, { withCredentials: true });
+    // First try the new endpoint with attachment support
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/create-incident-with-attachment"),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
   } catch (error) {
-    console.error(`Error updating incident ${incident_number}:`, error);
+    // If the new endpoint fails (not deployed yet), fallback to old method
+    if (error.response?.status === 404 || error.message?.includes('Cannot POST')) {
+      console.warn('New endpoint not available, falling back to separate upload method');
+      
+      // Extract incident data from FormData
+      const incidentData = {};
+      for (let [key, value] of formData.entries()) {
+        if (key !== 'file') {
+          incidentData[key] = value;
+        }
+      }
+      
+      // First create incident without attachment
+      const incidentResponse = await apiClient.post(
+        buildUrl(API_BASE, "/incident/create-incident"),
+        incidentData
+      );
+      
+      // Then upload attachment if exists
+      const file = formData.get('file');
+      if (file) {
+        try {
+          const attachmentFormData = new FormData();
+          attachmentFormData.append('attachment', file);
+          
+          await apiClient.post(
+            buildUrl(API_BASE, "/incident/upload-attachment"),
+            attachmentFormData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
+        } catch (uploadError) {
+          console.warn('Attachment upload failed, but incident was created:', uploadError);
+        }
+      }
+      
+      return incidentResponse;
+    }
+    throw error;
+  }
+};
+
+// Update incident
+export const updateIncident = async (
+  incident_number: string,
+  data: Partial<Incident>
+) => {
+  try {
+    return await apiClient.put(
+      buildUrl(API_BASE, `/incident/${incident_number}`),
+      data
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update incident with attachment
+export const updateIncidentWithAttachment = async (
+  incident_number: string,
+  formData: FormData
+) => {
+  try {
+    return await apiClient.put(
+      buildUrl(API_BASE, `/incident/${incident_number}/with-attachment`),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
     throw error;
   }
 };
@@ -150,18 +234,13 @@ export const fetchAllLocations = async () => {
   }
 };
 
-export const fetchDashboardStats = async (params?: {
-  userParentCategory?: string;
-  userType?: string;
-  technicianId?: string;
-  teamName?: string;
-}) => {
+export const fetchDashboardStats = async (userParentCategory?: string) => {
   try {
-    const queryParams = params || {};
-    return await axios.get(buildUrl(API_BASE, "/incident/dashboard-stats"), { 
-      params: queryParams,
-      withCredentials: true 
-    });
+    const params = userParentCategory ? { userParentCategory } : {};
+    return await apiClient.get(
+      buildUrl(API_BASE, "/incident/dashboard-stats"),
+      { params }
+    );
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
     throw error;

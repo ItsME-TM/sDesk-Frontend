@@ -8,6 +8,7 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
+  createIncidentWithAttachmentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
 
@@ -90,6 +91,27 @@ const UserAddIncident = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    
+    if (!file) return;
+
+    // File type validation
+    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
+      e.target.value = '';
+      return;
+    }
+
+    // File size validation (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      alert('File size must be less than 1MB.');
+      e.target.value = '';
+      return;
+    }
+
+    // Just store the file without uploading
     setSelectedFile(file);
   };
 
@@ -147,7 +169,22 @@ const UserAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    dispatch(createIncidentRequest(incidentData));
+    if (selectedFile) {
+      // Create FormData for multipart request
+      const formDataWithFile = new FormData();
+      Object.keys(incidentData).forEach(key => {
+        if (incidentData[key] !== null) {
+          formDataWithFile.append(key, incidentData[key]);
+        }
+      });
+      formDataWithFile.append('file', selectedFile);
+
+      // Use create incident with attachment
+      dispatch(createIncidentWithAttachmentRequest(formDataWithFile));
+    } else {
+      // Regular incident creation without attachment
+      dispatch(createIncidentRequest(incidentData));
+    }
 
     setFormData({
       serviceNo: "",

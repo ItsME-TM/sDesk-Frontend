@@ -45,6 +45,22 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                                         <td className="updated-on-column">{entry.updatedOn}</td>
                                         <td className="status-column">{entry.status}</td>
                                         <td className="comments-column">{entry.comments}</td>
+                                        <td>
+                                            {entry.attachment && entry.attachment.trim() !== '' ? (
+                                                <Button
+                                                    variant="outline-primary"
+                                                    size="sm"
+                                                    onClick={() => handleDownloadAttachment(entry.attachment, entry.attachmentOriginalName)}
+                                                    className="d-flex align-items-center"
+                                                    style={{ backgroundColor: '#007bff', color: '#fff', border: 'none' }}
+                                                > 
+                                                    <FaDownload className="me-1" />
+                                                    {entry.attachmentOriginalName || entry.attachment}
+                                                </Button>
+                                            ) : (
+                                                <span className="text-muted">No attachment</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
@@ -60,8 +76,13 @@ const IncidentHistory = ({ refNo, category, location, priority, historyData, use
                         Priority - <span>{priority}</span>
                     </p>
                 </div>
-            </div>
-        </div>
+            </Card.Body>
+            <Card.Footer className="bg-light text-muted d-flex flex-row gap-2 justify-content-start flex-wrap" style={{gap: '0.75rem'}}>
+                <div className="me-2"><strong>Category:</strong> {getCategoryName(category)}</div>
+                <div className="me-2"><strong>Location:</strong> {getLocationName(location)}</div>
+                <div><strong>Priority:</strong> {priority}</div>
+            </Card.Footer>
+        </Card>
     );
 };
 

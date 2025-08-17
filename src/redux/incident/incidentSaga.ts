@@ -2,6 +2,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import {
   fetchAllIncidents,
   createIncident,
+  createIncidentWithAttachment,
   updateIncident,
   getIncidentByNumber,
   getIncidentsAssignedToMe,
@@ -27,6 +28,9 @@ import {
   createIncidentRequest,
   createIncidentSuccess,
   createIncidentFailure,
+  createIncidentWithAttachmentRequest,
+  createIncidentWithAttachmentSuccess,
+  createIncidentWithAttachmentFailure,
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,
@@ -97,6 +101,23 @@ function* handleCreateIncident(action) {
       error.message ||
       "Unknown error occurred";
     yield put(createIncidentFailure(errorMessage));
+  }
+}
+
+function* handleCreateIncidentWithAttachment(action) {
+  try {
+    const response = yield call(createIncidentWithAttachment, action.payload);
+    yield put(createIncidentWithAttachmentSuccess(response.data));
+    // Refresh the assigned to me list for the handler
+    yield put(getAssignedToMeRequest({ serviceNum: response.data.handler }));
+    // Optionally refetch all incidents
+    yield put(fetchAllIncidentsRequest());
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(createIncidentWithAttachmentFailure(errorMessage));
   }
 }
 
@@ -299,7 +320,7 @@ function* handleFetchAllLocations() {
 }
 function* handleFetchDashboardStats(action) {
   try {
-    const response = yield call(fetchDashboardStats, action.payload);
+    const response = yield call(fetchDashboardStats, action.payload?.userParentCategory);
     yield put(fetchDashboardStatsSuccess(response.data));
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -315,6 +336,7 @@ function* handleFetchDashboardStats(action) {
 export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
   yield takeLatest(createIncidentRequest.type, handleCreateIncident);
+  yield takeLatest(createIncidentWithAttachmentRequest.type, handleCreateIncidentWithAttachment);
   yield takeLatest(updateIncidentRequest.type, handleUpdateIncident);
   yield takeLatest(getIncidentByNumberRequest.type, handleGetIncidentByNumber);
   yield takeLatest(getAssignedToMeRequest.type, handleGetAssignedToMe);

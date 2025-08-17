@@ -122,6 +122,10 @@ const TechnicianInsident = ({
     status: "",
   });
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [lastUpdateWasTransfer, setLastUpdateWasTransfer] = useState(false);
+
+  // Ref for UpdateStatus component to access its clearForm function
+  const updateStatusRef = useRef(null);
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
@@ -234,23 +238,33 @@ const TechnicianInsident = ({
       : incidentState.currentIncident;
     if (!currentIncident) return;
 
-    // Prepare data for update
-    const updatePayload = {
-      incident_number: currentIncident.incident_number,
-      data: {
-        category: updateStatusData.category || currentIncident.category,
-        location: updateStatusData.location || currentIncident.location,
-        priority: updateStatusData.priority || currentIncident.priority,
-        status: updateStatusData.status || currentIncident.status,
-        handler: updateStatusData.transferTo || currentIncident.handler,
-        description:
-          updateStatusData.description || currentIncident.description,
-        update_by: updateStatusData.updatedBy || currentIncident.update_by,
-        // Add this line to support auto-assign Tier2
-        automaticallyAssignForTier2:
-          updateStatusData.transferTo === "tier2-auto",
-      },
-    };
+    // Create FormData for multipart form submission
+    const formData = new FormData();
+    
+    // Add incident data
+    if (updateStatusData.category) formData.append('category', updateStatusData.category);
+    if (updateStatusData.location) formData.append('location', updateStatusData.location);
+    if (updateStatusData.priority) formData.append('priority', updateStatusData.priority);
+    if (updateStatusData.status) formData.append('status', updateStatusData.status);
+    
+    // Handle transfer logics
+    if (updateStatusData.transferTo) {
+      if (updateStatusData.transferTo === 'tier2-auto') {
+        // Set the automaticallyAssignForTier2 flag for backend
+        formData.append('automaticallyAssignForTier2', 'true');
+      } else {
+        // Set specific technician as handler
+        formData.append('handler', updateStatusData.transferTo);
+      }
+    }
+    
+    if (updateStatusData.description) formData.append('description', updateStatusData.description);
+    if (updateStatusData.updatedBy) formData.append('update_by', updateStatusData.updatedBy);
+    
+    // Add attachment if present
+    if (updateStatusData.selectedFile) {
+      formData.append('file', updateStatusData.selectedFile);
+    }
 
     // Dispatch Redux action to update incident
     dispatch({
@@ -289,6 +303,24 @@ const TechnicianInsident = ({
       setShowSuccessMessage(true);
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
+
+      // Clear the UpdateStatus form after successful update
+      if (updateStatusRef.current && updateStatusRef.current.clearForm) {
+        updateStatusRef.current.clearForm();
+      }
+
+      // If the last update was a transfer, notify the parent
+      if (lastUpdateWasTransfer) {
+        if (typeof window !== "undefined" && window.dispatchEvent) {
+          window.dispatchEvent(
+            new CustomEvent("incident-transferred", {
+              detail: { incident_number: currentIncident.incident_number },
+            })
+          );
+        }
+        setLastUpdateWasTransfer(false); // Reset transfer tracking
+      }
+
       setTimeout(() => {
         setShowSuccessMessage(false);
         // Close popup if parent provided a close handler (optional)
@@ -420,7 +452,7 @@ const TechnicianInsident = ({
                 />
               </div>
 
-              <div className="col-12 mb-3">
+              <div className="col-12 section-gap">
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
@@ -438,6 +470,7 @@ const TechnicianInsident = ({
               {currentIncident && (
                 <div className="col-12 mb-3">
                   <UpdateStatus
+                    ref={updateStatusRef}
                     incidentData={{
                       regNo: currentIncident.incident_number,
                       updateBy: currentIncident.update_by,
@@ -476,9 +509,10 @@ const TechnicianInsident = ({
               </div>
 
               {showSuccessMessage && (
-                <div className="col-12 mt-3">
-                  <div className="alert alert-success">
-                    Incident updated successfully!
+                <div className="technician-success-popup-overlay">
+                  <div className="technician-success-popup-card">
+                    <span className="technician-success-popup-icon">✅</span>
+                    <span className="technician-success-popup-text">Incident Update Successful!</span>
                   </div>
                 </div>
               )}

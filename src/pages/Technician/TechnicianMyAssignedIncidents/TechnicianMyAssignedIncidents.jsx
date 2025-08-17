@@ -105,7 +105,6 @@ const TechnicianMyAssignedIncidents = () => {
     // Fetch assigned incidents on component mount
     useEffect(() => {
         if (assignedUser && currentUser) {
-            // FIX: Use serviceNum as the key for Redux action
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
         }
         dispatch(fetchAllUsersRequest());
@@ -129,8 +128,6 @@ const TechnicianMyAssignedIncidents = () => {
         return location ? (location.name || location.loc_name) : locationNumber;
     };
 
-    // Loading and error states
-    
     // Only show loading spinner if loading is true AND assignedToMe is empty
     if (loading && (!assignedToMe || assignedToMe.length === 0)) {
         return (
@@ -197,6 +194,16 @@ const TechnicianMyAssignedIncidents = () => {
     };
 
     const renderTableRows = () => {
+        if (currentRows.length === 0) {
+            return (
+                <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                        No incidents found.
+                    </td>
+                </tr>
+            );
+        }
+
         return currentRows.map((row, idx) => (
             <tr key={idx}>
                 <td className='team-refno'>
@@ -264,10 +271,16 @@ const TechnicianMyAssignedIncidents = () => {
 
     return (
         <div className="TechnicianMyAssignedIncidents-main-content">
-            <div className="TechnicianMyAssignedIncidents-tickets-creator">
+            {showTransferSuccess && (
+                <div className="transfer-success-popup">
+                    <p>Incident Transfer Successful!</p>
+                </div>
+            )}
+
+            <div className="TechnicianMyAssignedIncidents-tickets-creator flex flex-row items-center gap-2 whitespace-nowrap">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
-                <IoIosArrowForward />
-                <span className="TechnicianMyAssignedIncidents-created-ticket">Assigned My</span>
+                <IoIosArrowForward style={{ position: 'relative', top: '4px' }} />
+                <span className="TechnicianMyAssignedIncidents-created-ticket">My Assigned Incidents</span>
             </div>
             <div className="TechnicianMyAssignedIncidents-content2">
                 <div className="TechnicianMyAssignedIncidents-TitleBar">
@@ -344,19 +357,25 @@ const TechnicianMyAssignedIncidents = () => {
                 </div>
                 
                 <div className="TechnicianMyAssignedIncidents-table">
-                    <table className="TechnicianMyAssignedIncidents-table-table">
-                        <thead>
-                            <tr>
-                                <th>Ref No</th>
-                                <th>Affected User</th>
-                                <th>Category</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>{renderTableRows()}</tbody>
-                    </table>
+                    <div className="hidden sm:block">
+                        <table className="TechnicianMyAssignedIncidents-table-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Ref No</th>
+                                    <th>Affected User</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>{renderTableRows()}</tbody>
+                        </table>
+                    </div>
+                    <div className="sm:hidden flex flex-col gap-4">
+                        {/* Removed extra incident details below the table. Mobile card rendering is now disabled. */}
+                    </div>
                 </div>
-                <div className="TechnicianMyAssignedIncidents-content3">
+                     <div className='TechnicianMyAssignedIncidents-footer-content'>
+  <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
                     <span>
                         Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
                     </span>
@@ -366,6 +385,8 @@ const TechnicianMyAssignedIncidents = () => {
                         <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
                     </div>
                 </div>
+                     </div>
+              
             </div>
             {showIncidentPopup && selectedIncident && (
                 <div className="incident-popup-overlay">

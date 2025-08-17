@@ -177,6 +177,13 @@ const TechnicianAllTeam = () => {
   };
 
   const renderTableRows = () => {
+    if (currentRows.length === 0) {
+      return (
+        <tr>
+          <td colSpan="6" className="text-center text-muted py-4">No incidents found.</td>
+        </tr>
+      );
+    }
     return currentRows.map((row, idx) => (
       <tr
         key={idx}

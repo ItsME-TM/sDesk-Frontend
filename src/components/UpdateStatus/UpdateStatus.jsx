@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import "./UpdateStatus.css";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { Card, Form, Row, Col, Button } from 'react-bootstrap';
 import { FaPlusSquare } from "react-icons/fa";
 import CategoryDropdown from "../CategoryDropdown/CategoryDropDown";
 import LocationDropdown from "../LocationDropdown/LocationDropdown";
 
-const UpdateStatus = ({
+const UpdateStatus = forwardRef(({
   incidentData,
   usersDataset,
   categoryDataset,
   locationDataset,
   incident,
   onStatusChange,
-  loggedInUser, // <-- add this prop
-}) => {
+  loggedInUser,
+}, ref) => {
   const [isCategoryPopupOpen, setIsCategoryPopupOpen] = useState(false);
   const [isLocationPopupOpen, setIsLocationPopupOpen] = useState(false);
   const categoryPopupRef = useRef(null);
@@ -169,14 +169,31 @@ const UpdateStatus = ({
         number: locationItem ? locationItem.loc_number : "",
       });
     }
-  }, [
-    incident,
-    usersDataset,
-    categoryDataset,
-    locationDataset,
-    incidentData,
-    loggedInUser,
-  ]);
+  }, [incident, usersDataset, categoryDataset, locationDataset, incidentData, loggedInUser]);
+
+  // Clear form function
+  const clearForm = () => {
+    setSelectedCategory({ name: "", number: "" });
+    setSelectedLocation({ name: "", number: "" });
+    setTransferTo("");
+    setDescription("");
+    setPriority("");
+    setStatus("");
+    setSelectedFile(null);
+    setFileName("No file chosen");
+    setNotifyUser(false);
+    
+    // Clear file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Expose clearForm function to parent component
+  useImperativeHandle(ref, () => ({
+    clearForm
+  }));
 
   return (
     <div className="update-status-container">
@@ -389,6 +406,6 @@ const UpdateStatus = ({
       )}
     </div>
   );
-};
+});
 
 export default UpdateStatus;
