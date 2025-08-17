@@ -495,9 +495,10 @@ const TechnicianInsident = ({
               </div>
 
               {showSuccessMessage && (
-                <div className="col-12 mt-3">
-                  <div className="alert alert-success">
-                    Incident updated successfully!
+                <div className="technician-success-popup-overlay">
+                  <div className="technician-success-popup-card">
+                    <span className="technician-success-popup-icon">✅</span>
+                    <span className="technician-success-popup-text">Incident Update Successful!</span>
                   </div>
                 </div>
               )}
