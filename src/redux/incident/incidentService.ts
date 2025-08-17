@@ -103,8 +103,8 @@ export const updateIncidentWithAttachment = async (
   formData: FormData
 ) => {
   try {
-    return await apiClient.put(
-      buildUrl(API_BASE, `/incident/${incident_number}/with-attachment`),
+    return await apiClient.post(
+      buildUrl(API_BASE, `/incident/${incident_number}/update-with-attachment`),
       formData,
       {
         headers: {
