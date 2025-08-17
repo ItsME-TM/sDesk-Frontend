@@ -85,6 +85,8 @@ pre, code, .debug, [class*="debug"] {
     background-color: #b10e0e;
     color: aliceblue;
      animation: fadeInOut 3s ease-in-out;
+     margin-top: -8%;
+     margin-left: 90%;
 }
 
 .TechnicianMyAssignedIncidents-showSearchBar {
