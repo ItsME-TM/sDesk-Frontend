@@ -247,7 +247,18 @@ const TechnicianInsident = ({
     if (updateStatusData.location) formData.append('location', updateStatusData.location);
     if (updateStatusData.priority) formData.append('priority', updateStatusData.priority);
     if (updateStatusData.status) formData.append('status', updateStatusData.status);
-    if (updateStatusData.transferTo) formData.append('handler', updateStatusData.transferTo);
+    
+    // Handle transfer logic
+    if (updateStatusData.transferTo) {
+      if (updateStatusData.transferTo === 'tier2-auto') {
+        // Set the automaticallyAssignForTier2 flag for backend
+        formData.append('automaticallyAssignForTier2', 'true');
+      } else {
+        // Set specific technician as handler
+        formData.append('handler', updateStatusData.transferTo);
+      }
+    }
+    
     if (updateStatusData.description) formData.append('description', updateStatusData.description);
     if (updateStatusData.updatedBy) formData.append('update_by', updateStatusData.updatedBy);
     
