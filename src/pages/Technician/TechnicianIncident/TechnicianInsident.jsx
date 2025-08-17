@@ -125,6 +125,8 @@ const TechnicianInsident = ({
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [lastUpdateWasTransfer, setLastUpdateWasTransfer] = useState(false);
 
+  // Ref for UpdateStatus component to access its clearForm function
+  const updateStatusRef = useRef(null);
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
@@ -299,6 +301,11 @@ const TechnicianInsident = ({
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
 
+      // Clear the UpdateStatus form after successful update
+      if (updateStatusRef.current && updateStatusRef.current.clearForm) {
+        updateStatusRef.current.clearForm();
+      }
+
       // If the last update was a transfer, notify the parent
       if (lastUpdateWasTransfer) {
         if (typeof window !== "undefined" && window.dispatchEvent) {
@@ -457,6 +464,7 @@ const TechnicianInsident = ({
               {currentIncident && (
                 <div className="col-12 section-gap">
                   <UpdateStatus
+                    ref={updateStatusRef}
                     incidentData={{
                       regNo: currentIncident.incident_number,
                       updateBy: currentIncident.update_by,
@@ -495,9 +503,10 @@ const TechnicianInsident = ({
               </div>
 
               {showSuccessMessage && (
-                <div className="col-12 mt-3">
-                  <div className="alert alert-success">
-                    Incident updated successfully!
+                <div className="technician-success-popup-overlay">
+                  <div className="technician-success-popup-card">
+                    <span className="technician-success-popup-icon">✅</span>
+                    <span className="technician-success-popup-text">Incident Update Successful!</span>
                   </div>
                 </div>
               )}
