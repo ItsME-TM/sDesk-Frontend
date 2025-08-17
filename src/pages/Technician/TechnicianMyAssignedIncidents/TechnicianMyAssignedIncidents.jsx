@@ -388,8 +388,8 @@ const TechnicianMyAssignedIncidents = () => {
                         {/* Removed extra incident details below the table. Mobile card rendering is now disabled. */}
                     </div>
                 </div>
-
-                <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+                     <div className='TechnicianMyAssignedIncidents-footer-content'>
+  <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
                     <span>
                         Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
                     </span>
@@ -399,6 +399,8 @@ const TechnicianMyAssignedIncidents = () => {
                         <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
                     </div>
                 </div>
+                     </div>
+              
             </div>
             {showIncidentPopup && selectedIncident && (
                 <div className="incident-popup-overlay">
