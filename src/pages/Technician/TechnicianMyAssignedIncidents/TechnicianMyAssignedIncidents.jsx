@@ -107,7 +107,6 @@ const TechnicianMyAssignedIncidents = () => {
     // Fetch assigned incidents on component mount
     useEffect(() => {
         if (assignedUser && currentUser) {
-            // FIX: Use serviceNum as the key for Redux action
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
         }
         dispatch(fetchAllUsersRequest());
@@ -157,8 +156,6 @@ const TechnicianMyAssignedIncidents = () => {
         return location ? (location.name || location.loc_name) : locationNumber;
     };
 
-    // Loading and error states
-    
     // Only show loading spinner if loading is true AND assignedToMe is empty
     if (loading && (!assignedToMe || assignedToMe.length === 0)) {
         return (
