@@ -385,24 +385,7 @@ const TechnicianMyAssignedIncidents = () => {
                         </table>
                     </div>
                     <div className="sm:hidden flex flex-col gap-4">
-                        {currentRows.length === 0 ? (
-                            <div className="incident-mobile-card">
-                                <div className="incident-mobile-card-header">
-                                    <span className="font-bold text-blue-700">No incidents found</span>
-                                </div>
-                            </div>
-                        ) : (
-                            currentRows.map((row, idx) => (
-                                <div key={idx} className="incident-mobile-card">
-                                    <div className="incident-mobile-card-header">
-                                        <span className="font-bold text-blue-700">Ref No: {row.refNo}</span>
-                                        <span className="incident-mobile-card-status">{row.status}</span>
-                                    </div>
-                                    <div className="incident-mobile-card-detail text-purple-700">Affected User: <span className="font-semibold">{row.affectedUser}</span></div>
-                                    <div className="incident-mobile-card-detail text-pink-700">Category: <span className="font-semibold">{row.category}</span></div>
-                                </div>
-                            ))
-                        )}
+                        {/* Removed extra incident details below the table. Mobile card rendering is now disabled. */}
                     </div>
                 </div>
 
