@@ -295,7 +295,7 @@ const TechnicianMyAssignedIncidents = () => {
                 </div>
             )}
 
-            <div className="TechnicianMyAssignedIncidents-tickets-creator">
+            <div className="TechnicianMyAssignedIncidents-tickets-creator flex flex-row items-center gap-2 whitespace-nowrap">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
                 <IoIosArrowForward />
                 <span className="TechnicianMyAssignedIncidents-created-ticket">My Assigned Incidents</span>
