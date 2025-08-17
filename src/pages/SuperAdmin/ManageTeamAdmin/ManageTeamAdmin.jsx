@@ -12,6 +12,7 @@ import { fetchMainCategoriesRequest, fetchSubCategoriesByMainCategoryIdRequest }
 import { useSelector as useAppSelector } from "react-redux";
 // Removed unused sDesk_t2_users_dataset import
 import "./ManageTeamAdmin.css";
+import { MdEdit, MdDeleteForever } from 'react-icons/md';
 
 const initialForm = {
   serviceNumber: "",
@@ -399,18 +400,18 @@ const ManageTeamAdmin = () => {
                 <td>{admin.teamName}</td>
                 <td>
                   <button
-                    className="icon-btn edit"
                     title="Edit this admin"
                     onClick={() => handleEditClick(admin)}
+                    style={{ background: 'none', border: 'none', padding: 0, marginRight: '10px', cursor: 'pointer' }}
                   >
-                    <i className="fas fa-pen"></i>
+                    <MdEdit style={{ color: '#1976d2', fontSize: '1.8em' }} />
                   </button>
                   <button
-                    className="icon-btn delete"
                     title="Delete this admin"
                     onClick={() => handleDeleteClick(admin)}
+                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
                   >
-                    <i className="fas fa-trash"></i>
+                    <MdDeleteForever style={{ color: '#d32f2f', fontSize: '1.8em' }} />
                   </button>
                 </td>
               </tr>
