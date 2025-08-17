@@ -1,9 +1,13 @@
+pre, code, .debug, [class*="debug"] {
+  display: none !important;
+}
 .TechnicianMyAssignedIncidents-main-content {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     height: 100vh;
   
+}
 .TechnicianMyAssignedIncidents-tickets-creator {
     display: flex;
     align-items: center; 
