@@ -143,6 +143,7 @@ const UpdateStatus = forwardRef(({
               <Form.Select value={transferTo} onChange={(e) => setTransferTo(e.target.value)}>
                 <option value="">Select One</option>
                 <option value="tier2-auto">Automatically Assign For Tier2</option>
+                  <option value="teamadmin">Assign For TeamAdmin</option>
                 {technicians.map((technician) => (
                   <option key={technician.service_number} value={technician.service_number}>
                     {technician.display_name || technician.user_name}
