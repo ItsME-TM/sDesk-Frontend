@@ -18,7 +18,7 @@ function MainDashboard() {
 
   useEffect(() => {
     dispatch(fetchMainCategoriesRequest());
-    if (isTechnician && user?.id) {
+    if (userType === "Technician" && user?.id) {
       dispatch(
         fetchDashboardStatsRequest({
           userParentCategory,
@@ -37,7 +37,7 @@ function MainDashboard() {
     } else {
       dispatch(fetchDashboardStatsRequest({ userParentCategory, userType }));
     }
-  }, [dispatch, userParentCategory, userType, user?.id, user?.teamName, isTechnician]);
+  }, [dispatch, userParentCategory, userType, user?.id, user?.teamName]);
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -46,7 +46,7 @@ function MainDashboard() {
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
   ];
 
-  // Determine user role for data filtering
+  // Determine if user is Super Admin
   const isSuperAdmin = 
     userType.toLowerCase().includes("superadmin") ||
     userType.toLowerCase().includes("super admin") ||
@@ -54,11 +54,6 @@ function MainDashboard() {
     userType.toLowerCase() === "super admin" ||
     user?.role?.toLowerCase() === "superadmin" ||
     user?.role?.toLowerCase() === "super admin";
-
-  const isTechnician = userType.toLowerCase() === "technician";
-
-  console.log('[MainDashboard] User info:', { userType, isSuperAdmin, isTechnician, user });
-  console.log('[MainDashboard] Dashboard stats:', dashboardStats);
 
   let cardCounts = {};
   let cardSubCounts = {};
@@ -76,25 +71,6 @@ function MainDashboard() {
     };
     
     // Total counts for all time
-    cardSubCounts = {
-      "Open": totalCounts["Open"] || 0,
-      "Hold": totalCounts["Hold"] || 0,
-      "In Progress": totalCounts["In Progress"] || 0,
-      "Closed": totalCounts["Closed"] || 0,
-    };
-  } else if (isTechnician) {
-    // For Technician: card value = today's assigned incidents, total = all assigned incidents
-    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
-    
-    // Today's incidents assigned to this technician
-    cardCounts = {
-      "Open": totalCounts["Open (Today)"] || 0,
-      "Hold": totalCounts["Hold (Today)"] || 0,
-      "In Progress": totalCounts["In Progress (Today)"] || 0,
-      "Closed": totalCounts["Closed (Today)"] || 0,
-    };
-    
-    // Total incidents ever assigned to this technician
     cardSubCounts = {
       "Open": totalCounts["Open"] || 0,
       "Hold": totalCounts["Hold"] || 0,
@@ -133,7 +109,7 @@ function MainDashboard() {
             className="MainDashboard-retry-button"
             onClick={() => {
               dispatch(fetchMainCategoriesRequest());
-              if (isTechnician && user?.id) {
+              if (userType === "Technician" && user?.id) {
                 dispatch(
                   fetchDashboardStatsRequest({
                     userParentCategory,
@@ -225,13 +201,10 @@ function MainDashboard() {
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                {isTechnician ? "High Priority (Today)" : "Unresolved (Today)"}
+                High Priority (Today)
               </span>
               <span className="MainDashboard-summary-value">
-                {isTechnician 
-                  ? (dashboardStats?.priorityCounts?.["High (Today)"] || 0)
-                  : ((cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0))
-                }
+                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
               </span>
             </div>
           </div>
