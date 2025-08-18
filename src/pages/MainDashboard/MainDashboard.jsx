@@ -201,7 +201,7 @@ function MainDashboard() {
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                High Priority (Today)
+                Unresolved (Today)
               </span>
               <span className="MainDashboard-summary-value">
                 {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
