@@ -23,6 +23,65 @@ export const createIncident = async (data: Partial<Incident>) => {
   }
 };
 
+// Create incident with attachment
+export const createIncidentWithAttachment = async (formData: FormData) => {
+  try {
+    // First try the new endpoint with attachment support
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/create-incident-with-attachment"),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
+    // If the new endpoint fails (not deployed yet), fallback to old method
+    if (error.response?.status === 404 || error.message?.includes('Cannot POST')) {
+      console.warn('New endpoint not available, falling back to separate upload method');
+      
+      // Extract incident data from FormData
+      const incidentData = {};
+      for (let [key, value] of formData.entries()) {
+        if (key !== 'file') {
+          incidentData[key] = value;
+        }
+      }
+      
+      // First create incident without attachment
+      const incidentResponse = await apiClient.post(
+        buildUrl(API_BASE, "/incident/create-incident"),
+        incidentData
+      );
+      
+      // Then upload attachment if exists
+      const file = formData.get('file');
+      if (file) {
+        try {
+          const attachmentFormData = new FormData();
+          attachmentFormData.append('attachment', file);
+          
+          await apiClient.post(
+            buildUrl(API_BASE, "/incident/upload-attachment"),
+            attachmentFormData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
+        } catch (uploadError) {
+          console.warn('Attachment upload failed, but incident was created:', uploadError);
+        }
+      }
+      
+      return incidentResponse;
+    }
+    throw error;
+  }
+};
+
 // Update incident
 export const updateIncident = async (
   incident_number: string,
@@ -32,6 +91,26 @@ export const updateIncident = async (
     return await apiClient.put(
       buildUrl(API_BASE, `/incident/${incident_number}`),
       data
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Update incident with attachment
+export const updateIncidentWithAttachment = async (
+  incident_number: string,
+  formData: FormData
+) => {
+  try {
+    return await apiClient.post(
+      buildUrl(API_BASE, `/incident/${incident_number}/update-with-attachment`),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
   } catch (error) {
     throw error;
@@ -145,6 +224,40 @@ export const fetchAllUsers = async () => {
 export const fetchAllLocations = async () => {
   try {
     return await apiClient.get(buildUrl(API_BASE, "/locations"));
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Upload attachment
+export const uploadAttachment = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append('attachment', file);
+    
+    return await apiClient.post(
+      buildUrl(API_BASE, "/incident/upload-attachment"),
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Download attachment
+export const downloadAttachment = async (filename: string) => {
+  try {
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/download-attachment/${filename}`),
+      {
+        responseType: 'blob', // Important for file downloads
+      }
+    );
   } catch (error) {
     throw error;
   }

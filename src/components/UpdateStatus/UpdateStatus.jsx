@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { Card, Form, Row, Col, Button } from 'react-bootstrap';
 import { FaPlusSquare } from "react-icons/fa";
 import CategoryDropdown from "../CategoryDropdown/CategoryDropDown";
 import LocationDropdown from "../LocationDropdown/LocationDropdown";
 import './UpdateStatus.css';
 
-const UpdateStatus = ({
+const UpdateStatus = forwardRef(({
   incidentData,
   usersDataset,
   categoryDataset,
@@ -13,7 +13,7 @@ const UpdateStatus = ({
   incident,
   onStatusChange,
   loggedInUser,
-}) => {
+}, ref) => {
   const [isCategoryPopupOpen, setIsCategoryPopupOpen] = useState(false);
   const [isLocationPopupOpen, setIsLocationPopupOpen] = useState(false);
   const categoryPopupRef = useRef(null);
@@ -25,6 +25,7 @@ const UpdateStatus = ({
   const [selectedLocation, setSelectedLocation] = useState({ name: incidentData.location || "", number: "" });
 
   const [fileName, setFileName] = useState("No file chosen");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [updatedBy, setUpdatedBy] = useState("");
   const [transferTo, setTransferTo] = useState("");
   const [description, setDescription] = useState("");
@@ -51,9 +52,10 @@ const UpdateStatus = ({
       description,
       priority,
       status,
+      selectedFile,
     };
     onStatusChange(data);
-  }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status]);
+  }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status, selectedFile]);
 
   useEffect(() => {
     if ((loggedInUser && loggedInUser.userName) || loggedInUser.name) {
@@ -82,6 +84,30 @@ const UpdateStatus = ({
       setSelectedLocation({ name: locationItem ? locationItem.loc_name : incidentData.location || "", number: locationItem ? locationItem.loc_number : "" });
     }
   }, [incident, usersDataset, categoryDataset, locationDataset, incidentData, loggedInUser]);
+
+  // Clear form function
+  const clearForm = () => {
+    setSelectedCategory({ name: "", number: "" });
+    setSelectedLocation({ name: "", number: "" });
+    setTransferTo("");
+    setDescription("");
+    setPriority("");
+    setStatus("");
+    setSelectedFile(null);
+    setFileName("No file chosen");
+    setNotifyUser(false);
+    
+    // Clear file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  // Expose clearForm function to parent component
+  useImperativeHandle(ref, () => ({
+    clearForm
+  }));
 
   return (
     <Card className="update-status-card-modern shadow-sm">
@@ -159,7 +185,42 @@ const UpdateStatus = ({
 
           <Form.Group controlId="formFile" className="mb-3">
             <Form.Label>Attachment</Form.Label>
-            <Form.Control type="file" onChange={(e) => setFileName(e.target.files[0] ? e.target.files[0].name : "No file chosen")} />
+            <Form.Control 
+              type="file" 
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  // Validate file size (1MB = 1048576 bytes)
+                  if (file.size > 1048576) {
+                    alert('File size must be less than 1MB');
+                    e.target.value = '';
+                    setFileName("No file chosen");
+                    setSelectedFile(null);
+                    return;
+                  }
+                  
+                  // Validate file type
+                  const allowedTypes = ['application/pdf', 'image/png', 'image/jpg', 'image/jpeg'];
+                  if (!allowedTypes.includes(file.type)) {
+                    alert('Only PDF, PNG, JPG, and JPEG files are allowed');
+                    e.target.value = '';
+                    setFileName("No file chosen");
+                    setSelectedFile(null);
+                    return;
+                  }
+                  
+                  setFileName(file.name);
+                  setSelectedFile(file);
+                } else {
+                  setFileName("No file chosen");
+                  setSelectedFile(null);
+                }
+              }}
+            />
+            {fileName !== "No file chosen" && (
+              <small className="text-muted">Selected: {fileName}</small>
+            )}
           </Form.Group>
         </Form>
       </Card.Body>
@@ -175,7 +236,6 @@ const UpdateStatus = ({
       )}
     </Card>
   );
-};
+});
 
 export default UpdateStatus;
-

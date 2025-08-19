@@ -42,6 +42,16 @@ export interface IncidentHistory {
   comments: string;
   category?: string;
   location?: string;
+  attachment?: string; // Server filename
+  attachmentOriginalName?: string; // Original filename for display
+}
+
+export interface UploadedAttachment {
+  success: boolean;
+  filename: string;
+  originalName: string;
+  size: number;
+  path: string;
 }
 
 export interface DashboardStats {
@@ -54,6 +64,17 @@ export interface DashboardStats {
   todayStats: {
     [key: string]: number;
   };
+  overallStatusCounts?: {
+    [key: string]: number;
+  };
+  todayStatusCounts?: {
+    [key: string]: number;
+  };
+  totalStatusCounts?: {
+    [key: string]: number;
+  };
+  allIncidents?: any[];
+  todayIncidents?: any[];
 }
 
 
@@ -71,6 +92,7 @@ export interface IncidentState {
   categoryItems: any[];
   users: any[];
   locations: any[];
+  uploadedAttachment: UploadedAttachment | null; // Add uploaded attachment state
   loading: boolean;
   error: string | null;
 }

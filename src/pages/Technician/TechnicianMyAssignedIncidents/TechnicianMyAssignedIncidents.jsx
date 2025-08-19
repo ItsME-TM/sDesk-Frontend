@@ -222,6 +222,16 @@ const TechnicianMyAssignedIncidents = () => {
     };
 
     const renderTableRows = () => {
+        if (currentRows.length === 0) {
+            return (
+                <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                        No incidents found.
+                    </td>
+                </tr>
+            );
+        }
+
         return currentRows.map((row, idx) => (
             <tr key={idx}>
                 <td className='team-refno'>
@@ -295,10 +305,10 @@ const TechnicianMyAssignedIncidents = () => {
                 </div>
             )}
 
-            <div className="TechnicianMyAssignedIncidents-tickets-creator">
+            <div className="TechnicianMyAssignedIncidents-tickets-creator flex flex-row items-center gap-2 whitespace-nowrap">
                 <span className="TechnicianMyAssignedIncidents-svr-desk">Incidents</span>
-                <IoIosArrowForward />
-                <span className="TechnicianMyAssignedIncidents-created-ticket">Assigned My</span>
+                <IoIosArrowForward style={{ position: 'relative', top: '4px' }} />
+                <span className="TechnicianMyAssignedIncidents-created-ticket">My Assigned Incidents</span>
             </div>
             <div className="TechnicianMyAssignedIncidents-content2">
                 <div className="TechnicianMyAssignedIncidents-TitleBar">
@@ -385,28 +395,11 @@ const TechnicianMyAssignedIncidents = () => {
                         </table>
                     </div>
                     <div className="sm:hidden flex flex-col gap-4">
-                        {currentRows.length === 0 ? (
-                            <div className="incident-mobile-card">
-                                <div className="incident-mobile-card-header">
-                                    <span className="font-bold text-blue-700">No incidents found</span>
-                                </div>
-                            </div>
-                        ) : (
-                            currentRows.map((row, idx) => (
-                                <div key={idx} className="incident-mobile-card">
-                                    <div className="incident-mobile-card-header">
-                                        <span className="font-bold text-blue-700">Ref No: {row.refNo}</span>
-                                        <span className="incident-mobile-card-status">{row.status}</span>
-                                    </div>
-                                    <div className="incident-mobile-card-detail text-purple-700">Affected User: <span className="font-semibold">{row.affectedUser}</span></div>
-                                    <div className="incident-mobile-card-detail text-pink-700">Category: <span className="font-semibold">{row.category}</span></div>
-                                </div>
-                            ))
-                        )}
+                        {/* Removed extra incident details below the table. Mobile card rendering is now disabled. */}
                     </div>
                 </div>
-
-                <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+                     <div className='TechnicianMyAssignedIncidents-footer-content'>
+  <div className="TechnicianMyAssignedIncidents-content3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
                     <span>
                         Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredData.length)} of {filteredData.length} entries
                     </span>
@@ -416,6 +409,8 @@ const TechnicianMyAssignedIncidents = () => {
                         <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}>Next</button>
                     </div>
                 </div>
+                     </div>
+              
             </div>
             {showIncidentPopup && selectedIncident && (
                 <div className="incident-popup-overlay">

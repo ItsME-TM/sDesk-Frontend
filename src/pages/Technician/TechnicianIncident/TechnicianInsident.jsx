@@ -1,7 +1,6 @@
-/* eslint-disable no-undef */
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {  useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./TechnicianInsident.css";
 import { IoIosArrowForward } from "react-icons/io";
 import UpdateStatus from "../../../components/UpdateStatus/UpdateStatus";
@@ -10,11 +9,12 @@ import AffectedUserDetail from "../../../components/AffectedUserDetail/AffectedU
 import {
   getIncidentByNumberRequest,
   fetchIncidentHistoryRequest,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 import { fetchCategoriesRequest } from "../../../redux/categories/categorySlice";
 import { fetchLocationsRequest } from "../../../redux/location/locationSlice";
 import {
-  
+  fetchUserByServiceNumberRequest,
   fetchAllUsersRequest,
 } from "../../../redux/sltusers/sltusersSlice";
 
@@ -24,6 +24,7 @@ const TechnicianInsident = ({
   loggedInUser,
   affectedUserDetails,
 }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { refNo: paramsRefNo } = useParams();
@@ -45,6 +46,10 @@ const TechnicianInsident = ({
     email: "",
   });
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Auto-fill Name, Designation, Email when Service No changes
   useEffect(() => {
@@ -120,13 +125,15 @@ const TechnicianInsident = ({
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [lastUpdateWasTransfer, setLastUpdateWasTransfer] = useState(false);
 
+  // Ref for UpdateStatus component to access its clearForm function
+  const updateStatusRef = useRef(null);
 
   // Ensure all users are loaded for auto-fill functionality
   useEffect(() => {
     if (!usersState.users || usersState.users.length === 0) {
       dispatch(fetchAllUsersRequest());
     }
-  }, [dispatch, usersState.allUsers, usersState.users]);
+  }, [dispatch, usersState.allUsers]);
 
   // Fetch incident and user details using Redux
   useEffect(() => {
@@ -159,7 +166,7 @@ const TechnicianInsident = ({
       dispatch(getIncidentByNumberRequest({ incident_number: currentRefNo }));
       dispatch(fetchIncidentHistoryRequest({ incident_number: currentRefNo }));
     }
-  }, [affectedUserDetails?.designation, affectedUserDetails?.email, affectedUserDetails?.name, currentRefNo, dispatch, incidentData, isPopup]); // Remove incidentData and isPopup from deps to prevent loops
+  }, [currentRefNo, dispatch]); // Remove incidentData and isPopup from deps to prevent loops
 
   // Update local state when Redux state changes
   useEffect(() => {
@@ -226,34 +233,47 @@ const TechnicianInsident = ({
   // --- FIX: Track update request and fetch history only after update is successful ---
   const [pendingHistoryIncidentNo, setPendingHistoryIncidentNo] =
     useState(null);
-  const handleUpdateClick = () => {
+  const handleUpdateClick = async () => {
     const currentIncident = isPopup
       ? incidentData
       : incidentState.currentIncident;
     if (!currentIncident) return;
 
-    // Prepare data for update
-    const updatePayload = {
-      incident_number: currentIncident.incident_number,
-      data: {
-        category: updateStatusData.category || currentIncident.category,
-        location: updateStatusData.location || currentIncident.location,
-        priority: updateStatusData.priority || currentIncident.priority,
-        status: updateStatusData.status || currentIncident.status,
-        handler: updateStatusData.transferTo || currentIncident.handler,
-        description:
-          updateStatusData.description || currentIncident.description,
-        update_by: updateStatusData.updatedBy || currentIncident.update_by,
-        // Add this line to support auto-assign Tier2
-        automaticallyAssignForTier2:
-          updateStatusData.transferTo === "tier2-auto",
-      },
-    };
+    // Create FormData for multipart form submission
+    const formData = new FormData();
+    
+    // Add incident data
+    if (updateStatusData.category) formData.append('category', updateStatusData.category);
+    if (updateStatusData.location) formData.append('location', updateStatusData.location);
+    if (updateStatusData.priority) formData.append('priority', updateStatusData.priority);
+    if (updateStatusData.status) formData.append('status', updateStatusData.status);
+    
+    // Handle transfer logics
+    if (updateStatusData.transferTo) {
+      if (updateStatusData.transferTo === 'tier2-auto') {
+        // Set the automaticallyAssignForTier2 flag for backend
+        formData.append('automaticallyAssignForTier2', 'true');
+      } else {
+        // Set specific technician as handler
+        formData.append('handler', updateStatusData.transferTo);
+      }
+    }
+    
+    if (updateStatusData.description) formData.append('description', updateStatusData.description);
+    if (updateStatusData.updatedBy) formData.append('update_by', updateStatusData.updatedBy);
+    
+    // Add attachment if present
+    if (updateStatusData.selectedFile) {
+      formData.append('file', updateStatusData.selectedFile);
+    }
 
-    // Dispatch Redux action to update incident
+    // Dispatch Redux action to update incident with attachment
     dispatch({
-      type: "incident/updateIncidentRequest",
-      payload: updatePayload,
+      type: "incident/updateIncidentWithAttachmentRequest",
+      payload: {
+        incident_number: currentIncident.incident_number,
+        formData: formData,
+      },
     });
 
     // Track if the update was a transfer
@@ -292,6 +312,11 @@ const TechnicianInsident = ({
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
 
+      // Clear the UpdateStatus form after successful update
+      if (updateStatusRef.current && updateStatusRef.current.clearForm) {
+        updateStatusRef.current.clearForm();
+      }
+
       // If the last update was a transfer, notify the parent
       if (lastUpdateWasTransfer) {
         if (typeof window !== "undefined" && window.dispatchEvent) {
@@ -312,7 +337,14 @@ const TechnicianInsident = ({
         }
       }, 1500);
     }
-  }, [incidentState, isPopup, incidentData, incidentState.currentIncident, dispatch, pendingHistoryIncidentNo, lastUpdateWasTransfer]);
+  }, [
+    incidentState,
+    isPopup,
+    incidentData,
+    incidentState.currentIncident,
+    dispatch,
+    pendingHistoryIncidentNo,
+  ]);
 
   const handleBackClick = () => {
     navigate("/technician/TechnicianAssignedIncidents");
@@ -403,6 +435,8 @@ const TechnicianInsident = ({
       comments: h.comments,
       category: getCategoryName(h.category),
       location: getLocationName(h.location),
+      attachment: h.attachment,
+      attachmentOriginalName: h.attachmentOriginalName,
     })) || [];
 
   // DEBUG PANEL: Show state at the top for troubleshooting
@@ -423,66 +457,6 @@ const TechnicianInsident = ({
               </div>
 
               <div className="col-12 section-gap">
-                {/* Display Incident Details here */}
-                <div className="incident-details-section">
-                  <h3>Incident Details</h3>
-                  <div className="incident-info">
-                    <div className="info-row">
-                      <span className="label">Incident Number:</span>
-                      <span className="value">{currentIncident.incident_number}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Reporter:</span>
-                      // eslint-disable-next-line no-undef
-                      <span className="value">{getUserName(currentIncident.informant)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Assigned To:</span>
-                      // eslint-disable-next-line no-undef
-                      <span className="value">{getUserName(currentIncident.handler)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Category:</span>
-                      <span className="value">{getCategoryName(currentIncident.category)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Location:</span>
-                      <span className="value">{getLocationName(currentIncident.location)}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Priority:</span>
-                      <span className="value">{currentIncident.priority}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Status:</span>
-                      <span className="value">{currentIncident.status}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Description:</span>
-                      <span className="value">{currentIncident.description}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Attachment:</span>
-                      <span className="value">
-                        {currentIncident.Attachment ? (
-                          <a
-                            href={`data:application/octet-stream;base64,${currentIncident.Attachment}`}
-                            download
-                          >
-                            Download Attachment
-                          </a>
-                        ) : (
-                          "No attachment"
-                        )}
-                      </span>
-                    </div>
-                    <div className="info-row">
-                      <span className="label">Created At:</span>
-                      <span className="value">{new Date(currentIncident.created_at).toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-                <br/>
                 <IncidentHistory
                   refNo={incidentDetailsWithNames.refNo}
                   category={incidentDetailsWithNames.category}
@@ -501,6 +475,7 @@ const TechnicianInsident = ({
               {currentIncident && (
                 <div className="col-12 section-gap">
                   <UpdateStatus
+                    ref={updateStatusRef}
                     incidentData={{
                       regNo: currentIncident.incident_number,
                       updateBy: currentIncident.update_by,
@@ -539,9 +514,10 @@ const TechnicianInsident = ({
               </div>
 
               {showSuccessMessage && (
-                <div className="col-12 mt-3">
-                  <div className="alert alert-success">
-                    Incident updated successfully!
+                <div className="technician-success-popup-overlay">
+                  <div className="technician-success-popup-card">
+                    <span className="technician-success-popup-icon">✅</span>
+                    <span className="technician-success-popup-text">Incident Update Successful!</span>
                   </div>
                 </div>
               )}

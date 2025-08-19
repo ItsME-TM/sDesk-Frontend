@@ -96,7 +96,7 @@ const AdminLocation = () => {
           <table>
             <thead>
               <tr>
-                <th>Location Code</th>
+               {/* <th>Location Code</th> */}
                 <th>Location Name</th>
                 <th>Region</th>
                 <th>Province</th>
@@ -107,7 +107,7 @@ const AdminLocation = () => {
               {locations.length > 0 ? (
                 locations.map((location) => (
                   <tr key={location.id}>
-                    <td>{location.locationCode}</td>
+                   {/* <td>{location.locationCode}</td> */}
                     <td>{location.locationName}</td>
                     <td>{location.region}</td>
                     <td>{location.province}</td>

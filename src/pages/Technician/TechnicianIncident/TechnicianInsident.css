@@ -1,3 +1,52 @@
+/* Success pop-up overlay for update message */
+.technician-success-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 0;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.technician-success-popup-card {
+    margin-top: 24px;
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #28a745;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(40, 167, 69, 0.18);
+    padding: 18px 32px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInDown 0.4s cubic-bezier(.42,0,.58,1);
+    pointer-events: auto;
+}
+
+.technician-success-popup-icon {
+    font-size: 2rem;
+    margin-right: 8px;
+}
+
+.technician-success-popup-text {
+    font-size: 1.1em;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 /* Shared gap for main sections */
 .section-gap {
   margin-bottom: 32px;
