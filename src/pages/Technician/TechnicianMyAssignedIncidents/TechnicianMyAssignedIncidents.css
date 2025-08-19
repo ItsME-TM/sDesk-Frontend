@@ -82,11 +82,11 @@ pre, code, .debug, [class*="debug"] {
     border: 2px solid #ffffff;
     gap: 5px;
     font-weight: 600;
-    background-color: #b10e0e;
+    background-color: #b10e0e; 
     color: aliceblue;
      animation: fadeInOut 3s ease-in-out;
-     margin-top: -8%;
-     margin-left: 90%;
+     margin-top: -4%;
+     margin-left: 93.5%;
 }
 
 .TechnicianMyAssignedIncidents-showSearchBar {
@@ -206,12 +206,12 @@ pre, code, .debug, [class*="debug"] {
     font-size: 12px;
     font-weight: bold;
     position: sticky;
-    bottom: 0;
-    z-index: 100;    
+    bottom: 100px;
+    z-index: 90px;    
 }
 
 .TechnicianMyAssignedIncidents-footer-content{
-margin-top: -9%;
+margin-top: -900%;
 
 }
 @keyframes fadeInOut {
