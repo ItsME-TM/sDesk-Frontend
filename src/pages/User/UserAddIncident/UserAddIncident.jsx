@@ -10,11 +10,13 @@ import {
   createIncidentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
+import { clearLookupUser } from "../../../redux/userLookup/userLookupSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
+  const { error: userLookupError, user: lookupUser } = useSelector((state) => state.userLookup);
 
   const [formData, setFormData] = useState({
     serviceNo: "",
@@ -110,13 +112,13 @@ const UserAddIncident = () => {
 
     if (!allowedTypes.includes(file.type)) {
         alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
-        e.target.value = ""; // Clear the input
+        e.target.value = ""; 
         return;
     }
 
-    if (file.size > 50 * 1024 * 1024) { // 50 MB limit
+    if (file.size > 50 * 1024 * 1024) { 
         alert("File size exceeds 50MB. Please choose a smaller file.");
-        e.target.value = ""; // Clear the input
+        e.target.value = ""; 
         return;
     }
     setSelectedFile(file);
@@ -163,7 +165,7 @@ const UserAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: user.serviceNum, // Use logged-in user's serviceNum
+      informant: user.serviceNum, 
       location: formData.location.name,
       handler: user.serviceNum,
       update_by: user.serviceNum,
@@ -200,6 +202,25 @@ const UserAddIncident = () => {
     }, 5000);
   };
 
+  
+  const formatServiceNumberError = (errorMessage, serviceNumber) => {
+    if (!errorMessage || !serviceNumber) return errorMessage;
+
+    
+    if (errorMessage.includes('User not found with service number')) {
+      
+      const serviceNumPattern = /^\d{6,}$/;
+      
+      if (!serviceNumPattern.test(serviceNumber.trim())) {
+        return "Invalid service number format. Please enter a valid number (e.g., 123456).";
+      } else {
+        return `No user found with service number '${serviceNumber}'. Please check and try again.`;
+      }
+    }
+
+    return errorMessage;
+  };
+
   const renderStatusMessage = () => {
     if (loading) {
       return (
@@ -221,11 +242,34 @@ const UserAddIncident = () => {
       );
     }
 
+ 
+    if (lookupUser && formData.serviceNo && !userLookupError) {
+      return (
+        <div className="status-message success-message">
+          <h3>✅ User found successfully. Proceed to add incident.</h3>
+        </div>
+      );
+    }
+
+    
+    if (userLookupError && formData.serviceNo) {
+      const formattedError = formatServiceNumberError(userLookupError, formData.serviceNo);
+      return (
+        <div className="status-message error-message">
+          <h3>❌ Service Number Error</h3>
+          <p>{formattedError}</p>
+          <button onClick={() => dispatch(clearLookupUser())}>Dismiss</button>
+        </div>
+      );
+    }
+
+   
     if (error) {
+      const formattedError = formatServiceNumberError(error, formData.serviceNo);
       return (
         <div className="status-message error-message">
           <h3>❌ Failed to Create Incident</h3>
-          <p>{error}</p>
+          <p>{formattedError}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>
       );
