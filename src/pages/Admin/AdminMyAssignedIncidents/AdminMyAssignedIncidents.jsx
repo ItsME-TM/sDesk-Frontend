@@ -4,7 +4,6 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { IoIosArrowForward } from "react-icons/io";
 import { sDesk_t2_category_dataset } from '../../../data/sDesk_t2_category_dataset';
-import { sDesk_t2_users_dataset } from '../../../data/sDesk_t2_users_dataset';
 import { sDesk_t2_location_dataset } from '../../../data/sDesk_t2_location_dataset';
 import { useNavigate } from 'react-router-dom';
 import { fetchAssignedToMeRequest } from '../../../redux/incident/incidentSlice';
@@ -16,12 +15,10 @@ const AdminMyAssignedIncidents = () => {
   
   // Redux state
   const { assignedToMe, loading, error } = useSelector((state) => state.incident);
-  
-  const currentAdmin = sDesk_t2_users_dataset.find(
-    user => user.service_number === 'SV001' && user.role === 'admin'
-  );
+  const { user: loggedInUser } = useSelector((state) => state.auth);
+  const { users } = useSelector((state) => state.sltusers);
 
-  const assignedUser = currentAdmin ? currentAdmin.service_number : null;
+  const assignedUser = loggedInUser ? loggedInUser.serviceNumber : null;
   
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +30,7 @@ const AdminMyAssignedIncidents = () => {
   // Fetch assigned incidents on component mount
   useEffect(() => {
     if (assignedUser) {
-      dispatch(fetchAssignedToMeRequest(assignedUser));
+      dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
     }
   }, [dispatch, assignedUser]);
 
@@ -52,7 +49,7 @@ const AdminMyAssignedIncidents = () => {
   };
 
   const getUserName = (serviceNumber) => {
-    const user = sDesk_t2_users_dataset.find(user => user.service_number === serviceNumber);
+    const user = users.find(user => user.service_number === serviceNumber);
     return user ? user.user_name : serviceNumber;
   };
 
@@ -91,7 +88,7 @@ const AdminMyAssignedIncidents = () => {
         <div className="AdminMyAssignedIncidents-content2">
           <div className="error-container">
             <p>Error loading assigned incidents: {error}</p>
-            <button onClick={() => dispatch(fetchAssignedToMeRequest(assignedUser))}>
+            <button onClick={() => dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }))}>
               Retry
             </button>
           </div>
@@ -124,7 +121,7 @@ const AdminMyAssignedIncidents = () => {
   const handleRowClick = (refNo) => {
     const incident = assignedToMe.find(item => item.incident_number === refNo);
     if (incident) {
-      const informant = sDesk_t2_users_dataset.find(user => user.service_number === incident.informant);
+      const informant = users.find(user => user.service_number === incident.informant);
       if (informant) {
         navigate('/admin/AdminUpdateIncident', {
           state: {
@@ -236,7 +233,7 @@ const AdminMyAssignedIncidents = () => {
         <div className="AdminMyAssignedIncidents-TitleBar">
           <div className="AdminMyAssignedIncidents-TitleBar-NameAndIcon">
             <FaHistory size={20} />
-            My Assigned Incidents - {currentAdmin.user_name}
+            My Assigned Incidents - {loggedInUser ? loggedInUser.userName : ''}
           </div>
           <div className="AdminMyAssignedIncidents-TitleBar-buttons">
             <button className="AdminMyAssignedIncidents-TitleBar-buttons-ExportData">

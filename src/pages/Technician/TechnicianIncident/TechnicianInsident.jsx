@@ -253,6 +253,9 @@ const TechnicianInsident = ({
       if (updateStatusData.transferTo === 'tier2-auto') {
         // Set the automaticallyAssignForTier2 flag for backend
         formData.append('automaticallyAssignForTier2', 'true');
+      } else if (updateStatusData.transferTo === 'teamadmin') {
+        // Set the assignForTeamAdmin flag for backend
+        formData.append('assignForTeamAdmin', 'true');
       } else {
         // Set specific technician as handler
         formData.append('handler', updateStatusData.transferTo);
