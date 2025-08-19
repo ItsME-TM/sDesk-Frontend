@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './UserUpdateIncident.css';
@@ -110,7 +111,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
         comments: currentIncident.description || 'No comments'
       });
     }
-  }, [currentIncident, allUsers, getUserName]);
+  }, [currentIncident, allUsers]);
 
   const handleBackClick = () => {
     navigate('/user/UserViewIncident');
@@ -164,6 +165,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
                 comments={incidentDetails.comments}
                 historyData={incidentHistory}
                 users={allUsers}
+                attachment={incidentData.Attachment}
               />
             </div>
           </div>

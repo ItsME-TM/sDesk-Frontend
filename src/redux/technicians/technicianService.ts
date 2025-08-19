@@ -11,9 +11,18 @@ export const fetchTechnicianByServiceNum = async (serviceNum: string) => {
   }
 };
 
-export const fetchTechnicians = async () => {
+export const fetchTechnicians = async (active?: boolean, level?: string) => {
   try {
-    return await apiClient.get(buildUrl(API_BASE, `/technicians`));
+    const params = new URLSearchParams();
+    if (active !== undefined) {
+      params.append('active', String(active));
+    }
+    if (level) {
+      params.append('level', level);
+    }
+    const queryString = params.toString();
+    const url = buildUrl(API_BASE, `/technicians${queryString ? `?${queryString}` : ''}`);
+    return await apiClient.get(url);
   } catch (error) {
     throw error;
   }
@@ -21,7 +30,7 @@ export const fetchTechnicians = async () => {
 
 export const createTechnician = async (data: Partial<Technician>) => {
   try {
-    return await apiClient.post(buildUrl(API_BASE, "/technician"), data);
+    return await apiClient.post(buildUrl(API_BASE, "technician"), data);
   } catch (error) {
     throw error;
   }
@@ -58,13 +67,8 @@ export const checkTechnicianStatus = async () => {
     throw error;
   }
 };
-export const fetchActiveTechnicians = async () => {
-  try {
-    return await apiClient.get(`${API_BASE}/technician/active`);
-  } catch (error) {
-    throw error;
-  }
-};
+
+
 
 // NEW: Force logout technician (admin only)
 export const forceLogoutTechnician = async (serviceNum: string) => {
