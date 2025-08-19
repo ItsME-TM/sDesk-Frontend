@@ -2,7 +2,9 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import {
   fetchAllIncidents,
   createIncident,
+  createIncidentWithAttachment,
   updateIncident,
+  updateIncidentWithAttachment,
   getIncidentByNumber,
   getIncidentsAssignedToMe,
   getIncidentsAssignedByMe,
@@ -16,6 +18,7 @@ import {
   fetchAllLocations,
   fetchAdminTeamData,
   fetchDashboardStats,
+  uploadAttachment,
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -27,9 +30,15 @@ import {
   createIncidentRequest,
   createIncidentSuccess,
   createIncidentFailure,
+  createIncidentWithAttachmentRequest,
+  createIncidentWithAttachmentSuccess,
+  createIncidentWithAttachmentFailure,
   updateIncidentRequest,
   updateIncidentSuccess,
   updateIncidentFailure,
+  updateIncidentWithAttachmentRequest,
+  updateIncidentWithAttachmentSuccess,
+  updateIncidentWithAttachmentFailure,
   getIncidentByNumberRequest,
   getIncidentByNumberSuccess,
   getIncidentByNumberFailure,
@@ -66,6 +75,9 @@ import {
   fetchAllLocationsRequest,
   fetchAllLocationsSuccess,
   fetchAllLocationsFailure,
+  uploadAttachmentRequest,
+  uploadAttachmentSuccess,
+  uploadAttachmentFailure,
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -97,6 +109,23 @@ function* handleCreateIncident(action) {
   }
 }
 
+function* handleCreateIncidentWithAttachment(action) {
+  try {
+    const response = yield call(createIncidentWithAttachment, action.payload);
+    yield put(createIncidentWithAttachmentSuccess(response.data));
+    // Refresh the assigned to me list for the handler
+    yield put(getAssignedToMeRequest({ serviceNum: response.data.handler }));
+    // Optionally refetch all incidents
+    yield put(fetchAllIncidentsRequest());
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(createIncidentWithAttachmentFailure(errorMessage));
+  }
+}
+
 function* handleUpdateIncident(action) {
   try {
     const { incident_number, data } = action.payload;
@@ -110,6 +139,22 @@ function* handleUpdateIncident(action) {
       error.message ||
       "Unknown error occurred";
     yield put(updateIncidentFailure(errorMessage));
+  }
+}
+
+function* handleUpdateIncidentWithAttachment(action) {
+  try {
+    const { incident_number, formData } = action.payload;
+    const response = yield call(updateIncidentWithAttachment, incident_number, formData);
+    yield put(updateIncidentWithAttachmentSuccess(response.data));
+    // Optionally refetch all incidents
+    yield put(fetchAllIncidentsRequest());
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Unknown error occurred";
+    yield put(updateIncidentWithAttachmentFailure(errorMessage));
   }
 }
 
@@ -257,7 +302,7 @@ function* handleFetchAllLocations() {
 }
 function* handleFetchDashboardStats(action) {
   try {
-    const response = yield call(fetchDashboardStats, action.payload?.userParentCategory);
+    const response = yield call(fetchDashboardStats, action.payload);
     yield put(fetchDashboardStatsSuccess(response.data));
   } catch (error) {
     const errorMessage =
@@ -272,7 +317,9 @@ function* handleFetchDashboardStats(action) {
 export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
   yield takeLatest(createIncidentRequest.type, handleCreateIncident);
+  yield takeLatest(createIncidentWithAttachmentRequest.type, handleCreateIncidentWithAttachment);
   yield takeLatest(updateIncidentRequest.type, handleUpdateIncident);
+  yield takeLatest(updateIncidentWithAttachmentRequest.type, handleUpdateIncidentWithAttachment);
   yield takeLatest(getIncidentByNumberRequest.type, handleGetIncidentByNumber);
   yield takeLatest(getAssignedToMeRequest.type, handleGetAssignedToMe);
   // Also listen for the alias action type to support both usages
@@ -288,4 +335,18 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
+  yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
+}
+
+function* handleUploadAttachment(action: any) {
+  try {
+    const response = yield call(uploadAttachment, action.payload);
+    yield put(uploadAttachmentSuccess(response.data));
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to upload attachment";
+    yield put(uploadAttachmentFailure(errorMessage));
+  }
 }

@@ -8,6 +8,7 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
+  createIncidentWithAttachmentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
 
@@ -88,37 +89,29 @@ const UserAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) {
-        return;
+    
+    if (!file) return;
+
+    // File type validation
+    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
+      e.target.value = '';
+      return;
     }
 
-    const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/pdf',
-        'application/msword', // .doc
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-        'application/vnd.ms-excel', // .xls
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-        'application/vnd.ms-powerpoint', // .ppt
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-        'text/plain', // .txt
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
-        e.target.value = ""; // Clear the input
-        return;
+    // File size validation (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      alert('File size must be less than 1MB.');
+      e.target.value = '';
+      return;
     }
 
-    if (file.size > 50 * 1024 * 1024) { // 50 MB limit
-        alert("File size exceeds 50MB. Please choose a smaller file.");
-        e.target.value = ""; // Clear the input
-        return;
-    }
+    // Just store the file without uploading
     setSelectedFile(file);
   };
 
@@ -176,7 +169,22 @@ const UserAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    dispatch(createIncidentRequest(incidentData));
+    if (selectedFile) {
+      // Create FormData for multipart request
+      const formDataWithFile = new FormData();
+      Object.keys(incidentData).forEach(key => {
+        if (incidentData[key] !== null) {
+          formDataWithFile.append(key, incidentData[key]);
+        }
+      });
+      formDataWithFile.append('file', selectedFile);
+
+      // Use create incident with attachment
+      dispatch(createIncidentWithAttachmentRequest(formDataWithFile));
+    } else {
+      // Regular incident creation without attachment
+      dispatch(createIncidentRequest(incidentData));
+    }
 
     setFormData({
       serviceNo: "",

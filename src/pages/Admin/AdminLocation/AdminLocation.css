@@ -126,12 +126,14 @@
   padding: 20px;
   max-height: 80%;
   overflow-y: auto;
+  position: relative;
 }
 
 .AdminLocation-table table {
   border-collapse: collapse;
   background-color: #f8f9fa;
   width: 100%;
+  table-layout: fixed;
 }
 
 .AdminLocation-table th,

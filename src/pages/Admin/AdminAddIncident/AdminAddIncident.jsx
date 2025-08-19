@@ -8,12 +8,13 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import {
   createIncidentRequest,
   clearError,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const AdminAddIncident = () => {
   const dispatch = useDispatch();
   // Redux state
-  const { loading, error } = useSelector((state) => state.incident);
+  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   // Get admin user data
@@ -94,38 +95,36 @@ const AdminAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    if (!file) {
-        return;
+    
+    if (!file) return;
+
+    // File type validation
+    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
+      e.target.value = '';
+      return;
     }
 
-    const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/pdf',
-        'application/msword', // .doc
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-        'application/vnd.ms-excel', // .xls
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-        'application/vnd.ms-powerpoint', // .ppt
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-        'text/plain', // .txt
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
-        e.target.value = ""; // Clear the input
-        return;
+    // File size validation (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      alert('File size must be less than 1MB.');
+      e.target.value = '';
+      return;
     }
 
-    if (file.size > 50 * 1024 * 1024) { // 50 MB limit
-        alert("File size exceeds 50MB. Please choose a smaller file.");
-        e.target.value = ""; // Clear the input
-        return;
+    try {
+      // Upload file immediately
+      dispatch(uploadAttachmentRequest(file));
+      setSelectedFile(file);
+    } catch (error) {
+      alert('Failed to upload file. Please try again.');
+      e.target.value = '';
     }
-    setSelectedFile(file);
   };
 
   const handleRemoveFile = () => {
@@ -177,6 +176,8 @@ const AdminAddIncident = () => {
       description: formData.description || "",
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
+      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
+      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
 

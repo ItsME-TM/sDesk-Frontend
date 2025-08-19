@@ -138,29 +138,43 @@
   flex-wrap: wrap;
 }
 
-/* Responsive breakpoints */
+
 
 /* Tablet view (≤768px) */
 @media (max-width: 768px) {
   .AddInicident-content2-UserDetails-UserInfo-Cube1,
   .AddInicident-content2-UserDetails-UserInfo-Cube2,
   .AddInicident-content2-UserDetails-UserInfo-Cube3 {
-      width: 100%;
+    width: 100%;
     margin-bottom: 10px;
   }
 
+  
+  .AddInicident-content2-UserDetails-UserInfo-Cube1-title,
+  .AddInicident-content2-UserDetails-UserInfo-Cube2 .AddInicident-content2-UserDetails-UserInfo-Cube1-title,
+  .AddInicident-content2-UserDetails-UserInfo-Cube3 .AddInicident-content2-UserDetails-UserInfo-Cube1-title {
+    font-size: 15px;
+  }
+
+  .AddInicident-content2-UserDetails-UserInfo-Cube1-input input,
+  .AddInicident-content2-UserDetails-UserInfo-Cube2 .AddInicident-content2-UserDetails-UserInfo-Cube1-input input,
+  .AddInicident-content2-UserDetails-UserInfo-Cube3 .AddInicident-content2-UserDetails-UserInfo-Cube1-input input {
+    font-size: 13px;
+    height: 32px;
+  }
+
   .lookup-status {
-    font-size: 10px;
+    font-size: 11px;
     white-space: normal;
   }
 }
 
-/* Mobile view (≤480px or 320px) */
+
 @media (max-width: 480px) {
   .AddInicident-content2-UserDetails-UserInfo-Cube1,
   .AddInicident-content2-UserDetails-UserInfo-Cube2,
   .AddInicident-content2-UserDetails-UserInfo-Cube3 {
-    width: 100%; /* stack vertically */
+    width: 100%; 
   }
 
   .AddInicident-content2-UserDetails {
@@ -175,10 +189,23 @@
   .AddInicident-content2-UserDetails-UserInfo {
     gap: 6px;
   }
+ 
+  .AddInicident-content2-UserDetails-UserInfo-Cube1-title,
+  .AddInicident-content2-UserDetails-UserInfo-Cube2 .AddInicident-content2-UserDetails-UserInfo-Cube1-title,
+  .AddInicident-content2-UserDetails-UserInfo-Cube3 .AddInicident-content2-UserDetails-UserInfo-Cube1-title {
+    font-size: 13px;
+  }
+
+
+  .AddInicident-content2-UserDetails-UserInfo-Cube1-input input,
+  .AddInicident-content2-UserDetails-UserInfo-Cube2 .AddInicident-content2-UserDetails-UserInfo-Cube1-input input,
+  .AddInicident-content2-UserDetails-UserInfo-Cube3 .AddInicident-content2-UserDetails-UserInfo-Cube1-input input {
+    font-size: 12px;
+    height: 34px;
+  }
 
   .lookup-status {
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 5px;
   }
 }
-

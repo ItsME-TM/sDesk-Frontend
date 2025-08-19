@@ -240,19 +240,16 @@ function AdminUserList() {
                       return user.active === true;
                     return true;
                   })
-                  .filter(
-                    (user) =>
-                      user.email
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.name
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) ||
-                      user.team
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase()) 
-                    
-                  )
+                  .filter((user) => {
+                    const searchString = searchQuery.toLowerCase();
+                    return (
+                      (user.email && user.email.toLowerCase().includes(searchString)) ||
+                      (user.name && user.name.toLowerCase().includes(searchString)) ||
+                      (user.team && user.team.toLowerCase().includes(searchString)) ||
+                      (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
+                      (user.level && user.level.toLowerCase().includes(searchString))
+                    );
+                  })
                   .map((user) => (
                     <tr key={user.serviceNum}>
                       <td>{user.serviceNum}</td>
