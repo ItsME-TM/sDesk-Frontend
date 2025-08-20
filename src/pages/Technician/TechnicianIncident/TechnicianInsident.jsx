@@ -315,8 +315,8 @@ const TechnicianInsident = ({
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
 
-      // Clear the UpdateStatus form after successful update
-      if (updateStatusRef.current && updateStatusRef.current.clearForm) {
+      // Clear the form in UpdateStatus component
+      if (updateStatusRef.current) {
         updateStatusRef.current.clearForm();
       }
 

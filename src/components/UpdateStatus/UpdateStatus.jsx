@@ -87,8 +87,6 @@ const UpdateStatus = forwardRef(({
 
   // Clear form function
   const clearForm = () => {
-    setSelectedCategory({ name: "", number: "" });
-    setSelectedLocation({ name: "", number: "" });
     setTransferTo("");
     setDescription("");
     setPriority("");
