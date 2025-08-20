@@ -270,6 +270,12 @@ const TechnicianInsident = ({
       formData.append('file', updateStatusData.selectedFile);
     }
 
+    console.log("TechnicianInsident: Dispatching update for incident_number:", currentIncident.incident_number);
+    // Log formData contents
+    for (let pair of formData.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
+    }
+
     // Dispatch Redux action to update incident with attachment
     dispatch({
       type: "incident/updateIncidentWithAttachmentRequest",

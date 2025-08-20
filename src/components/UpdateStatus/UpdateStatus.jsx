@@ -46,7 +46,7 @@ const UpdateStatus = forwardRef(({
   useEffect(() => {
     const data = {
       updatedBy,
-      category: selectedCategory.number,
+      category: selectedCategory.name, // Changed from .number to .name
       location: selectedLocation.number,
       transferTo,
       description,
@@ -54,6 +54,7 @@ const UpdateStatus = forwardRef(({
       status,
       selectedFile,
     };
+    console.log("UpdateStatus: Data being sent to onStatusChange:", data);
     onStatusChange(data);
   }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status, selectedFile]);
 
