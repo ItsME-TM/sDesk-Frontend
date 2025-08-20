@@ -5,6 +5,7 @@ import { Technician } from "./technicianTypes";
 const initialState = {
   technicians: [] as Technician[],
    activeTechnicians: [] as Technician[],
+   
   loading: false,
   error: null as string | null,
 };
@@ -13,7 +14,7 @@ const technicianSlice = createSlice({
   name: "technicians",
   initialState,
   reducers: {
-    fetchTechniciansRequest(state) {
+    fetchTechniciansRequest(state, action) {
       state.loading = true;
       state.error = null;
     },
@@ -84,6 +85,7 @@ const technicianSlice = createSlice({
     state.error = action.payload;
   },
   
+    // Re-add fetchActiveTechniciansRequest and related actions
     fetchActiveTechniciansRequest(state) {
       state.loading = true;
       state.error = null;
@@ -106,15 +108,6 @@ const technicianSlice = createSlice({
           ? { ...tech, active: isOnline }
           : tech
       );
-      // Also update active technicians list
-      if (isOnline) {
-        const technician = state.technicians.find(tech => tech.serviceNum === serviceNum);
-        if (technician && !state.activeTechnicians.find(tech => tech.serviceNum === serviceNum)) {
-          state.activeTechnicians.push(technician);
-        }
-      } else {
-        state.activeTechnicians = state.activeTechnicians.filter(tech => tech.serviceNum !== serviceNum);
-      }
     },
     forceLogoutTechnicianRequest(state) {
       state.loading = true;
@@ -130,7 +123,6 @@ const technicianSlice = createSlice({
           ? { ...tech, active: false }
           : tech
       );
-      state.activeTechnicians = state.activeTechnicians.filter(tech => tech.serviceNum !== serviceNum);
     },
     forceLogoutTechnicianFailure(state, action) {
       state.loading = false;
@@ -155,13 +147,13 @@ export const {
   checkTechnicianStatusRequest,
   checkTechnicianStatusSuccess,
   checkTechnicianStatusFailure,
-  fetchActiveTechniciansRequest,
-  fetchActiveTechniciansSuccess,
-  fetchActiveTechniciansFailure,
+  fetchActiveTechniciansRequest, // Re-add this
+  fetchActiveTechniciansSuccess, // Re-add this
+  fetchActiveTechniciansFailure, // Re-add this
   updateTechnicianOnlineStatus,
   forceLogoutTechnicianRequest,
-  forceLogoutTechnicianSuccess,
-  forceLogoutTechnicianFailure
+  forceLogoutTechnicianFailure,
+  forceLogoutTechnicianSuccess
 } = technicianSlice.actions;
 
 //Selectors

@@ -24,9 +24,10 @@ forceLogoutTechnicianFailure
 } from './technicianSlice';
 import * as technicianService from './technicianService';
 
-function* handleFetchTechnicians() {
+function* handleFetchTechnicians(action) {
   try {
-    const response = yield call(technicianService.fetchTechnicians);
+    const { active, level } = action.payload || {};
+    const response = yield call(technicianService.fetchTechnicians, active, level);
     yield put(fetchTechniciansSuccess(response.data));
   } catch (error) {
     yield put(fetchTechniciansFailure(error.message));

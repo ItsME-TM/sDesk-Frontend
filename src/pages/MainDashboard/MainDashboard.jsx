@@ -30,7 +30,7 @@ function MainDashboard() {
 
   useEffect(() => {
     dispatch(fetchMainCategoriesRequest());
-    if (isTechnician && user?.id) {
+    if (userType === "Technician" && user?.id) {
       dispatch(
         fetchDashboardStatsRequest({
           userParentCategory,
@@ -51,6 +51,7 @@ function MainDashboard() {
     }
   }, [dispatch, userParentCategory, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
 
+
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
     { title: "Hold", color: "#00c4b4", icon: <FaSnowflake /> },
@@ -58,11 +59,10 @@ function MainDashboard() {
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
   ];
 
-  // Determine if user is Super Admin
-  // (already declared above)
 
   console.log('[MainDashboard] User info:', { userType, isSuperAdmin, isTechnician, isAdmin, user });
   console.log('[MainDashboard] Dashboard stats:', dashboardStats);
+
 
   let cardCounts = {};
   let cardSubCounts = {};
@@ -156,7 +156,7 @@ function MainDashboard() {
             className="MainDashboard-retry-button"
             onClick={() => {
               dispatch(fetchMainCategoriesRequest());
-              if (isTechnician && user?.id) {
+              if (userType === "Technician" && user?.id) {
                 dispatch(
                   fetchDashboardStatsRequest({
                     userParentCategory,
@@ -248,13 +248,10 @@ function MainDashboard() {
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                {isTechnician ? "High Priority (Today)" : "Unresolved (Today)"}
+                High Priority (Today)
               </span>
               <span className="MainDashboard-summary-value">
-                {isTechnician 
-                  ? (dashboardStats?.priorityCounts?.["High (Today)"] || 0)
-                  : ((cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0))
-                }
+                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
               </span>
             </div>
           </div>

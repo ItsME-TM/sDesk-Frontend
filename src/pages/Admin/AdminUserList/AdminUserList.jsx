@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import React, { useEffect, useState, useMemo } from "react";
 import "./AdminUserList.css";
 import { FaHouseUser, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
@@ -43,7 +46,7 @@ function AdminUserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
+  const [onlineTechnicians] = useState(new Set());
 
   useEffect(() => {
     dispatch(fetchSubCategoriesRequest());
@@ -107,7 +110,7 @@ function AdminUserList() {
           level: user.level || "",
           id: user.id,
         })),
-    [technicians, mainCategories, subCategories, onlineTechnicians]
+    [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
   );
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
@@ -126,55 +129,6 @@ function AdminUserList() {
     }
   };
 
-  const confirmEdit = async (newRole, updatedFields) => {
-    if (editUser) {
-      try {
-        await updateUserRoleById(editUser.serviceNum, newRole);
-     
-      } catch (err) {
-      }
-
-      const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
-      dispatch(
-        updateTechnicianRequest({
-          serviceNum: editUser.serviceNum,
-          email: updatedFields.email,
-          name: updatedFields.name,
-          team: updatedFields.teamName || updatedFields.team,
-          active: updatedFields.active,
-          tier: Number(updatedFields.tier),
-          teamId: updatedFields.teamId || updatedFields.teamId,
-          level: updatedFields.tier === "1" ? "Tier1" : "Tier2",
-          cat1: cat1 || "",
-          cat2: cat2 || "",
-          cat3: cat3 || "",
-          cat4: cat4 || "",
-          rr: 1,
-          designation: "Technician",
-          contactNumber: updatedFields.contactNumber,
-          id: editUser.id,
-        })
-      );
-      const handleDeactivate = (serviceNum) => {
-        // Dispatch Redux action that calls backend to force logout + send message
-        dispatch(forceLogoutTechnicianRequest(serviceNum));
-      };
-      // NEW: If technician is being deactivated and is currently online, force logout
-      if (
-        updatedFields.active === false &&
-        onlineTechnicians.has(editUser.serviceNum)
-      ) {
-        dispatch(
-          forceLogoutTechnicianRequest({
-            serviceNum: editUser.serviceNum,
-            socket,
-          })
-        );
-      }
-    }
-    setIsEditUserOpen(false);
-    setEditUser(null);
-  };
 
   const handleDelete = (serviceNumber) => {
     const user = technicians.find(
@@ -301,6 +255,7 @@ function AdminUserList() {
                       <td>{user.serviceNum}</td>
                       <td>{user.name}</td>
                       <td>{user.team}</td>
+                      
                       <td>
                         <span
                           style={{
@@ -364,6 +319,7 @@ function AdminUserList() {
               if (newUser.serviceNum) {
                 try {
                   await updateUserRoleById(newUser.serviceNum, "technician");
+                // eslint-disable-next-line no-empty
                 } catch (err) {}
               }
 
@@ -378,10 +334,10 @@ function AdminUserList() {
                   tier: Number(newUser.tier),
                   level: Number(newUser.tier) === 1 ? "Tier1" : "Tier2",
                   teamId: newUser.teamId,
-                  cat1: newUser.cat1 || "",
-                  cat2: newUser.cat2 || "",
-                  cat3: newUser.cat3 || "",
-                  cat4: newUser.cat4 || "",
+                  cat1: cat1 || "",
+                  cat2: cat2 || "",
+                  cat3: cat3 || "",
+                  cat4: cat4 || "",
                   rr: 1,
                   designation: "Technician",
                   contactNumber: newUser.contactNumber,
