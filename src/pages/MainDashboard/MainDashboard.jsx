@@ -16,6 +16,18 @@ function MainDashboard() {
   const userType = user?.userType || user?.role || user?.type || "Unknown";
   const userParentCategory = "PAC001";
 
+  // Determine user role for data filtering
+  const isSuperAdmin = 
+    userType.toLowerCase().includes("superadmin") ||
+    userType.toLowerCase().includes("super admin") ||
+    userType.toLowerCase() === "superadmin" ||
+    userType.toLowerCase() === "super admin" ||
+    user?.role?.toLowerCase() === "superadmin" ||
+    user?.role?.toLowerCase() === "super admin";
+
+  const isTechnician = userType.toLowerCase() === "technician";
+  const isAdmin = userType.toLowerCase() === "admin";
+
   useEffect(() => {
     dispatch(fetchMainCategoriesRequest());
     if (userType === "Technician" && user?.id) {
@@ -26,18 +38,19 @@ function MainDashboard() {
           technicianId: user.id,
         })
       );
-    } else if (userType === "admin" && user?.teamName) {
+    } else if (isAdmin && user?.serviceNum) {
       dispatch(
         fetchDashboardStatsRequest({
           userParentCategory,
           userType,
-          teamName: user.teamName,
+          adminServiceNum: user.serviceNum,
         })
       );
     } else {
       dispatch(fetchDashboardStatsRequest({ userParentCategory, userType }));
     }
-  }, [dispatch, userParentCategory, userType, user?.id, user?.teamName]);
+  }, [dispatch, userParentCategory, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
+
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -46,14 +59,10 @@ function MainDashboard() {
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
   ];
 
-  // Determine if user is Super Admin
-  const isSuperAdmin = 
-    userType.toLowerCase().includes("superadmin") ||
-    userType.toLowerCase().includes("super admin") ||
-    userType.toLowerCase() === "superadmin" ||
-    userType.toLowerCase() === "super admin" ||
-    user?.role?.toLowerCase() === "superadmin" ||
-    user?.role?.toLowerCase() === "super admin";
+
+  console.log('[MainDashboard] User info:', { userType, isSuperAdmin, isTechnician, isAdmin, user });
+  console.log('[MainDashboard] Dashboard stats:', dashboardStats);
+
 
   let cardCounts = {};
   let cardSubCounts = {};
@@ -71,6 +80,44 @@ function MainDashboard() {
     };
     
     // Total counts for all time
+    cardSubCounts = {
+      "Open": totalCounts["Open"] || 0,
+      "Hold": totalCounts["Hold"] || 0,
+      "In Progress": totalCounts["In Progress"] || 0,
+      "Closed": totalCounts["Closed"] || 0,
+    };
+  } else if (isTechnician) {
+    // For Technician: card value = today's assigned incidents, total = all assigned incidents
+    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
+    
+    // Today's incidents assigned to this technician
+    cardCounts = {
+      "Open": totalCounts["Open (Today)"] || 0,
+      "Hold": totalCounts["Hold (Today)"] || 0,
+      "In Progress": totalCounts["In Progress (Today)"] || 0,
+      "Closed": totalCounts["Closed (Today)"] || 0,
+    };
+    
+    // Total incidents ever assigned to this technician
+    cardSubCounts = {
+      "Open": totalCounts["Open"] || 0,
+      "Hold": totalCounts["Hold"] || 0,
+      "In Progress": totalCounts["In Progress"] || 0,
+      "Closed": totalCounts["Closed"] || 0,
+    };
+  } else if (isAdmin) {
+    // For Admin: card value = today's incidents under their main categories, total = all incidents under their main categories
+    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
+    
+    // Today's incidents under admin's main categories and subcategories
+    cardCounts = {
+      "Open": totalCounts["Open (Today)"] || 0,
+      "Hold": totalCounts["Hold (Today)"] || 0,
+      "In Progress": totalCounts["In Progress (Today)"] || 0,
+      "Closed": totalCounts["Closed (Today)"] || 0,
+    };
+    
+    // Total incidents under admin's main categories and subcategories
     cardSubCounts = {
       "Open": totalCounts["Open"] || 0,
       "Hold": totalCounts["Hold"] || 0,
@@ -117,12 +164,12 @@ function MainDashboard() {
                     technicianId: user.id,
                   })
                 );
-              } else if (userType === "Admin" && user?.teamName) {
+              } else if (isAdmin && user?.serviceNum) {
                 dispatch(
                   fetchDashboardStatsRequest({
                     userParentCategory,
                     userType,
-                    teamName: user.teamName,
+                    adminServiceNum: user.serviceNum,
                   })
                 );
               } else {
