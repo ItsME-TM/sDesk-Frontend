@@ -50,11 +50,11 @@ const UserViewIncident = () => {
         priorityFilter === "all" || incident.priority === priorityFilter;
       const categoryMatch =
         categoryFilter === "all" || incident.category === categoryFilter;
-      const searchMatch = // Add search logic
+      const searchMatch = 
         !searchTerm ||
-        incident.incident_number
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+        Object.values(incident).some(value =>
+          String(value).toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
       return statusMatch && priorityMatch && categoryMatch && searchMatch;
     });

@@ -263,12 +263,24 @@ export const downloadAttachment = async (filename: string) => {
   }
 };
 
-export const fetchDashboardStats = async (userParentCategory?: string) => {
+export const fetchDashboardStats = async (params?: {
+  userParentCategory?: string;
+  userType?: string;
+  technicianId?: string;
+  teamName?: string;
+  adminServiceNum?: string;
+}) => {
   try {
-    const params = userParentCategory ? { userParentCategory } : {};
+    const queryParams: Record<string, any> = {};
+    if (params?.userParentCategory) queryParams.userParentCategory = params.userParentCategory;
+    if (params?.userType) queryParams.userType = params.userType;
+    if (params?.technicianId) queryParams.technicianId = params.technicianId;
+    if (params?.teamName) queryParams.teamName = params.teamName;
+    if (params?.adminServiceNum) queryParams.adminServiceNum = params.adminServiceNum;
+    
     return await apiClient.get(
       buildUrl(API_BASE, "/incident/dashboard-stats"),
-      { params }
+      { params: queryParams }
     );
   } catch (error) {
     throw error;

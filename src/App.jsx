@@ -108,7 +108,7 @@ function App() {
               <Route  path="UserMyAssignedIncidents"element={<UserMyAssignedIncidents />} />
               <Route path="UserMyTeamIncidentViewAll"element={<UserMyTeamIncidentViewAll />}/>
               <Route path="/user/UserUpdateIncident" element={<UserUpdateIncident />}/>
-            </Route>{" "}
+            </Route>
           </Route>
         </Routes>
       </SocketProvider>

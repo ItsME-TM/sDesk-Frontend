@@ -8,14 +8,15 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
-  createIncidentWithAttachmentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
+import { clearLookupUser } from "../../../redux/userLookup/userLookupSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
+  const { error: userLookupError, user: lookupUser } = useSelector((state) => state.userLookup);
 
   const [formData, setFormData] = useState({
     serviceNo: "",
@@ -89,29 +90,37 @@ const UserAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    
-    if (!file) return;
-
-    // File type validation
-    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    
-    if (!allowedTypes.includes(fileExtension)) {
-      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
-      e.target.value = '';
-      return;
+    if (!file) {
+        return;
     }
 
-    // File size validation (1MB = 1024 * 1024 bytes)
-    if (file.size > 1024 * 1024) {
-      alert('File size must be less than 1MB.');
-      e.target.value = '';
-      return;
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/pdf',
+        'application/msword', // .doc
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/vnd.ms-excel', // .xls
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-powerpoint', // .ppt
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+        'text/plain', // .txt
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
+        e.target.value = ""; 
+        return;
     }
 
-    // Just store the file without uploading
+    if (file.size > 50 * 1024 * 1024) { 
+        alert("File size exceeds 50MB. Please choose a smaller file.");
+        e.target.value = ""; 
+        return;
+    }
     setSelectedFile(file);
   };
 
@@ -156,7 +165,7 @@ const UserAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: user.serviceNum, // Use logged-in user's serviceNum
+      informant: user.serviceNum, 
       location: formData.location.name,
       handler: user.serviceNum,
       update_by: user.serviceNum,
@@ -169,22 +178,7 @@ const UserAddIncident = () => {
       Attachment: selectedFile ? selectedFile.name : null,
     };
 
-    if (selectedFile) {
-      // Create FormData for multipart request
-      const formDataWithFile = new FormData();
-      Object.keys(incidentData).forEach(key => {
-        if (incidentData[key] !== null) {
-          formDataWithFile.append(key, incidentData[key]);
-        }
-      });
-      formDataWithFile.append('file', selectedFile);
-
-      // Use create incident with attachment
-      dispatch(createIncidentWithAttachmentRequest(formDataWithFile));
-    } else {
-      // Regular incident creation without attachment
-      dispatch(createIncidentRequest(incidentData));
-    }
+    dispatch(createIncidentRequest(incidentData));
 
     setFormData({
       serviceNo: "",
@@ -208,6 +202,25 @@ const UserAddIncident = () => {
     }, 5000);
   };
 
+  
+  const formatServiceNumberError = (errorMessage, serviceNumber) => {
+    if (!errorMessage || !serviceNumber) return errorMessage;
+
+    
+    if (errorMessage.includes('User not found with service number')) {
+      
+      const serviceNumPattern = /^\d{6,}$/;
+      
+      if (!serviceNumPattern.test(serviceNumber.trim())) {
+        return "Invalid service number format. Please enter a valid number (e.g., 123456).";
+      } else {
+        return `No user found with service number '${serviceNumber}'. Please check and try again.`;
+      }
+    }
+
+    return errorMessage;
+  };
+
   const renderStatusMessage = () => {
     if (loading) {
       return (
@@ -229,11 +242,34 @@ const UserAddIncident = () => {
       );
     }
 
+ 
+    if (lookupUser && formData.serviceNo && !userLookupError) {
+      return (
+        <div className="status-message success-message">
+          <h3>✅ User found successfully. Proceed to add incident.</h3>
+        </div>
+      );
+    }
+
+    
+    if (userLookupError && formData.serviceNo) {
+      const formattedError = formatServiceNumberError(userLookupError, formData.serviceNo);
+      return (
+        <div className="status-message error-message">
+          <h3>❌ Service Number Error</h3>
+          <p>{formattedError}</p>
+          <button onClick={() => dispatch(clearLookupUser())}>Dismiss</button>
+        </div>
+      );
+    }
+
+   
     if (error) {
+      const formattedError = formatServiceNumberError(error, formData.serviceNo);
       return (
         <div className="status-message error-message">
           <h3>❌ Failed to Create Incident</h3>
-          <p>{error}</p>
+          <p>{formattedError}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>
       );

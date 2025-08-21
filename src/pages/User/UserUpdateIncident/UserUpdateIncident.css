@@ -152,9 +152,9 @@
   text-align: left;
   vertical-align: top;
   word-wrap: break-word;
-  hyphens: auto;
-  -webkit-hyphens: auto;
   -ms-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
 }
 
 .UserUpdateIncident-table th {

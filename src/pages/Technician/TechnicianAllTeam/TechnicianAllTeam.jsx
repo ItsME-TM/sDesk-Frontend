@@ -1,7 +1,10 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React, { useState, useEffect } from "react";
 import { FaHistory, FaSearch } from "react-icons/fa";
+
 import { TiExportOutline } from "react-icons/ti";
-import { useNavigate } from "react-router-dom";
+
 import { IoIosArrowForward } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,7 +20,6 @@ import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory
 import "./TechnicianAllTeam.css";
 
 const TechnicianAllTeam = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Redux state
