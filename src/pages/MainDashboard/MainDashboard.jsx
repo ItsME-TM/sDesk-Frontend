@@ -14,7 +14,6 @@ function MainDashboard() {
   const { user } = useSelector((state) => state.auth);
 
   const userType = user?.userType || user?.role || user?.type || "Unknown";
-  const userParentCategory = "PAC001";
 
   // Determine user role for data filtering
   const isSuperAdmin = 
@@ -33,7 +32,6 @@ function MainDashboard() {
     if (userType === "Technician" && user?.id) {
       dispatch(
         fetchDashboardStatsRequest({
-          userParentCategory,
           userType,
           technicianId: user.id,
         })
@@ -41,15 +39,14 @@ function MainDashboard() {
     } else if (isAdmin && user?.serviceNum) {
       dispatch(
         fetchDashboardStatsRequest({
-          userParentCategory,
           userType,
           adminServiceNum: user.serviceNum,
         })
       );
     } else {
-      dispatch(fetchDashboardStatsRequest({ userParentCategory, userType }));
+      dispatch(fetchDashboardStatsRequest({ userType }));
     }
-  }, [dispatch, userParentCategory, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
+  }, [dispatch, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
 
 
   const cardData = [
@@ -159,7 +156,6 @@ function MainDashboard() {
               if (userType === "Technician" && user?.id) {
                 dispatch(
                   fetchDashboardStatsRequest({
-                    userParentCategory,
                     userType,
                     technicianId: user.id,
                   })
@@ -167,13 +163,12 @@ function MainDashboard() {
               } else if (isAdmin && user?.serviceNum) {
                 dispatch(
                   fetchDashboardStatsRequest({
-                    userParentCategory,
                     userType,
                     adminServiceNum: user.serviceNum,
                   })
                 );
               } else {
-                dispatch(fetchDashboardStatsRequest({ userParentCategory, userType }));
+                dispatch(fetchDashboardStatsRequest({ userType }));
               }
             }}
           >
