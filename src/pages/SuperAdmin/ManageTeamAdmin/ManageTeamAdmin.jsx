@@ -74,6 +74,19 @@ const ManageTeamAdmin = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Handle contact number validation - only allow digits and limit to 10 characters
+    if (name === "contactNumber") {
+      const numericValue = value.replace(/\D/g, ''); // Remove non-digit characters
+      if (numericValue.length <= 10) {
+        setForm((prev) => ({
+          ...prev,
+          [name]: numericValue,
+        }));
+      }
+      return;
+    }
+    
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -112,7 +125,7 @@ const ManageTeamAdmin = () => {
           userName: user.display_name || "",
           designation: "admin",
           email: user.email || "",
-          contactNumber: user.contactNumber || "",
+          contactNumber: user.contactNumber ? user.contactNumber.replace(/\D/g, '').slice(0, 10) : "",
         }));
         setSubmitError("");
       } else {
@@ -253,8 +266,11 @@ const ManageTeamAdmin = () => {
     if (!form.serviceNumber)
       errors.serviceNumber = "Service Number is required";
     if (!form.userName) errors.userName = "Full Name is required";
-    if (!form.contactNumber)
+    if (!form.contactNumber) {
       errors.contactNumber = "Contact Number is required";
+    } else if (!/^\d{10}$/.test(form.contactNumber)) {
+      errors.contactNumber = "Contact Number must be exactly 10 digits";
+    }
     if (!form.designation) errors.designation = "Designation is required";
     if (!form.email) errors.email = "Email is required";
     if (!form.teamId) errors.teamId = "Team ID is required";
@@ -453,7 +469,12 @@ const ManageTeamAdmin = () => {
                     name="contactNumber"
                     value={form.contactNumber}
                     onChange={handleChange}
-                   
+                    type="tel"
+                    pattern="[0-9]{10}"
+                    maxLength="10"
+                    placeholder="Enter 10-digit contact number"
+                    title="Please enter exactly 10 digits"
+                    required
                   />
                 </div>
                 <div className="form-group">
