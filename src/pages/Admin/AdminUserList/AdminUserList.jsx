@@ -221,93 +221,96 @@ function AdminUserList() {
         </div>
 
         <div className="AdminUserList-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Service Number</th>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Active</th>
-                <th>Level</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length > 0 ? (
-                users
-                  .filter((user) => {
-                    if (selectShowOption === "Active")
-                      return user.active === true;
-                    return true;
-                  })
-                  .filter((user) => {
-                    const searchString = searchQuery.toLowerCase();
-                    return (
-                      (user.email && user.email.toLowerCase().includes(searchString)) ||
-                      (user.name && user.name.toLowerCase().includes(searchString)) ||
-                      (user.team && user.team.toLowerCase().includes(searchString)) ||
-                      (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                      (user.level && user.level.toLowerCase().includes(searchString))
-                    );
-                  })
-                  .map((user) => (
-                    <tr key={user.serviceNum}>
-                      <td>{user.serviceNum}</td>
-                      <td>{user.name}</td>
-                      <td>{user.team}</td>
-                      
-                      <td>
-                        <span
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            backgroundColor: user.isOnline
-                              ? "#2de37d"
-                              : "#ff4d4d",
-                            borderRadius: "50%",
-                            display: "inline-block",
-                            marginRight: "5px",
-                          }}
-                        />
-                        {user.active ? "True" : "False"}
-                      </td>{" "}
-                      <td>{user.level}</td>
-                      <td>
-                        <button
-                          className="AdminUserList-table-edit-btn"
-                          onClick={() => handleEdit(user.serviceNum)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="AdminUserList-table-delete-btn"
-                          onClick={() => handleDelete(user.serviceNum)}
-                        >
-                          <FaTrash />
-                        </button>
-                        {user.active === "True" && (
-                          <button
-                            className="AdminUserList-table-logout-btn"
-                            onClick={() =>
-                              handleDeactivate(technician.serviceNum)
-                            }
-                            title="Force Logout"
-                          >
-                            Logout
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-              ) : (
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No users found
-                  </td>
+                  <th>Service Number</th>
+                  <th>Name</th>
+                  <th>Team</th>
+                  <th>Active</th>
+                  <th>Level</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(() => {
+                  const filteredUsers = users
+                    .filter((user) => {
+                      if (selectShowOption === "Active")
+                        return user.active === true;
+                      return true;
+                    })
+                    .filter((user) => {
+                      const searchString = searchQuery.toLowerCase();
+                      return (
+                        (user.email && user.email.toLowerCase().includes(searchString)) ||
+                        (user.name && user.name.toLowerCase().includes(searchString)) ||
+                        (user.team && user.team.toLowerCase().includes(searchString)) ||
+                        (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
+                        (user.level && user.level.toLowerCase().includes(searchString))
+                      );
+                    });
+                  if (filteredUsers.length > 0) {
+                    return filteredUsers.map((user) => (
+                      <tr key={user.serviceNum}>
+                        <td>{user.serviceNum}</td>
+                        <td>{user.name}</td>
+                        <td>{user.team}</td>
+                        <td>
+                          <span
+                            style={{
+                              height: "10px",
+                              width: "10px",
+                              backgroundColor: user.isOnline
+                                ? "#2de37d"
+                                : "#ff4d4d",
+                              borderRadius: "50%",
+                              display: "inline-block",
+                              marginRight: "5px",
+                            }}
+                          />
+                          {user.active ? "True" : "False"}
+                        </td>
+                        <td>{user.level}</td>
+                        <td>
+                          <button
+                            className="AdminUserList-table-edit-btn"
+                            onClick={() => handleEdit(user.serviceNum)}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            className="AdminUserList-table-delete-btn"
+                            onClick={() => handleDelete(user.serviceNum)}
+                          >
+                            <FaTrash />
+                          </button>
+                          {user.active === "True" && (
+                            <button
+                              className="AdminUserList-table-logout-btn"
+                              onClick={() =>
+                                handleDeactivate(user.serviceNum)
+                              }
+                              title="Force Logout"
+                            >
+                              Logout
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ));
+                  } else {
+                    return (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: "center" }}>
+                          No users found
+                        </td>
+                      </tr>
+                    );
+                  }
+                })()}
+              </tbody>
+            </table>
         </div>
       </div>
 
