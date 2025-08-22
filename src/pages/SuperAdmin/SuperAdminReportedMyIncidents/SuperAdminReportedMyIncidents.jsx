@@ -304,7 +304,15 @@ const SuperAdminReportedMyIncidents = () => {
               </tr>
             </thead>
             <tbody>
-              {renderTableRows()}
+              {currentRows.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>
+                    No incidents found for your search.
+                  </td>
+                </tr>
+              ) : (
+                renderTableRows()
+              )}
             </tbody>
           </table>
         </div>
