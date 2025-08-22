@@ -306,7 +306,7 @@ const SuperAdminReportedMyIncidents = () => {
             <tbody>
               {currentRows.length === 0 ? (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>
+                  <td colSpan="4" style={{ textAlign: 'center', color: '#787878ff', padding: '2rem' }}>
                     No incidents found for your search.
                   </td>
                 </tr>
