@@ -168,10 +168,10 @@ const TechnicianAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: userData[0].service_number, // Use technician's service number as informant
+      informant: formData.serviceNo, // Affected User's service number
       location: formData.location.name, // Use location name, not number
-      handler: userData[0].service_number, // Same as informant for technician
-      update_by: userData[0].service_number,
+      handler: formData.serviceNo, // Affected User's service number as handler
+      update_by: formData.serviceNo, // Affected User's service number
       category: formData.category.name, // Use category name, not number
       update_on: new Date().toISOString().split("T")[0], // Date format: YYYY-MM-DD
       status: "Open", // Must be 'Open', 'In Progress', 'Hold', or 'Closed'
