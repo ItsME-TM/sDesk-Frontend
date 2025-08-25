@@ -253,6 +253,9 @@ const TechnicianInsident = ({
       if (updateStatusData.transferTo === 'tier2-auto') {
         // Set the automaticallyAssignForTier2 flag for backend
         formData.append('automaticallyAssignForTier2', 'true');
+      } else if (updateStatusData.transferTo === 'teamadmin') {
+        // Set the assignForTeamAdmin flag for backend
+        formData.append('assignForTeamAdmin', 'true');
       } else {
         // Set specific technician as handler
         formData.append('handler', updateStatusData.transferTo);
@@ -265,6 +268,12 @@ const TechnicianInsident = ({
     // Add attachment if present
     if (updateStatusData.selectedFile) {
       formData.append('file', updateStatusData.selectedFile);
+    }
+
+    console.log("TechnicianInsident: Dispatching update for incident_number:", currentIncident.incident_number);
+    // Log formData contents
+    for (let pair of formData.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
     }
 
     // Dispatch Redux action to update incident with attachment
@@ -312,8 +321,8 @@ const TechnicianInsident = ({
       lastHandledIncidentRef.current = currentIncident.incident_number;
       setPendingHistoryIncidentNo(null); // Reset
 
-      // Clear the UpdateStatus form after successful update
-      if (updateStatusRef.current && updateStatusRef.current.clearForm) {
+      // Clear the form in UpdateStatus component
+      if (updateStatusRef.current) {
         updateStatusRef.current.clearForm();
       }
 

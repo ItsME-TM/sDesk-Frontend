@@ -314,13 +314,13 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                           <FaList /> My Team - All Incidents
                         </Link>
                       </li>
-                      {role === "technician" && (
+                      {(role === "technician" || role === "admin") && (
                         <li className="SideBar-sub-list">
                           <Link
-                            to="/technician/TechnicianMyAssignedInsidents"
+                            to={role === "admin" ? "/admin/AdminMyAssignedIncidents" : "/technician/TechnicianMyAssignedInsidents"}
                             className={
                               location.pathname ===
-                              "/technician/TechnicianMyAssignedInsidents"
+                              (role === "admin" ? "/admin/AdminMyAssignedIncidents" : "/technician/TechnicianMyAssignedInsidents")
                                 ? "active"
                                 : ""
                             }

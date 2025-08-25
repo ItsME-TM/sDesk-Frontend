@@ -46,7 +46,7 @@ const UpdateStatus = forwardRef(({
   useEffect(() => {
     const data = {
       updatedBy,
-      category: selectedCategory.number,
+      category: selectedCategory.name, // Changed from .number to .name
       location: selectedLocation.number,
       transferTo,
       description,
@@ -54,6 +54,7 @@ const UpdateStatus = forwardRef(({
       status,
       selectedFile,
     };
+    console.log("UpdateStatus: Data being sent to onStatusChange:", data);
     onStatusChange(data);
   }, [updatedBy, selectedCategory, selectedLocation, transferTo, description, priority, status, selectedFile]);
 
@@ -87,8 +88,6 @@ const UpdateStatus = forwardRef(({
 
   // Clear form function
   const clearForm = () => {
-    setSelectedCategory({ name: "", number: "" });
-    setSelectedLocation({ name: "", number: "" });
     setTransferTo("");
     setDescription("");
     setPriority("");
@@ -143,6 +142,7 @@ const UpdateStatus = forwardRef(({
               <Form.Select value={transferTo} onChange={(e) => setTransferTo(e.target.value)}>
                 <option value="">Select One</option>
                 <option value="tier2-auto">Automatically Assign For Tier2</option>
+                  <option value="teamadmin">Assign For TeamAdmin</option>
                 {technicians.map((technician) => (
                   <option key={technician.service_number} value={technician.service_number}>
                     {technician.display_name || technician.user_name}

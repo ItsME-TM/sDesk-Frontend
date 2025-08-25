@@ -228,6 +228,16 @@ const TechnicianMyAssignedIncidents = () => {
     };
 
     const renderTableRows = () => {
+        if (currentRows.length === 0) {
+            return (
+                <tr>
+                    <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                        No incidents found
+                    </td>
+                </tr>
+            );
+        }
+
         return currentRows.map((row, idx) => (
             <tr key={idx}>
                 <td className='team-refno'>

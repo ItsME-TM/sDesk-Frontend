@@ -203,24 +203,6 @@ const UserAddIncident = () => {
   };
 
   
-  const formatServiceNumberError = (errorMessage, serviceNumber) => {
-    if (!errorMessage || !serviceNumber) return errorMessage;
-
-    
-    if (errorMessage.includes('User not found with service number')) {
-      
-      const serviceNumPattern = /^\d{6,}$/;
-      
-      if (!serviceNumPattern.test(serviceNumber.trim())) {
-        return "Invalid service number format. Please enter a valid number (e.g., 123456).";
-      } else {
-        return `No user found with service number '${serviceNumber}'. Please check and try again.`;
-      }
-    }
-
-    return errorMessage;
-  };
-
   const renderStatusMessage = () => {
     if (loading) {
       return (
@@ -242,34 +224,12 @@ const UserAddIncident = () => {
       );
     }
 
- 
-    if (lookupUser && formData.serviceNo && !userLookupError) {
-      return (
-        <div className="status-message success-message">
-          <h3>✅ User found successfully. Proceed to add incident.</h3>
-        </div>
-      );
-    }
-
-    
-    if (userLookupError && formData.serviceNo) {
-      const formattedError = formatServiceNumberError(userLookupError, formData.serviceNo);
-      return (
-        <div className="status-message error-message">
-          <h3>❌ Service Number Error</h3>
-          <p>{formattedError}</p>
-          <button onClick={() => dispatch(clearLookupUser())}>Dismiss</button>
-        </div>
-      );
-    }
-
    
     if (error) {
-      const formattedError = formatServiceNumberError(error, formData.serviceNo);
       return (
         <div className="status-message error-message">
           <h3>❌ Failed to Create Incident</h3>
-          <p>{formattedError}</p>
+          <p>{error}</p>
           <button onClick={() => dispatch(clearError())}>Dismiss</button>
         </div>
       );

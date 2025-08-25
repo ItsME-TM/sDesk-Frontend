@@ -125,13 +125,7 @@ const AdminUpdateIncident = () => {
     
     dispatch(updateIncidentRequest(updatedIncidentData));
     
-    // Clear the UpdateStatus form after dispatching the update
-    if (updateStatusRef.current && updateStatusRef.current.clearForm) {
-      // Add a small delay to allow the update to process
-      setTimeout(() => {
-        updateStatusRef.current.clearForm();
-      }, 500);
-    }
+    
   };
 
   const handleBackClick = () => {
