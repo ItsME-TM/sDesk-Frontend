@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
 import './CategoryDropDown.css';
 import { fetchCategoriesRequest } from '../../redux/categories/categorySlice';
 
-const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
+const CategoryDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
+    const [searchTerm, setSearchTerm] = useState('');
     const dispatch = useDispatch();
     
     // Get data from Redux store
@@ -29,6 +30,55 @@ const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
         onClose();
     };
 
+    // Filter categories based on search term (case insensitive)
+    const filterCategories = (categories) => {
+        if (!searchTerm.trim()) return categories;
+
+        const searchLower = searchTerm.toLowerCase();
+
+        return categories.map(mainCategory => {
+            const filteredSubCategories = mainCategory.subCategories.map(subCategory => {
+                const filteredItems = subCategory.categoryItems.filter(item =>
+                    item.name.toLowerCase().includes(searchLower)
+                );
+                
+                // Include subcategory if it has matching items or if subcategory name matches
+                if (filteredItems.length > 0 || subCategory.name.toLowerCase().includes(searchLower)) {
+                    return {
+                        ...subCategory,
+                        categoryItems: filteredItems
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            // Include main category if it has matching subcategories or if main category name matches
+            if (filteredSubCategories.length > 0 || mainCategory.name.toLowerCase().includes(searchLower)) {
+                return {
+                    ...mainCategory,
+                    subCategories: filteredSubCategories
+                };
+            }
+            return null;
+        }).filter(Boolean);
+    };
+
+    const filteredCategories = filterCategories(mainCategories);
+
+    // Auto-expand categories when searching
+    useEffect(() => {
+        if (searchTerm.trim()) {
+            const newExpanded = {};
+            filteredCategories.forEach(mainCategory => {
+                newExpanded[`main-${mainCategory.id}`] = true;
+                mainCategory.subCategories.forEach(subCategory => {
+                    newExpanded[`sub-${subCategory.id}`] = true;
+                });
+            });
+            setExpanded(newExpanded);
+        }
+    }, [searchTerm, filteredCategories]);
+
     if (isLoading) {
         return <div className="AdminCategoryTree-content">Loading categories...</div>;
     }
@@ -49,8 +99,22 @@ const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
                         <IoIosClose size={30} />
                     </button>
                 </div>
+                <div className="AdminCategoryTree-search-container">
+                    <input
+                        type="text"
+                        placeholder="Search categories..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="AdminCategoryTree-search-input"
+                    />
+                </div>
                 <div className="AdminCategoryTree-content-TreePopup-Body">
-                    {mainCategories.map((mainCategory) => (
+                    {filteredCategories.length === 0 && searchTerm.trim() ? (
+                        <div className="AdminCategoryTree-no-results">
+                            No categories found matching "{searchTerm}"
+                        </div>
+                    ) : (
+                        filteredCategories.map((mainCategory) => (
                         <div key={mainCategory.id} className="AdminCategoryTree-node">
                             <div
                                 className="AdminCategoryTree-content-TreePopup-Body-Label"
@@ -96,7 +160,8 @@ const CategoryDropdown = ({ onSelect, onClose, categoryDataset }) => {
                                 </div>
                             )}
                         </div>
-                    ))}
+                    ))
+                    )}
                 </div>
             </div>
         </div>
