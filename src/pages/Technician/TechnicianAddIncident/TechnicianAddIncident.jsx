@@ -9,13 +9,14 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import {
   createIncidentRequest,
   clearError,
+  uploadAttachmentRequest,
 } from "../../../redux/incident/incidentSlice";
 
 const TechnicianAddIncident = () => {
   const dispatch = useDispatch();
 
   // Redux state
-  const { loading, error } = useSelector((state) => state.incident);
+  const { loading, error, uploadedAttachment } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
 
   // Get technician user data
@@ -97,9 +98,36 @@ const TechnicianAddIncident = () => {
     setIsLocationPopupOpen(false);
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setSelectedFile(file);
+    
+    if (!file) return;
+
+    // File type validation
+    const allowedTypes = ['pdf', 'png', 'jpg', 'jpeg'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      alert('Only PDF, PNG, JPG, and JPEG files are allowed.');
+      e.target.value = '';
+      return;
+    }
+
+    // File size validation (1MB = 1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      alert('File size must be less than 1MB.');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      // Upload file immediately
+      dispatch(uploadAttachmentRequest(file));
+      setSelectedFile(file);
+    } catch (error) {
+      alert('Failed to upload file. Please try again.');
+      e.target.value = '';
+    }
   };
 
   const handleRemoveFile = () => {
@@ -140,10 +168,10 @@ const TechnicianAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: userData[0].service_number, // Use technician's service number as informant
+      informant: formData.serviceNo, // Affected User's service number
       location: formData.location.name, // Use location name, not number
-      handler: userData[0].service_number, // Same as informant for technician
-      update_by: userData[0].service_number,
+      handler: formData.serviceNo, // Affected User's service number as handler
+      update_by: formData.serviceNo, // Affected User's service number
       category: formData.category.name, // Use category name, not number
       update_on: new Date().toISOString().split("T")[0], // Date format: YYYY-MM-DD
       status: "Open", // Must be 'Open', 'In Progress', 'Hold', or 'Closed'
@@ -151,6 +179,8 @@ const TechnicianAddIncident = () => {
       description: formData.description || "",
       notify_informant: true,
       Attachment: selectedFile ? selectedFile.name : null,
+      attachmentFilename: uploadedAttachment ? uploadedAttachment.filename : null,
+      attachmentOriginalName: uploadedAttachment ? uploadedAttachment.originalName : null,
     };
 
     dispatch(createIncidentRequest(incidentData));

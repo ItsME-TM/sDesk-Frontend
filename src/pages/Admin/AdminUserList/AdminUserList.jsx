@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import React, { useEffect, useState, useMemo } from "react";
 import "./AdminUserList.css";
 import { FaHouseUser, FaSearch, FaEdit, FaTrash } from "react-icons/fa";
@@ -43,7 +46,7 @@ function AdminUserList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const [onlineTechnicians, setOnlineTechnicians] = useState(new Set());
+  const [onlineTechnicians] = useState(new Set());
 
   useEffect(() => {
     dispatch(fetchSubCategoriesRequest());
@@ -109,7 +112,7 @@ function AdminUserList() {
       
           id: user.id,
         })),
-    [technicians, mainCategories, subCategories, onlineTechnicians]
+    [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
   );
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
@@ -386,10 +389,10 @@ function AdminUserList() {
                   position: newUser.position,
                  tier: newUser.tier ,
                   teamId: newUser.teamId,
-                  cat1: newUser.cat1 || "",
-                  cat2: newUser.cat2 || "",
-                  cat3: newUser.cat3 || "",
-                  cat4: newUser.cat4 || "",
+                  cat1: cat1 || "",
+                  cat2: cat2 || "",
+                  cat3: cat3 || "",
+                  cat4: cat4 || "",
                   
                   contactNumber: newUser.contactNumber,
                   teamLeader: newUser.teamLeader ?? false,

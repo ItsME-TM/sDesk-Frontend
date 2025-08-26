@@ -404,19 +404,21 @@ const AdminMyTeamIncidentViewAll = () => {
           </div>
         </div>
         <div className="AdminincidentViewAll-table">
-          <table className="AdminincidentViewAll-table-table">
-            <thead>
-              <tr>
-                <th>Ref No</th>
-                <th>Assigned To</th>
-                <th>Affected User</th>
-                <th>Category</th>
-                <th>Location</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>{renderTableRows()}</tbody>
-          </table>
+          <div className="AdminincidentViewAll-table-wrapper">
+            <table className="AdminincidentViewAll-table-table">
+              <thead>
+                <tr>
+                  <th>Ref No</th>
+                  <th>Assigned To</th>
+                  <th>Affected User</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>{renderTableRows()}</tbody>
+            </table>
+          </div>
         </div>
         <div className="AdminincidentViewAll-content3">
           <span className="AdminincidentViewAll-content3-team-entry-info">

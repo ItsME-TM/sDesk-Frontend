@@ -81,22 +81,41 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-.edit-btn {
-  background-color: #ffc107;
-  color: #212529;
+
+/* Icon-only buttons for edit/delete */
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+  font-size: 1rem;
   margin-right: 0.5rem;
 }
 
-.edit-btn:hover {
+/* Reduce icon size inside button */
+.icon-btn i {
+  font-size: 1rem;
+}
+
+.icon-btn.edit {
+  background-color: #ffc107;
+  color: #212529;
+}
+.icon-btn.edit:hover {
   background-color: #e0a800;
 }
 
-.delete-btn {
+.icon-btn.delete {
   background-color: #dc3545;
   color: #fff;
 }
-
-.delete-btn:hover {
+.icon-btn.delete:hover {
   background-color: #c82333;
 }
 
@@ -453,6 +472,18 @@
     font-size: 0.9rem;
   }
 
+  .table-responsive {
+    width: 100vw;
+    max-width: 100vw;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .teamadmin-table {
+    min-width: 600px;
+    width: max-content;
+  }
+
   .form-row {
     flex-direction: column;
     gap: 0.8rem; /* Adjusted for mobile */
@@ -461,9 +492,41 @@
 
   .modal-content {
       padding: 1.2rem; /* Adjusted for mobile */
+      width: 98vw;
+      max-width: 99vw;
+      min-width: 0;
+  max-height: 90vh;
+  overflow-y: auto;
   }
 
   .modal-header h3 {
       font-size: 1.3rem; /* Adjusted for mobile */
+  }
+
+  .add-user-form {
+    width: 100%;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.9rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: stretch;
+  }
+
+  .category-checkbox-group-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.4rem;
   }
 }

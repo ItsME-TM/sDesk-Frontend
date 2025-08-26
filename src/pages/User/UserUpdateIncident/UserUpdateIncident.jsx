@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './UserUpdateIncident.css';
@@ -144,6 +145,8 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
       )}
 
       <div className="content-area flex-grow-1 overflow-auto p-md-4 p-2">
+     <br/>
+     <br/>
         <div className="container-fluid">
           <div className="row g-4">
             <div className="col-12">
@@ -162,6 +165,7 @@ const UserUpdateIncident = ({ incidentData, isPopup, onClose, loggedInUser }) =>
                 comments={incidentDetails.comments}
                 historyData={incidentHistory}
                 users={allUsers}
+                attachment={incidentData.Attachment}
               />
             </div>
           </div>

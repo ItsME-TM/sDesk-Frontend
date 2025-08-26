@@ -5,6 +5,20 @@
     height: 100vh;
 }
 
+.AdminMyAssignedIncidents-tickets-creator {
+    display: flex;
+    align-items: center; 
+    background-color: #f0f0f0; 
+    padding: 10px; 
+    border-radius: 5px; 
+    width: 1290px;
+}
+
+.AdminMyAssignedIncidents-svr-desk {
+    font-weight: bold;
+    margin-right: 10px; 
+}
+
 .AdminMyAssignedIncidents-direction-bar {
     display: flex;
     align-items: center;
@@ -198,4 +212,33 @@
 .AdminMyAssignedIncidents-content3-team-pagination-buttons span {
     padding: 5px 10px;
     color: #666;
+}
+
+.AdminMyAssignedIncidents-footer-content {
+    margin-top: -9%;
+}
+
+.AdminMyAssignedIncidents-table-table {
+    border-collapse: collapse;
+    background-color: #f8f9fa;
+    width: 100%;
+}
+
+.refno-link {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+
+
+.team-status-text {
+    font-weight: 600;
+}
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

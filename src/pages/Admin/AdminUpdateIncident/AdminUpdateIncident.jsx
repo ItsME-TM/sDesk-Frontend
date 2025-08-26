@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './AdminUpdateIncident.css';
 import { IoIosArrowForward } from 'react-icons/io';
@@ -54,6 +54,9 @@ const AdminUpdateIncident = () => {
     priority: '',
     status: '',
   });
+
+  // Ref for UpdateStatus component to access its clearForm function
+  const updateStatusRef = useRef(null);
 
   const getUserName = (serviceNumber) => {
     const user = allUsers.find(u => u.service_number === serviceNumber || u.serviceNum === serviceNumber);
@@ -119,7 +122,10 @@ const AdminUpdateIncident = () => {
       update_by: updateStatusData.updatedBy || currentIncident.update_by,
       description: updateStatusData.description || currentIncident.description,
     };
+    
     dispatch(updateIncidentRequest(updatedIncidentData));
+    
+    
   };
 
   const handleBackClick = () => {
@@ -156,6 +162,7 @@ const AdminUpdateIncident = () => {
         
         {currentIncident && (
           <UpdateStatus
+            ref={updateStatusRef}
             incidentData={incidentDetails}
             incident={currentIncident}
             usersDataset={allUsers}

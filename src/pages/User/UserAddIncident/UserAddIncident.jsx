@@ -10,11 +10,13 @@ import {
   createIncidentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
+import { clearLookupUser } from "../../../redux/userLookup/userLookupSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.incident);
   const { user } = useSelector((state) => state.auth);
+  const { error: userLookupError, user: lookupUser } = useSelector((state) => state.userLookup);
 
   const [formData, setFormData] = useState({
     serviceNo: "",
@@ -90,6 +92,35 @@ const UserAddIncident = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/pdf',
+        'application/msword', // .doc
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/vnd.ms-excel', // .xls
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+        'application/vnd.ms-powerpoint', // .ppt
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+        'text/plain', // .txt
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        alert("Invalid file type. Only images, PDFs, and common document formats are allowed.");
+        e.target.value = ""; 
+        return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) { 
+        alert("File size exceeds 50MB. Please choose a smaller file.");
+        e.target.value = ""; 
+        return;
+    }
     setSelectedFile(file);
   };
 
@@ -134,10 +165,10 @@ const UserAddIncident = () => {
 
     const incidentData = {
       incident_number: incidentNumber,
-      informant: user.serviceNum, // Use logged-in user's serviceNum
-      location: formData.location.name,
-      handler: user.serviceNum,
-      update_by: user.serviceNum,
+      informant: formData.serviceNo, // Affected User's service number
+      location: formData.location.name, // Use location name, not number
+      handler: formData.serviceNo, // Affected User's service number as handler
+      update_by: formData.serviceNo, // Affected User's service number
       category: formData.category.name,
       update_on: new Date().toISOString().split("T")[0],
       status: "Open",
@@ -171,6 +202,7 @@ const UserAddIncident = () => {
     }, 5000);
   };
 
+  
   const renderStatusMessage = () => {
     if (loading) {
       return (
@@ -192,6 +224,7 @@ const UserAddIncident = () => {
       );
     }
 
+   
     if (error) {
       return (
         <div className="status-message error-message">

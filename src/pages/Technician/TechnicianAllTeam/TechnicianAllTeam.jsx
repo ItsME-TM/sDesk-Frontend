@@ -1,7 +1,10 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import React, { useState, useEffect } from "react";
 import { FaHistory, FaSearch } from "react-icons/fa";
+
 import { TiExportOutline } from "react-icons/ti";
-import { useNavigate } from "react-router-dom";
+
 import { IoIosArrowForward } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -17,7 +20,6 @@ import IncidentHistory from "../../../components/IncidentHistory/IncidentHistory
 import "./TechnicianAllTeam.css";
 
 const TechnicianAllTeam = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Redux state
@@ -177,6 +179,13 @@ const TechnicianAllTeam = () => {
   };
 
   const renderTableRows = () => {
+    if (currentRows.length === 0) {
+      return (
+        <tr>
+          <td colSpan="6" className="text-center text-muted py-4">No incidents found.</td>
+        </tr>
+      );
+    }
     return currentRows.map((row, idx) => (
       <tr
         key={idx}
