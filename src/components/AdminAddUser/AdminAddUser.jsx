@@ -23,8 +23,8 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     email: '',
     contactNumber: '',
     teamName: loggedInUser?.teamName || '', 
-    role: 'technician',
-    tier: '1',
+    position: 'technician',
+    tier: 'tier1'||'tier2',
     active: true,
     teamId:loggedInUser?.teamId|| '',
     categories: [
@@ -80,13 +80,12 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       }));
     }
   }, [sltUser]);
-
+  
   useEffect(() => {
     if (!sltUser) {
       setFormData(prev => ({ ...prev, name: '', email: '' }));
     }
   }, [sltUser]);
-
   useEffect(() => {
     if (isEdit && editUser) {
       setFormData(prev => ({
@@ -95,8 +94,8 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         name: editUser.name || '',
         email: editUser.email || '',
         categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
-        tier: editUser.tier?.toString() || '1',
-        role: editUser.role || 'technician',
+        tier: editUser.tier|| 'tier1'||'tier2',
+        position: editUser.role || 'technician'||'teamLeader',
         active: editUser.active !== undefined ? editUser.active : true,
       }));
     }
@@ -111,9 +110,9 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         email: '',
         teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
-        role: 'technician',
-        tier: '1',
-        active: true,
+        position: 'technician',
+        tier:'tier1'||'tier2',
+        active: false,
         categories: [],
       });
       setErrors({});
@@ -163,6 +162,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
   };
 
 
+
 const selectedCategories = formData.categories || [];
 const handleSubmit = e => {
   e.preventDefault();
@@ -188,18 +188,14 @@ const handleSubmit = e => {
     name: nameToUse,
     teamId: formData.teamId,
     team: formData.teamName,
-    tier: Number(formData.tier),
+    tier:  String(formData.tier) === 'tier1' ? 'tier1' : 'tier2',
     active: formData.active,
     cat1: formData.categories[0] || '',
     cat2: formData.categories[1] || '',
     cat3: formData.categories[2] || '',
     cat4: formData.categories[3] || '',
-    level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
-    rr: 1,
-    designation: 'Technician',
+    position: formData.position,
     contactNumber: formData.contactNumber,
-    teamLevel: 'Default',
-    teamLeader: formData.teamLeader ?? false,
     assignAfterSignOff: formData.assignAfterSignOff ?? false,
     permanentMember: formData.permanentMember ?? false,
     subrootUser: formData.subrootUser ?? false,
@@ -294,18 +290,19 @@ useEffect(() => {
                 />
               </div>
               <div>
-                <label>Role:</label>
-                <select name="role" value={formData.role} onChange={handleChange}>
+                <label>Position:</label>
+                <select name="position" value={formData.role} onChange={handleChange}>
                   <option value="technician">Technician</option>
                   <option value="teamLeader">Team Leader</option>
                 </select>
               </div>
               <div>
                 <label>Tier:</label>
-                <select name="tier" value={formData.tier} onChange={handleChange}>
-                  <option value="1">Tier1</option>
-                  <option value="2">Tier2</option>
-                </select>
+               <select name="tier" value={formData.tier} onChange={handleChange}>
+  <option value="tier1">Tier1</option>
+  <option value="tier2">Tier2</option>
+</select>
+
               </div>
               <div className="form-left-ActiveCheckBox">
                 <label>Active:</label>
@@ -328,7 +325,8 @@ useEffect(() => {
                       value={item.id}
                       checked={formData.categories.includes(item.id)}
                       onChange={handleCategoryChange}
-                    />
+                   
+                />
                     {item.name}
                   </label>
                 ))}
