@@ -273,6 +273,8 @@
 .AdminLocation-table th:nth-child(5),
 .AdminLocation-table td:nth-child(5) {
   text-align: center; /* Actions - center */
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* Table row styling improvements */
@@ -336,10 +338,11 @@
 }
 
 .AdminLocation-actions-container {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .AdminLocation-action-btn {
