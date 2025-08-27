@@ -1,3 +1,4 @@
+
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
@@ -101,13 +102,15 @@ function AdminUserList() {
           name: user.name,
           team: getTeamName(user.team),
           teamId: getTeamId(user.teamId),
+          tier:user.tier,
+          position:user.position,
           cat1: getSubCategoryName(user.cat1),
           cat2: getSubCategoryName(user.cat2),
           cat3: getSubCategoryName(user.cat3),
           cat4: getSubCategoryName(user.cat4),
           active: Boolean(user.active),
           isOnline: user.active,
-          level: user.level || "",
+          
           id: user.id,
         })),
     [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
@@ -228,7 +231,9 @@ function AdminUserList() {
                   <th>Name</th>
                   <th>Team</th>
                   <th>Active</th>
-                  <th>Level</th>
+              
+                   <th>Tier</th>
+                <th>Position</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -247,7 +252,8 @@ function AdminUserList() {
                         (user.name && user.name.toLowerCase().includes(searchString)) ||
                         (user.team && user.team.toLowerCase().includes(searchString)) ||
                         (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                        (user.level && user.level.toLowerCase().includes(searchString))
+                       (user.tier && user.tier.toLowerCase().includes(searchString)) ||
+                      (user.position && user.role.toLowerCase().includes(searchString))
                       );
                     });
                   if (filteredUsers.length > 0) {
@@ -271,7 +277,8 @@ function AdminUserList() {
                           />
                           {user.active ? "True" : "False"}
                         </td>
-                        <td>{user.level}</td>
+                        <td>{user.tier}</td>
+                         <td>{user.position}</td>
                         <td>
                           <button
                             className="AdminUserList-table-edit-btn"
@@ -285,17 +292,7 @@ function AdminUserList() {
                           >
                             <FaTrash />
                           </button>
-                          {user.active === "True" && (
-                            <button
-                              className="AdminUserList-table-logout-btn"
-                              onClick={() =>
-                                handleDeactivate(user.serviceNum)
-                              }
-                              title="Force Logout"
-                            >
-                              Logout
-                            </button>
-                          )}
+                       
                         </td>
                       </tr>
                     ));
@@ -321,12 +318,11 @@ function AdminUserList() {
             if (!newUser.isEdit) {
               if (newUser.serviceNum) {
                 try {
-                  await updateUserRoleById(newUser.serviceNum, "technician");
+                  await updateUserRoleById(newUser.serviceNum, newUser.position);
                 // eslint-disable-next-line no-empty
                 } catch (err) {}
               }
 
-              const [cat1, cat2, cat3, cat4] = newUser.categories || [];
               dispatch(
                 createTechnicianRequest({
                   serviceNum: newUser.serviceNum,
@@ -334,20 +330,14 @@ function AdminUserList() {
                   name: newUser.name,
                   team: newUser.teamName || newUser.team,
                   active: newUser.active,
-                  tier: Number(newUser.tier),
-                  level: Number(newUser.tier) === 1 ? "Tier1" : "Tier2",
+                  position: newUser.position,
+                  tier: newUser.tier,
                   teamId: newUser.teamId,
-                  cat1: cat1 || "",
-                  cat2: cat2 || "",
-                  cat3: cat3 || "",
-                  cat4: cat4 || "",
-                  rr: 1,
-                  designation: "Technician",
+                  cat1: newUser.cat1 || "",
+                  cat2: newUser.cat2 || "",
+                  cat3: newUser.cat3 || "",
+                  cat4: newUser.cat4 || "",
                   contactNumber: newUser.contactNumber,
-                  teamLeader: newUser.teamLeader ?? false,
-                  assignAfterSignOff: newUser.assignAfterSignOff ?? false,
-                  permanentMember: newUser.permanentMember ?? false,
-                  subrootUser: newUser.subrootUser ?? false,
                 })
               );
               dispatch(fetchTechniciansRequest());
