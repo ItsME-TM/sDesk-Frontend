@@ -341,17 +341,7 @@ function AdminUserList() {
                         >
                           <FaTrash />
                         </button>
-                        {user.active === "True" && (
-                          <button
-                            className="AdminUserList-table-logout-btn"
-                            onClick={() =>
-                              handleDeactivate(technician.serviceNum)
-                            }
-                            title="Force Logout"
-                          >
-                            Logout
-                          </button>
-                        )}
+                       
                       </td>
                     </tr>
                   ))
