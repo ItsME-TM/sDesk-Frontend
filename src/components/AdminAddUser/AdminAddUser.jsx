@@ -197,7 +197,7 @@ const handleSubmit = e => {
     name: nameToUse,
     teamId: formData.teamId,
     team: formData.teamName,
-    tier: Number(formData.tier),
+    tier:  String(formData.tier) === 'tier1' ? 'tier1' : 'tier2',
     active: formData.active,
     cat1: formData.categories[0] || '',
     cat2: formData.categories[1] || '',
