@@ -120,9 +120,9 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         email: '',
         teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
-        role: 'technician',
-        tier: '1',
-        active: true,
+        position: 'technician',
+        tier: 'tier1',
+       active: true,
         categories: [],
       });
       setErrors({});
