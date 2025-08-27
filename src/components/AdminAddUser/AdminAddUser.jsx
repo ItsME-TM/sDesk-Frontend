@@ -24,7 +24,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     email: '',
     contactNumber: '',
     teamName: loggedInUser?.teamName || '', 
-       position: 'technician',
+    position: 'technician',
     tier: 'tier1'||'tier2',
     active: true,
     teamId:loggedInUser?.teamId|| '',
@@ -120,9 +120,9 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         email: '',
         teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
-        position: 'technician',
-        tier:'tier1'||'tier2',
-        active: false,
+        role: 'technician',
+        tier: '1',
+        active: true,
         categories: [],
       });
       setErrors({});
@@ -197,7 +197,7 @@ const handleSubmit = e => {
     name: nameToUse,
     teamId: formData.teamId,
     team: formData.teamName,
-    tier:  String(formData.tier) === 'tier1' ? 'tier1' : 'tier2',
+    tier: Number(formData.tier),
     active: formData.active,
     cat1: formData.categories[0] || '',
     cat2: formData.categories[1] || '',
@@ -298,8 +298,8 @@ useEffect(() => {
                 />
               </div>
               <div>
-               <label>Position:</label>
-                <select name="position" value={formData.role} onChange={handleChange}>
+                <label>Position:</label>
+                <select name="position" value={formData.position} onChange={handleChange}>
                   <option value="technician">Technician</option>
                   <option value="teamLeader">Team Leader</option>
                 </select>

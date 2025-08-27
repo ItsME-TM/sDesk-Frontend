@@ -104,8 +104,6 @@ function AdminUserList() {
           name: user.name,
           team: getTeamName(user.team),
           teamId: getTeamId(user.teamId),
-          tier:user.tier,
-          position:user.position,
           cat1: getSubCategoryName(user.cat1),
           cat2: getSubCategoryName(user.cat2),
           cat3: getSubCategoryName(user.cat3),
@@ -320,7 +318,8 @@ function AdminUserList() {
             if (!newUser.isEdit) {
               if (newUser.serviceNum) {
                 try {
-                  await updateUserRoleById(newUser.serviceNum, newUser.position);
+                  await updateUserRoleById(newUser.serviceNum, "technician");
+                // eslint-disable-next-line no-empty
                 } catch (err) {}
               }
 

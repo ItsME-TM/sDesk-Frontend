@@ -379,6 +379,31 @@ const incidentSlice = createSlice({
     clearUploadedAttachment(state) {
       state.uploadedAttachment = null;
     },
+
+    updateIncidentInList(state, action) {
+      const updatedIncident = action.payload;
+      const update = (list) =>
+        list.map((incident) =>
+          incident.incident_number === updatedIncident.incident_number
+            ? { ...incident, ...updatedIncident }
+            : incident
+        );
+
+      state.incidents = update(state.incidents);
+      state.assignedToMe = update(state.assignedToMe);
+      state.assignedByMe = update(state.assignedByMe);
+      state.teamIncidents = update(state.teamIncidents);
+
+      if (
+        state.currentIncident?.incident_number ===
+        updatedIncident.incident_number
+      ) {
+        state.currentIncident = {
+          ...state.currentIncident,
+          ...updatedIncident,
+        };
+      }
+    },
   },
 });
 
@@ -449,6 +474,7 @@ export const {
   uploadAttachmentSuccess,
   uploadAttachmentFailure,
   clearUploadedAttachment,
+  updateIncidentInList,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage

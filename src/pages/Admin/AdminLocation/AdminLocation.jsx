@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import "./AdminLocation.css";
-import { FaMapMarkerAlt, FaEdit, FaTrash } from "react-icons/fa";
+import { FaMapMarkerAlt, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import {
   fetchLocationsRequest,
@@ -30,6 +30,16 @@ const AdminLocation = () => {
   const [editLocation, setEditLocation] = useState(null);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("all");
+
+  const regions = ["Metro", "R1", "R2", "R3"];
+
+  const filteredLocations = locations.filter((location) => {
+    const matchesRegion = selectedRegion === "all" || location.region === selectedRegion;
+    const matchesSearch = location.locationName.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesRegion && matchesSearch;
+  });
 
   const handleEdit = (location) => {
     setEditLocation(location);
@@ -92,6 +102,33 @@ const AdminLocation = () => {
           </div>
         </div>
 
+        <div className="AdminLocation-filters">
+          <div className="AdminLocation-filters-row">
+            <div className="AdminLocation-region-filter">
+              <select 
+                value={selectedRegion} 
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="AdminLocation-region-select"
+              >
+                <option value="all">All Regions</option>
+                {regions.map((region) => (
+                  <option key={region} value={region}>{region}</option>
+                ))}
+              </select>
+            </div>
+            <div className="AdminLocation-search-bar">
+              <FaSearch className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search locations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="AdminLocation-search-input"
+              />
+            </div>
+          </div>
+        </div>
+
         <div className="AdminLocation-table">
           <table>
             <thead>
@@ -104,8 +141,8 @@ const AdminLocation = () => {
               </tr>
             </thead>
             <tbody>
-              {locations.length > 0 ? (
-                locations.map((location) => (
+              {filteredLocations.length > 0 ? (
+                filteredLocations.map((location) => (
                   <tr key={location.id}>
                    {/* <td>{location.locationCode}</td> */}
                     <td>{location.locationName}</td>

@@ -123,10 +123,19 @@ const UpdateStatus = forwardRef(({
 
             <Form.Group as={Col} md="3" controlId="category">
               <Form.Label>
-                <FaPlusSquare onClick={() => setIsCategoryPopupOpen(true)} className="me-1 clickable-icon" />
+                <FaPlusSquare
+                  onClick={() => loggedInUser.role !== 'technician' && setIsCategoryPopupOpen(true)}
+                  className={`me-1 ${loggedInUser.role !== 'technician' ? 'clickable-icon' : ''}`}
+                />
                 Category
               </Form.Label>
-              <Form.Control type="text" value={selectedCategory.name} readOnly onClick={() => setIsCategoryPopupOpen(true)} />
+              <Form.Control
+                type="text"
+                value={selectedCategory.name}
+                readOnly
+                disabled={loggedInUser.role === 'technician'}
+                onClick={() => loggedInUser.role !== 'technician' && setIsCategoryPopupOpen(true)}
+              />
             </Form.Group>
 
             <Form.Group as={Col} md="2" controlId="location">
