@@ -1,3 +1,6 @@
+//mainAdminUserList
+
+
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
@@ -109,7 +112,7 @@ function AdminUserList() {
           cat4: getSubCategoryName(user.cat4),
           active: Boolean(user.active),
           isOnline: user.active,
-      
+          
           id: user.id,
         })),
     [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
@@ -131,53 +134,6 @@ function AdminUserList() {
     }
   };
 
-  const confirmEdit = async (newRole, updatedFields) => {
-    if (editUser) {
-      try {
-        await updateUserRoleById(editUser.serviceNum, newRole);
-     
-      } catch (err) {
-      }
-
-      const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
-      dispatch(
-        updateTechnicianRequest({
-          serviceNum: editUser.serviceNum,
-          email: updatedFields.email,
-          name: updatedFields.name,
-          team: updatedFields.teamName || updatedFields.team,
-          active: updatedFields.active,
-           position: updatedFields.role,
-          teamId: updatedFields.teamId || updatedFields.teamId,
-          tier: updatedFields.tier ,
-          cat1: cat1 || "",
-          cat2: cat2 || "",
-          cat3: cat3 || "",
-          cat4: cat4 || "",
-          contactNumber: updatedFields.contactNumber,
-          id: editUser.id,
-        })
-      );
-      const handleDeactivate = (serviceNum) => {
-        // Dispatch Redux action that calls backend to force logout + send message
-        dispatch(forceLogoutTechnicianRequest(serviceNum));
-      };
-      // NEW: If technician is being deactivated and is currently online, force logout
-      if (
-        updatedFields.active === false &&
-        onlineTechnicians.has(editUser.serviceNum)
-      ) {
-        dispatch(
-          forceLogoutTechnicianRequest({
-            serviceNum: editUser.serviceNum,
-            socket,
-          })
-        );
-      }
-    }
-    setIsEditUserOpen(false);
-    setEditUser(null);
-  };
 
   const handleDelete = (serviceNumber) => {
     const user = technicians.find(
@@ -270,90 +226,90 @@ function AdminUserList() {
         </div>
 
         <div className="AdminUserList-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Service Number</th>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Active</th>
-                <th>Tier</th>
-                <th>Position</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length > 0 ? (
-                users
-                  .filter((user) => {
-                    if (selectShowOption === "Active")
-                      return user.active === true;
-                    return true;
-                  })
-                  .filter((user) => {
-                    const searchString = searchQuery.toLowerCase();
-                    return (
-                      (user.email && user.email.toLowerCase().includes(searchString)) ||
-                      (user.name && user.name.toLowerCase().includes(searchString)) ||
-                      (user.team && user.team.toLowerCase().includes(searchString)) ||
-                      (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                      (user.tier && user.tier.toLowerCase().includes(searchString)) ||
-                      (user.position && user.role.toLowerCase().includes(searchString))
-
-                    );
-                  })
-                  .map((user) => (
-                    <tr key={user.serviceNum}>
-                      <td>{user.serviceNum}</td>
-                      <td>{user.name}</td>
-                      <td>{user.team}</td>
-                      <td>
-                        <span
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            backgroundColor: user.isOnline
-                              ? "#2de37d"
-                              : "#ff4d4d",
-                            borderRadius: "50%",
-                            display: "inline-block",
-                            marginRight: "5px",
-                          }}
-                        />
-                        {user.active ? "True" : "False"}
-                      </td>{" "}
-                           <td>{user.tier}</td>
-
-
-
-
-                      <td>{user.position}</td>
-                      <td>
-                        <button
-                          className="AdminUserList-table-edit-btn"
-                          onClick={() => handleEdit(user.serviceNum)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="AdminUserList-table-delete-btn"
-                          onClick={() => handleDelete(user.serviceNum)}
-                        >
-                          <FaTrash />
-                        </button>
-                       
-                      </td>
-                    </tr>
-                  ))
-              ) : (
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No users found
-                  </td>
+                  <th>Service Number</th>
+                  <th>Name</th>
+                  <th>Team</th>
+                  <th>Active</th>
+              
+                   <th>Tier</th>
+                <th>Position</th>
+                  <th>Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(() => {
+                  const filteredUsers = users
+                    .filter((user) => {
+                      if (selectShowOption === "Active")
+                        return user.active === true;
+                      return true;
+                    })
+                    .filter((user) => {
+                      const searchString = searchQuery.toLowerCase();
+                      return (
+                        (user.email && user.email.toLowerCase().includes(searchString)) ||
+                        (user.name && user.name.toLowerCase().includes(searchString)) ||
+                        (user.team && user.team.toLowerCase().includes(searchString)) ||
+                        (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
+                       (user.tier && user.tier.toLowerCase().includes(searchString)) ||
+                      (user.position && user.role.toLowerCase().includes(searchString))
+                      );
+                    });
+                  if (filteredUsers.length > 0) {
+                    return filteredUsers.map((user) => (
+                      <tr key={user.serviceNum}>
+                        <td>{user.serviceNum}</td>
+                        <td>{user.name}</td>
+                        <td>{user.team}</td>
+                        <td>
+                          <span
+                            style={{
+                              height: "10px",
+                              width: "10px",
+                              backgroundColor: user.isOnline
+                                ? "#2de37d"
+                                : "#ff4d4d",
+                              borderRadius: "50%",
+                              display: "inline-block",
+                              marginRight: "5px",
+                            }}
+                          />
+                          {user.active ? "True" : "False"}
+                        </td>
+                        <td>{user.tier}</td>
+                         <td>{user.position}</td>
+                        <td>
+                          <button
+                            className="AdminUserList-table-edit-btn"
+                            onClick={() => handleEdit(user.serviceNum)}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            className="AdminUserList-table-delete-btn"
+                            onClick={() => handleDelete(user.serviceNum)}
+                          >
+                            <FaTrash />
+                          </button>
+                       
+                        </td>
+                      </tr>
+                    ));
+                  } else {
+                    return (
+                      <tr>
+                        <td colSpan="6" style={{ textAlign: "center" }}>
+                          No users found
+                        </td>
+                      </tr>
+                    );
+                  }
+                })()}
+              </tbody>
+            </table>
         </div>
       </div>
 
@@ -368,7 +324,6 @@ function AdminUserList() {
                 } catch (err) {}
               }
 
-              const [cat1, cat2, cat3, cat4] = newUser.categories || [];
               dispatch(
                 createTechnicianRequest({
                   serviceNum: newUser.serviceNum,
@@ -377,18 +332,13 @@ function AdminUserList() {
                   team: newUser.teamName || newUser.team,
                   active: newUser.active,
                   position: newUser.position,
-                 tier: newUser.tier ,
+                  tier: newUser.tier,
                   teamId: newUser.teamId,
-                  cat1: cat1 || "",
-                  cat2: cat2 || "",
-                  cat3: cat3 || "",
-                  cat4: cat4 || "",
-                  
+                  cat1: newUser.cat1 || "",
+                  cat2: newUser.cat2 || "",
+                  cat3: newUser.cat3 || "",
+                  cat4: newUser.cat4 || "",
                   contactNumber: newUser.contactNumber,
-                  teamLeader: newUser.teamLeader ?? false,
-                  assignAfterSignOff: newUser.assignAfterSignOff ?? false,
-                  permanentMember: newUser.permanentMember ?? false,
-                  subrootUser: newUser.subrootUser ?? false,
                 })
               );
               dispatch(fetchTechniciansRequest());

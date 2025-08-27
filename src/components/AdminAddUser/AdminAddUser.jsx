@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
@@ -23,7 +24,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     email: '',
     contactNumber: '',
     teamName: loggedInUser?.teamName || '', 
-    position: 'technician',
+       position: 'technician',
     tier: 'tier1'||'tier2',
     active: true,
     teamId:loggedInUser?.teamId|| '',
@@ -80,26 +81,35 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       }));
     }
   }, [sltUser]);
-  
+
   useEffect(() => {
     if (!sltUser) {
       setFormData(prev => ({ ...prev, name: '', email: '' }));
     }
   }, [sltUser]);
+
   useEffect(() => {
     if (isEdit && editUser) {
-      setFormData(prev => ({
-        ...prev,
+      // When opening in edit mode, clear any lingering user data from the SLT user slice.
+      // This prevents stale data from appearing in the name/email fields.
+      dispatch(clearUser());
+
+      // When editing, completely re-initialize the form data from the editUser prop.
+      // This prevents stale state from a previous user from persisting.
+      setFormData({
         id: editUser.serviceNum || editUser.serviceNumber || editUser.id || '',
         name: editUser.name || '',
         email: editUser.email || '',
-        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
+        contactNumber: editUser.contactNumber || '',
+        teamName: loggedInUser?.teamName || '',
         tier: editUser.tier|| 'tier1'||'tier2',
-        position: editUser.role || 'technician'||'teamLeader',
+        position: editUser.position|| 'technician'||'teamLeader',
         active: editUser.active !== undefined ? editUser.active : true,
-      }));
+        teamId: loggedInUser?.teamId || '',
+        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
+      });
     }
-  }, [isEdit, editUser]);
+  }, [isEdit, editUser, loggedInUser, dispatch]);
 
   // Reset formData to initial state (with teamName) every time the modal is opened in add mode
   useEffect(() => {
@@ -162,7 +172,6 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
   };
 
 
-
 const selectedCategories = formData.categories || [];
 const handleSubmit = e => {
   e.preventDefault();
@@ -194,11 +203,10 @@ const handleSubmit = e => {
     cat2: formData.categories[1] || '',
     cat3: formData.categories[2] || '',
     cat4: formData.categories[3] || '',
-    position: formData.position,
+   position: formData.position,
     contactNumber: formData.contactNumber,
-    assignAfterSignOff: formData.assignAfterSignOff ?? false,
-    permanentMember: formData.permanentMember ?? false,
-    subrootUser: formData.subrootUser ?? false,
+    
+    
     isEdit,
   };
 
@@ -290,7 +298,7 @@ useEffect(() => {
                 />
               </div>
               <div>
-                <label>Position:</label>
+               <label>Position:</label>
                 <select name="position" value={formData.role} onChange={handleChange}>
                   <option value="technician">Technician</option>
                   <option value="teamLeader">Team Leader</option>
@@ -298,11 +306,10 @@ useEffect(() => {
               </div>
               <div>
                 <label>Tier:</label>
-               <select name="tier" value={formData.tier} onChange={handleChange}>
+                 <select name="tier" value={formData.tier} onChange={handleChange}>
   <option value="tier1">Tier1</option>
   <option value="tier2">Tier2</option>
 </select>
-
               </div>
               <div className="form-left-ActiveCheckBox">
                 <label>Active:</label>
@@ -325,8 +332,7 @@ useEffect(() => {
                       value={item.id}
                       checked={formData.categories.includes(item.id)}
                       onChange={handleCategoryChange}
-                   
-                />
+                    />
                     {item.name}
                   </label>
                 ))}
