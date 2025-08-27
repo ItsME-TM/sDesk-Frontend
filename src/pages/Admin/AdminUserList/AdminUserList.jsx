@@ -101,13 +101,15 @@ function AdminUserList() {
           name: user.name,
           team: getTeamName(user.team),
           teamId: getTeamId(user.teamId),
+          tier:user.tier,
+          position:user.position,
           cat1: getSubCategoryName(user.cat1),
           cat2: getSubCategoryName(user.cat2),
           cat3: getSubCategoryName(user.cat3),
           cat4: getSubCategoryName(user.cat4),
           active: Boolean(user.active),
           isOnline: user.active,
-          level: user.level || "",
+      
           id: user.id,
         })),
     [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
@@ -129,6 +131,53 @@ function AdminUserList() {
     }
   };
 
+  const confirmEdit = async (newRole, updatedFields) => {
+    if (editUser) {
+      try {
+        await updateUserRoleById(editUser.serviceNum, newRole);
+     
+      } catch (err) {
+      }
+
+      const [cat1, cat2, cat3, cat4] = updatedFields.categories || [];
+      dispatch(
+        updateTechnicianRequest({
+          serviceNum: editUser.serviceNum,
+          email: updatedFields.email,
+          name: updatedFields.name,
+          team: updatedFields.teamName || updatedFields.team,
+          active: updatedFields.active,
+           position: updatedFields.role,
+          teamId: updatedFields.teamId || updatedFields.teamId,
+          tier: updatedFields.tier ,
+          cat1: cat1 || "",
+          cat2: cat2 || "",
+          cat3: cat3 || "",
+          cat4: cat4 || "",
+          contactNumber: updatedFields.contactNumber,
+          id: editUser.id,
+        })
+      );
+      const handleDeactivate = (serviceNum) => {
+        // Dispatch Redux action that calls backend to force logout + send message
+        dispatch(forceLogoutTechnicianRequest(serviceNum));
+      };
+      // NEW: If technician is being deactivated and is currently online, force logout
+      if (
+        updatedFields.active === false &&
+        onlineTechnicians.has(editUser.serviceNum)
+      ) {
+        dispatch(
+          forceLogoutTechnicianRequest({
+            serviceNum: editUser.serviceNum,
+            socket,
+          })
+        );
+      }
+    }
+    setIsEditUserOpen(false);
+    setEditUser(null);
+  };
 
   const handleDelete = (serviceNumber) => {
     const user = technicians.find(
@@ -221,96 +270,90 @@ function AdminUserList() {
         </div>
 
         <div className="AdminUserList-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Service Number</th>
-                  <th>Name</th>
-                  <th>Team</th>
-                  <th>Active</th>
-                  <th>Level</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  const filteredUsers = users
-                    .filter((user) => {
-                      if (selectShowOption === "Active")
-                        return user.active === true;
-                      return true;
-                    })
-                    .filter((user) => {
-                      const searchString = searchQuery.toLowerCase();
-                      return (
-                        (user.email && user.email.toLowerCase().includes(searchString)) ||
-                        (user.name && user.name.toLowerCase().includes(searchString)) ||
-                        (user.team && user.team.toLowerCase().includes(searchString)) ||
-                        (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                        (user.level && user.level.toLowerCase().includes(searchString))
-                      );
-                    });
-                  if (filteredUsers.length > 0) {
-                    return filteredUsers.map((user) => (
-                      <tr key={user.serviceNum}>
-                        <td>{user.serviceNum}</td>
-                        <td>{user.name}</td>
-                        <td>{user.team}</td>
-                        <td>
-                          <span
-                            style={{
-                              height: "10px",
-                              width: "10px",
-                              backgroundColor: user.isOnline
-                                ? "#2de37d"
-                                : "#ff4d4d",
-                              borderRadius: "50%",
-                              display: "inline-block",
-                              marginRight: "5px",
-                            }}
-                          />
-                          {user.active ? "True" : "False"}
-                        </td>
-                        <td>{user.level}</td>
-                        <td>
-                          <button
-                            className="AdminUserList-table-edit-btn"
-                            onClick={() => handleEdit(user.serviceNum)}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="AdminUserList-table-delete-btn"
-                            onClick={() => handleDelete(user.serviceNum)}
-                          >
-                            <FaTrash />
-                          </button>
-                          {user.active === "True" && (
-                            <button
-                              className="AdminUserList-table-logout-btn"
-                              onClick={() =>
-                                handleDeactivate(user.serviceNum)
-                              }
-                              title="Force Logout"
-                            >
-                              Logout
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ));
-                  } else {
+          <table>
+            <thead>
+              <tr>
+                <th>Service Number</th>
+                <th>Name</th>
+                <th>Team</th>
+                <th>Active</th>
+                <th>Tier</th>
+                <th>Position</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length > 0 ? (
+                users
+                  .filter((user) => {
+                    if (selectShowOption === "Active")
+                      return user.active === true;
+                    return true;
+                  })
+                  .filter((user) => {
+                    const searchString = searchQuery.toLowerCase();
                     return (
-                      <tr>
-                        <td colSpan="6" style={{ textAlign: "center" }}>
-                          No users found
-                        </td>
-                      </tr>
+                      (user.email && user.email.toLowerCase().includes(searchString)) ||
+                      (user.name && user.name.toLowerCase().includes(searchString)) ||
+                      (user.team && user.team.toLowerCase().includes(searchString)) ||
+                      (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
+                      (user.tier && user.tier.toLowerCase().includes(searchString)) ||
+                      (user.position && user.role.toLowerCase().includes(searchString))
+
                     );
-                  }
-                })()}
-              </tbody>
-            </table>
+                  })
+                  .map((user) => (
+                    <tr key={user.serviceNum}>
+                      <td>{user.serviceNum}</td>
+                      <td>{user.name}</td>
+                      <td>{user.team}</td>
+                      <td>
+                        <span
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            backgroundColor: user.isOnline
+                              ? "#2de37d"
+                              : "#ff4d4d",
+                            borderRadius: "50%",
+                            display: "inline-block",
+                            marginRight: "5px",
+                          }}
+                        />
+                        {user.active ? "True" : "False"}
+                      </td>{" "}
+                           <td>{user.tier}</td>
+
+
+
+
+                      <td>{user.position}</td>
+                      <td>
+                        <button
+                          className="AdminUserList-table-edit-btn"
+                          onClick={() => handleEdit(user.serviceNum)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="AdminUserList-table-delete-btn"
+                          onClick={() => handleDelete(user.serviceNum)}
+                        >
+                          <FaTrash />
+                        </button>
+                       
+                      </td>
+                    </tr>
+                  ))
+              ) : (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: "center" }}>
+                    No users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -321,8 +364,7 @@ function AdminUserList() {
             if (!newUser.isEdit) {
               if (newUser.serviceNum) {
                 try {
-                  await updateUserRoleById(newUser.serviceNum, "technician");
-                // eslint-disable-next-line no-empty
+                  await updateUserRoleById(newUser.serviceNum, newUser.position);
                 } catch (err) {}
               }
 
@@ -334,15 +376,14 @@ function AdminUserList() {
                   name: newUser.name,
                   team: newUser.teamName || newUser.team,
                   active: newUser.active,
-                  tier: Number(newUser.tier),
-                  level: Number(newUser.tier) === 1 ? "Tier1" : "Tier2",
+                  position: newUser.position,
+                 tier: newUser.tier ,
                   teamId: newUser.teamId,
                   cat1: cat1 || "",
                   cat2: cat2 || "",
                   cat3: cat3 || "",
                   cat4: cat4 || "",
-                  rr: 1,
-                  designation: "Technician",
+                  
                   contactNumber: newUser.contactNumber,
                   teamLeader: newUser.teamLeader ?? false,
                   assignAfterSignOff: newUser.assignAfterSignOff ?? false,
