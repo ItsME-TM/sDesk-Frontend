@@ -40,7 +40,6 @@ function TechnicalOfficers() {
   const isTeamLeader = user?.position === "teamLeader";
 
   useEffect(() => {
-
     if (!isTeamLeader) {
       dispatch(logoutRequest());
       return;
@@ -73,7 +72,6 @@ function TechnicalOfficers() {
   };
 
   const transformedData = useMemo(() => {
-
     const filteredTechnicians = technicians.filter(
       (user) => user.position === "technician"
     );
@@ -81,8 +79,6 @@ function TechnicalOfficers() {
     const transformed = filteredTechnicians.map((user) => ({
       serviceNum: user.serviceNum,
       name: user.name,
-      team: getTeamName(user.teamId),
-      position: user.position,
       tier: user.tier,
       cat1: getSubCategoryName(user.cat1),
       cat2: getSubCategoryName(user.cat2),
@@ -107,13 +103,11 @@ function TechnicalOfficers() {
   };
 
   const confirmToggle = async () => {
-
     if (technicianToToggle) {
       const updatedTechnician = {
         ...technicianToToggle,
         active: !technicianToToggle.active,
       };
-
 
       // Emit socket event to notify technician status change
       if (technicianToToggle.active && !updatedTechnician.active) {
@@ -149,9 +143,14 @@ function TechnicalOfficers() {
 
   // Filter data based on search and selection
   const filteredData = transformedData.filter((user) => {
-    const matchesSearch = user.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch =
+      user.serviceNum.toLowerCase().includes(searchLower) ||
+      user.name.toLowerCase().includes(searchLower) ||
+      (user.active ? "active" : "inactive").includes(searchLower) ||
+      user.tier.toString().toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower) ||
+      user.contactNumber.toLowerCase().includes(searchLower);
 
     if (selectShowOption === "Active") {
       return matchesSearch && user.active;
@@ -228,7 +227,7 @@ function TechnicalOfficers() {
             <FaSearch className="TechnicalOfficers-content2-content3-search-icon" />
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="Search by service number, name, status, tier, email, or contact..."
               value={searchQuery}
               onChange={handleSearch}
               className="TechnicalOfficers-content2-content3-search-input"
@@ -237,76 +236,74 @@ function TechnicalOfficers() {
         </div>
 
         <div className="TechnicalOfficers-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Service Number</th>
-                <th>Name</th>
-                <th>Team</th>
-                <th>Status</th>
-                <th>Tier</th>
-                <th>Position</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(() => {
-                if (filteredData.length > 0) {
-                  return filteredData.map((user) => (
-                    <tr key={user.id || user.serviceNum}>
-                      <td>{user.serviceNum}</td>
-                      <td>{user.name}</td>
-                      <td>{user.team}</td>
-                      <td>
-                        <span
-                          style={{
-                            height: "10px",
-                            width: "10px",
-                            backgroundColor: user.isOnline
-                              ? "#2de37d"
-                              : "#ff4d4d",
-                            borderRadius: "50%",
-                            display: "inline-block",
-                            marginRight: "5px",
-                          }}
-                        />
-                        {user.active ? "Active" : "Inactive"}
-                      </td>
-                      <td>{user.tier}</td>
-                      <td>{user.position}</td>
-                      <td>{user.email}</td>
-                      <td>{user.contactNumber}</td>
-                      <td>
-                        <button
-                          className={`TechnicalOfficers-table-toggle-btn ${
-                            user.active ? "active" : "inactive"
-                          }`}
-                          onClick={() => handleToggleActive(user)}
-                          title={user.active ? "Deactivate" : "Activate"}
-                        >
-                          {user.active ? (
-                            <FaToggleOn size="1.5em" color="#2de37d" />
-                          ) : (
-                            <FaToggleOff size="1.5em" color="#ff4d4d" />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ));
-                } else {
-                  return (
-                    <tr>
-                      <td colSpan="9" style={{ textAlign: "center" }}>
-                        No technicians found
-                      </td>
-                    </tr>
-                  );
-                }
-              })()}
-            </tbody>
-          </table>
+          <div className="TechnicalOfficers-table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service Number</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                  <th>Tier</th>
+                  <th>Email</th>
+                  <th>Contact</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  if (filteredData.length > 0) {
+                    return filteredData.map((user) => (
+                      <tr key={user.id || user.serviceNum}>
+                        <td>{user.serviceNum}</td>
+                        <td>{user.name}</td>
+                        <td>
+                          <span
+                            style={{
+                              height: "10px",
+                              width: "10px",
+                              backgroundColor: user.isOnline
+                                ? "#2de37d"
+                                : "#ff4d4d",
+                              borderRadius: "50%",
+                              display: "inline-block",
+                              marginRight: "5px",
+                            }}
+                          />
+                          {user.active ? "Active" : "Inactive"}
+                        </td>
+                        <td>{user.tier}</td>
+                        <td>{user.email}</td>
+                        <td>{user.contactNumber}</td>
+                        <td>
+                          <button
+                            className={`TechnicalOfficers-table-toggle-btn ${
+                              user.active ? "active" : "inactive"
+                            }`}
+                            onClick={() => handleToggleActive(user)}
+                            title={user.active ? "Deactivate" : "Activate"}
+                          >
+                            {user.active ? (
+                              <FaToggleOn size="1.5em" color="#2de37d" />
+                            ) : (
+                              <FaToggleOff size="1.5em" color="#ff4d4d" />
+                            )}
+                          </button>
+                        </td>
+                      </tr>
+                    ));
+                  } else {
+                    return (
+                      <tr>
+                        <td colSpan="7" style={{ textAlign: "center" }}>
+                          No technicians found
+                        </td>
+                      </tr>
+                    );
+                  }
+                })()}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
