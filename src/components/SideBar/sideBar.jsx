@@ -17,7 +17,6 @@ import { BiCategory } from "react-icons/bi";
 const SideBar = ({ role, isOpen, closeSidebar }) => {
   const [isDashBoardOpen, setIsDashBoardOpen] = useState(false);
   const [isIncidentsOpen, setIsIncidentsOpen] = useState(false);
-  console.log("[SideBar] role:", role);
 
   const toggleDashBoard = (e) => {
     // This checks if the click is on the SVG or its path to prevent the Link from firing
@@ -203,6 +202,23 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                 <HiComputerDesktop /> Dashboard
               </Link>
             </li>
+          )}
+          {role === "teamLeader" && (
+            <>
+              <li className="SideBar-dropdown-header">
+                <Link
+                  to="/technician/TechnicalOfficers"
+                  className={
+                    location.pathname === "/technician/TechnicalOfficers"
+                      ? "active"
+                      : ""
+                  }
+                  onClick={closeSidebar}
+                >
+                  <FaUsers /> Technical Officers
+                </Link>
+              </li>
+            </>
           )}
           {(role === "admin" ||
             role === "technician" ||
