@@ -71,16 +71,25 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
   // When SLT user is fetched
   useEffect(() => {
-    if (sltUser) {
-      setFormData(prev => ({
-        ...prev,
-        name: sltUser.display_name || '',
-        email: sltUser.email || '',
-        id: sltUser.serviceNum || '',
-        contactNumber: sltUser.contactNumber || '',
-      }));
+    if (!isEdit && sltUser) {
+      // Validate the fetched user's role
+      if (sltUser.role === 'technician' || sltUser.role === 'admin' || sltUser.role === 'superAdmin') {
+        setErrors(prev => ({ ...prev, id: `This user is already ${sltUser.role}.` }));
+        setFormData(prev => ({ ...prev, name: '', email: '', contactNumber: '' }));
+      } else {
+        // If the user role is valid, populate the form
+        setFormData(prev => ({
+          ...prev,
+          name: sltUser.display_name || '',
+          email: sltUser.email || '',
+          id: sltUser.serviceNum || '',
+          contactNumber: sltUser.contactNumber || '',
+        }));
+        // Clear any previous error for the ID field
+        setErrors(prev => ({ ...prev, id: undefined }));
+      }
     }
-  }, [sltUser]);
+  }, [sltUser, isEdit]);
 
   useEffect(() => {
     if (!sltUser) {
@@ -175,6 +184,13 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 const selectedCategories = formData.categories || [];
 const handleSubmit = e => {
   e.preventDefault();
+
+  // Failsafe validation for user role
+  if (!isEdit && sltUser && (sltUser.role === 'technician' || sltUser.role === 'admin' || sltUser.role === 'superAdmin')) {
+    setErrors(prev => ({ ...prev, id: `This user is already ${sltUser.role} and cannot be added.` }));
+    return; // Stop submission
+  }
+
   const newErrors = {};
   // Always validate against the displayed (fetched) values
   const nameToUse = sltUser ? (sltUser.display_name || '') : formData.name;
