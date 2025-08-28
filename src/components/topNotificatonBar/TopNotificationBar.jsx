@@ -18,8 +18,16 @@ const roleDisplayNames = {
 
 export default function TopNotificationBar({ user, notificationCount = 0, toggleSidebar }) {
   const navigate = useNavigate();
+  let role;
   const dispatch = useAppDispatch();
-  const role = user?.role;
+  if(user.role === 'technician'){
+    if(user.position){
+      role = user.position;
+    }
+  }
+  else{
+    role = user?.role;
+  }
   const displayName = user?.userName;
   const [showConfirm, setShowConfirm] = useState(false);
 
