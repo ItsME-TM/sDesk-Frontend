@@ -318,7 +318,7 @@ function AdminUserList() {
             if (!newUser.isEdit) {
               if (newUser.serviceNum) {
                 try {
-                  await updateUserRoleById(newUser.serviceNum, newUser.position);
+                  await updateUserRoleById(newUser.serviceNum, "technician");
                 // eslint-disable-next-line no-empty
                 } catch (err) {}
               }
