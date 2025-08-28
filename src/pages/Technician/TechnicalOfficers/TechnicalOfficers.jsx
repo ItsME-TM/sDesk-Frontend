@@ -40,6 +40,7 @@ function TechnicalOfficers() {
   const isTeamLeader = user?.position === "teamLeader";
 
   useEffect(() => {
+
     if (!isTeamLeader) {
       dispatch(logoutRequest());
       return;
@@ -71,28 +72,31 @@ function TechnicalOfficers() {
     return subCategory ? subCategory.name : subCategoryId;
   };
 
-  const transformedData = useMemo(
-    () =>
-      technicians
-        .filter((user) => user.position === "technician") // Only show technicians, not team leaders
-        .map((user) => ({
-          serviceNum: user.serviceNum,
-          name: user.name,
-          team: getTeamName(user.teamId),
-          position: user.position,
-          tier: user.tier,
-          cat1: getSubCategoryName(user.cat1),
-          cat2: getSubCategoryName(user.cat2),
-          cat3: getSubCategoryName(user.cat3),
-          cat4: getSubCategoryName(user.cat4),
-          active: Boolean(user.active),
-          isOnline: user.active,
-          email: user.email,
-          contactNumber: user.contactNumber,
-          id: user.id,
-        })),
-    [technicians, getTeamName, getSubCategoryName]
-  );
+  const transformedData = useMemo(() => {
+
+    const filteredTechnicians = technicians.filter(
+      (user) => user.position === "technician"
+    );
+
+    const transformed = filteredTechnicians.map((user) => ({
+      serviceNum: user.serviceNum,
+      name: user.name,
+      team: getTeamName(user.teamId),
+      position: user.position,
+      tier: user.tier,
+      cat1: getSubCategoryName(user.cat1),
+      cat2: getSubCategoryName(user.cat2),
+      cat3: getSubCategoryName(user.cat3),
+      cat4: getSubCategoryName(user.cat4),
+      active: Boolean(user.active),
+      isOnline: user.active,
+      email: user.email,
+      contactNumber: user.contactNumber,
+      id: user.id,
+    }));
+
+    return transformed;
+  }, [technicians, getTeamName, getSubCategoryName]);
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
   const handleSearch = (e) => setSearchQuery(e.target.value);
@@ -103,11 +107,13 @@ function TechnicalOfficers() {
   };
 
   const confirmToggle = async () => {
+
     if (technicianToToggle) {
       const updatedTechnician = {
         ...technicianToToggle,
         active: !technicianToToggle.active,
       };
+
 
       // Emit socket event to notify technician status change
       if (technicianToToggle.active && !updatedTechnician.active) {
@@ -117,16 +123,22 @@ function TechnicalOfficers() {
         });
       }
 
-      dispatch(
-        updateTechnicianRequest({
-          ...updatedTechnician,
-          serviceNum: technicianToToggle.serviceNum,
-        })
-      );
-      dispatch(fetchTechniciansRequest());
+      try {
+        dispatch(
+          updateTechnicianRequest({
+            ...updatedTechnician,
+            serviceNum: technicianToToggle.serviceNum,
+          })
+        );
+
+        dispatch(fetchTechniciansRequest());
+      } catch (error) {
+        
+      }
 
       setIsTogglePopupOpen(false);
       setTechnicianToToggle(null);
+    } else {
     }
   };
 
