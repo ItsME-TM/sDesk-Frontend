@@ -57,10 +57,6 @@ function MainDashboard() {
   ];
 
 
-  console.log('[MainDashboard] User info:', { userType, isSuperAdmin, isTechnician, isAdmin, user });
-  console.log('[MainDashboard] Dashboard stats:', dashboardStats);
-
-
   let cardCounts = {};
   let cardSubCounts = {};
 
