@@ -133,12 +133,12 @@ function TechnicalOfficers() {
 
         dispatch(fetchTechniciansRequest());
       } catch (error) {
-        
+        console.error(error);
+        alert("Failed to update technician status. Please try again.");
       }
 
       setIsTogglePopupOpen(false);
       setTechnicianToToggle(null);
-    } else {
     }
   };
 
