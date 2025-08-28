@@ -6,7 +6,7 @@ import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
 import socket from '../../utils/socket';
 
-const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addTechnicianError }) => {
+const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addTechnicianError, allTechnicians = [] }) => {
   // Show error if technician already exists (on submit)
   const showSubmitUserExists =
     addTechnicianError &&
@@ -188,6 +188,26 @@ const handleSubmit = e => {
   } else if (formData.categories.length > 4) {
     newErrors.categories = 'Can assign only up to 4 categories';
   }
+  
+  // Team Leader validation
+  if (formData.position === 'teamLeader') {
+    const teamLeadersInTeam = allTechnicians.filter(
+      (tech) =>
+        tech.team === formData.teamName &&
+        (tech.position === 'teamLeader')
+    );
+
+    const isEditingSelfAsLeader =
+      isEdit &&
+      editUser &&
+      (editUser.position === 'teamLeader') &&
+      (editUser.serviceNum === formData.id || editUser.serviceNumber === formData.id);
+
+    if (teamLeadersInTeam.length >= 4 && !isEditingSelfAsLeader) {
+      newErrors.position = 'A team can only have up to 4 team leaders.';
+    }
+  }
+
   setErrors(newErrors);
   if (Object.keys(newErrors).length > 0) return;
 
@@ -303,6 +323,7 @@ useEffect(() => {
                   <option value="technician">Technician</option>
                   <option value="teamLeader">Team Leader</option>
                 </select>
+                {errors.position && <span className="error-message">{errors.position}</span>}
               </div>
               <div>
                 <label>Tier:</label>

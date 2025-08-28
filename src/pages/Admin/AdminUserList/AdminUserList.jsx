@@ -314,6 +314,7 @@ function AdminUserList() {
       {isAddUserOpen && (
         <AdminAddUser
           onClose={() => setIsAddUserOpen(false)}
+          allTechnicians={technicians}
           onSubmit={async (newUser) => {
             if (!newUser.isEdit) {
               if (newUser.serviceNum) {
@@ -351,6 +352,7 @@ function AdminUserList() {
         <AdminAddUser
           isEdit
           editUser={editUser}
+          allTechnicians={technicians}
           onClose={() => setIsEditUserOpen(false)}
           onSubmit={async (updatedUser) => {
             if (updatedUser.isEdit) {
