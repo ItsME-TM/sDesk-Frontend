@@ -8,8 +8,8 @@ export const loginWithMicrosoft = async ({ code, state, redirect_uri }) => {
       code,
       state,
       redirect_uri,
-      client_id: "2dfa1784-299b-4bf9-91be-400d831396ed",
-      client_secret: "YOUR_CLIENT_SECRET",
+      client_id: import.meta.env.VITE_MICROSOFT_CLIENT_ID,
+      client_secret: import.meta.env.VITE_MICROSOFT_CLIENT_SECRET,
     });
     return response;
   } catch (error) {

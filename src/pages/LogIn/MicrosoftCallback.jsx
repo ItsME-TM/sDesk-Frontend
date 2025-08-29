@@ -17,7 +17,7 @@ function MicrosoftCallback() {
     if (!code) {
       dispatch(loginWithMicrosoftFailure('No authorization code found'));
       return;
-    }    const appUrl = (import.meta.env.VITE_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+    }    const appUrl = (import.meta.env.VITE_APP_URL).replace(/\/$/, '');
     
     dispatch(loginWithMicrosoftRequest({ 
       code, 
