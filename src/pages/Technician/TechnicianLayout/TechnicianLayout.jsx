@@ -11,6 +11,7 @@ const TechnicianLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const user = useAppSelector(state => state.auth.user);
     const role = user?.role;
+    const sidebarRole = user.position;
     const loading = useAppSelector(state => state.auth.loading);
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -39,7 +40,7 @@ const TechnicianLayout = () => {
     }
     return (
         <div className="Technician-layout-dashboard">
-            <SideBar role={role} isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
+            <SideBar role={sidebarRole} isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
             {isSidebarOpen && <div className="overlay" onClick={closeSidebar}></div>}
             <div className="Technician-layout-dashboard-main">
                 <TopNotificationBar user={user} notificationCount={10} toggleSidebar={toggleSidebar} />

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
@@ -5,7 +6,7 @@ import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
 import socket from '../../utils/socket';
 
-const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addTechnicianError }) => {
+const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addTechnicianError, allTechnicians = [] }) => {
   // Show error if technician already exists (on submit)
   const showSubmitUserExists =
     addTechnicianError &&
@@ -23,8 +24,8 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     email: '',
     contactNumber: '',
     teamName: loggedInUser?.teamName || '', 
-    role: 'technician',
-    tier: '1',
+    position: 'technician',
+    tier: 'tier1'||'tier2',
     active: true,
     teamId:loggedInUser?.teamId|| '',
     categories: [
@@ -70,16 +71,25 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
   // When SLT user is fetched
   useEffect(() => {
-    if (sltUser) {
-      setFormData(prev => ({
-        ...prev,
-        name: sltUser.display_name || '',
-        email: sltUser.email || '',
-        id: sltUser.serviceNum || '',
-        contactNumber: sltUser.contactNumber || '',
-      }));
+    if (!isEdit && sltUser) {
+      // Validate the fetched user's role
+      if (sltUser.role === 'technician' || sltUser.role === 'admin' || sltUser.role === 'superAdmin') {
+        setErrors(prev => ({ ...prev, id: `This user is already ${sltUser.role}.` }));
+        setFormData(prev => ({ ...prev, name: '', email: '', contactNumber: '' }));
+      } else {
+        // If the user role is valid, populate the form
+        setFormData(prev => ({
+          ...prev,
+          name: sltUser.display_name || '',
+          email: sltUser.email || '',
+          id: sltUser.serviceNum || '',
+          contactNumber: sltUser.contactNumber || '',
+        }));
+        // Clear any previous error for the ID field
+        setErrors(prev => ({ ...prev, id: undefined }));
+      }
     }
-  }, [sltUser]);
+  }, [sltUser, isEdit]);
 
   useEffect(() => {
     if (!sltUser) {
@@ -89,18 +99,26 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
   useEffect(() => {
     if (isEdit && editUser) {
-      setFormData(prev => ({
-        ...prev,
+      // When opening in edit mode, clear any lingering user data from the SLT user slice.
+      // This prevents stale data from appearing in the name/email fields.
+      dispatch(clearUser());
+
+      // When editing, completely re-initialize the form data from the editUser prop.
+      // This prevents stale state from a previous user from persisting.
+      setFormData({
         id: editUser.serviceNum || editUser.serviceNumber || editUser.id || '',
         name: editUser.name || '',
         email: editUser.email || '',
-        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
-        tier: editUser.tier?.toString() || '1',
-        role: editUser.role || 'technician',
+        contactNumber: editUser.contactNumber || '',
+        teamName: loggedInUser?.teamName || '',
+        tier: editUser.tier|| 'tier1'||'tier2',
+        position: editUser.position|| 'technician'||'teamLeader',
         active: editUser.active !== undefined ? editUser.active : true,
-      }));
+        teamId: loggedInUser?.teamId || '',
+        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
+      });
     }
-  }, [isEdit, editUser]);
+  }, [isEdit, editUser, loggedInUser, dispatch]);
 
   // Reset formData to initial state (with teamName) every time the modal is opened in add mode
   useEffect(() => {
@@ -111,9 +129,9 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         email: '',
         teamId: loggedInUser?.teamId || '',
         teamName: loggedInUser?.teamName || '',
-        role: 'technician',
-        tier: '1',
-        active: true,
+        position: 'technician',
+        tier: 'tier1',
+       active: true,
         categories: [],
       });
       setErrors({});
@@ -166,6 +184,13 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 const selectedCategories = formData.categories || [];
 const handleSubmit = e => {
   e.preventDefault();
+
+  // Failsafe validation for user role
+  if (!isEdit && sltUser && (sltUser.role === 'technician' || sltUser.role === 'admin' || sltUser.role === 'superAdmin')) {
+    setErrors(prev => ({ ...prev, id: `This user is already ${sltUser.role} and cannot be added.` }));
+    return; // Stop submission
+  }
+
   const newErrors = {};
   // Always validate against the displayed (fetched) values
   const nameToUse = sltUser ? (sltUser.display_name || '') : formData.name;
@@ -179,6 +204,26 @@ const handleSubmit = e => {
   } else if (formData.categories.length > 4) {
     newErrors.categories = 'Can assign only up to 4 categories';
   }
+  
+  // Team Leader validation
+  if (formData.position === 'teamLeader') {
+    const teamLeadersInTeam = allTechnicians.filter(
+      (tech) =>
+        tech.team === formData.teamName &&
+        (tech.position === 'teamLeader')
+    );
+
+    const isEditingSelfAsLeader =
+      isEdit &&
+      editUser &&
+      (editUser.position === 'teamLeader') &&
+      (editUser.serviceNum === formData.id || editUser.serviceNumber === formData.id);
+
+    if (teamLeadersInTeam.length >= 4 && !isEditingSelfAsLeader) {
+      newErrors.position = 'A team can only have up to 4 team leaders.';
+    }
+  }
+
   setErrors(newErrors);
   if (Object.keys(newErrors).length > 0) return;
 
@@ -188,21 +233,16 @@ const handleSubmit = e => {
     name: nameToUse,
     teamId: formData.teamId,
     team: formData.teamName,
-    tier: Number(formData.tier),
+    tier:  String(formData.tier) === 'tier1' ? 'tier1' : 'tier2',
     active: formData.active,
     cat1: formData.categories[0] || '',
     cat2: formData.categories[1] || '',
     cat3: formData.categories[2] || '',
     cat4: formData.categories[3] || '',
-    level: Number(formData.tier) === 1 ? 'Tier1' : 'Tier2',
-    rr: 1,
-    designation: 'Technician',
+   position: formData.position,
     contactNumber: formData.contactNumber,
-    teamLevel: 'Default',
-    teamLeader: formData.teamLeader ?? false,
-    assignAfterSignOff: formData.assignAfterSignOff ?? false,
-    permanentMember: formData.permanentMember ?? false,
-    subrootUser: formData.subrootUser ?? false,
+    
+    
     isEdit,
   };
 
@@ -294,18 +334,19 @@ useEffect(() => {
                 />
               </div>
               <div>
-                <label>Role:</label>
-                <select name="role" value={formData.role} onChange={handleChange}>
+                <label>Position:</label>
+                <select name="position" value={formData.position} onChange={handleChange}>
                   <option value="technician">Technician</option>
                   <option value="teamLeader">Team Leader</option>
                 </select>
+                {errors.position && <span className="error-message">{errors.position}</span>}
               </div>
               <div>
                 <label>Tier:</label>
-                <select name="tier" value={formData.tier} onChange={handleChange}>
-                  <option value="1">Tier1</option>
-                  <option value="2">Tier2</option>
-                </select>
+                 <select name="tier" value={formData.tier} onChange={handleChange}>
+  <option value="tier1">Tier1</option>
+  <option value="tier2">Tier2</option>
+</select>
               </div>
               <div className="form-left-ActiveCheckBox">
                 <label>Active:</label>

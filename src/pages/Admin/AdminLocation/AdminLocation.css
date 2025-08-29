@@ -74,6 +74,92 @@
   cursor: pointer;
 }
 
+.AdminLocation-filters {
+  display: flex;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 0 20px;
+}
+
+.AdminLocation-filters-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.AdminLocation-region-filter {
+  min-width: 200px;
+}
+
+.AdminLocation-region-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 200px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.AdminLocation-region-select:hover {
+  border-color: #b10e0e;
+}
+
+.AdminLocation-search-bar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  gap: 10px;
+  width: 300px;
+}
+
+.AdminLocation-search-bar .search-icon {
+  color: #666;
+}
+
+.AdminLocation-search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.AdminLocation-search-input::placeholder {
+  color: #999;
+}
+
+/* Mobile responsiveness for filters */
+@media (max-width: 768px) {
+  .AdminLocation-filters {
+    margin: 0 10px;
+    padding: 15px;
+  }
+
+  .AdminLocation-filters-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .AdminLocation-region-filter {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .AdminLocation-region-select {
+    width: 100%;
+  }
+
+  .AdminLocation-search-bar {
+    width: 100%;
+  }
+}
+
 .AdminLocation-showSearchBar {
   display: flex;
   flex-direction: row;
@@ -187,6 +273,8 @@
 .AdminLocation-table th:nth-child(5),
 .AdminLocation-table td:nth-child(5) {
   text-align: center; /* Actions - center */
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* Table row styling improvements */
@@ -250,10 +338,11 @@
 }
 
 .AdminLocation-actions-container {
-  display: flex;
+  display: inline-flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .AdminLocation-action-btn {
