@@ -16,17 +16,17 @@ const handleMicrosoftLogin = () => {
    
 
 
-    const appUrl = (import.meta.env.VITE_APP_URL || 'http://localhost:3000').replace(/\/$/, '');
+    const appUrl = (import.meta.env.VITE_APP_URL).replace(/\/$/, '');
 
     const params = new URLSearchParams({
-        client_id: import.meta.env.VITE_MICROSOFT_CLIENT_ID || '2dfa1784-299b-4bf9-91be-400d831396ed',
+        client_id: import.meta.env.VITE_MICROSOFT_CLIENT_ID,
         response_type: 'code',
         redirect_uri: `${appUrl}/auth/callback`,
         response_mode: 'query',
         scope: 'openid profile email User.Read',
         state: '12345',
     });
-    const tenantId = import.meta.env.VITE_MICROSOFT_TENANT_ID || '6339b7c7-ee52-4336-adb9-c35e1f8eba82';
+    const tenantId = import.meta.env.VITE_MICROSOFT_TENANT_ID;
 
 
 
