@@ -80,10 +80,9 @@
 
 .TopNotificationBar-userName {
   font-weight: 600;
-  color: #e7e69b;
+  color: #f6f5c6;
   font-size: 1.08em;
   letter-spacing: 0.01em;
-  background: #17109beb;
   border-radius: 4px;
   padding: 4px 12px;
   margin-right: 4px;
@@ -91,8 +90,7 @@
 
 .TopNotificationBar-role {
   font-size: 1.2em;
-  color: #c5def1;
-  background: #17109beb;
+  color: #fdfeff;
   border-radius: 4px;
   padding: 4px 10px;
   margin-left: 2px;
@@ -102,12 +100,12 @@
 .TopNotificationBar-logout-btn {
   display: flex;
   align-items: center;
-  background: #e91111;
-  border: 1px solid #e6d2d2;
+  background: #e91111aa;
   border-radius: 4px;
   padding: 4px 10px;
   margin-left: 8px;
   cursor: pointer;
+  border: #d5ecd4;
   transition: background 0.2s, border 0.2s;
 }
 .TopNotificationBar-logout-btn:hover {
