@@ -153,7 +153,7 @@ const SideBar = ({ role, isOpen, closeSidebar }) => {
                   }
                   onClick={closeSidebar}
                 >
-                  <FaUsers /> User
+                  <FaUsers /> Technical Officers
                 </Link>
               </li>
               {role === "superAdmin" && (
