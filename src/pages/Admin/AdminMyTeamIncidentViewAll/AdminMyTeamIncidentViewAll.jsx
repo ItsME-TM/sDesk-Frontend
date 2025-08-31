@@ -61,7 +61,7 @@ const AdminMyTeamIncidentViewAll = () => {
     return <div>Error: Admin user not found.</div>;
   }
 
-  const adminTeam = currentAdmin.parent_category_name || "Unknown Team";
+  const adminTeam = currentAdmin.parent_category_name || "All Team";
 
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
     // Process categoryItems to transform them to the expected format if needed
