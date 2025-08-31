@@ -5,7 +5,11 @@ import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
 import { IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
-import { fetchAssignedToMeRequest } from '../../../redux/incident/incidentSlice';
+import { 
+    fetchAssignedToMeRequest, 
+    updateIncidentInList, 
+    addIncidentToAssignedToMe 
+} from '../../../redux/incident/incidentSlice';
 import { fetchAllUsersRequest } from '../../../redux/sltusers/sltusersSlice';
 import { fetchCategoryItemsRequest } from '../../../redux/categories/categorySlice';
 import { fetchLocationsRequest } from '../../../redux/location/locationSlice';
@@ -45,25 +49,72 @@ const AdminMyAssignedIncidents = () => {
         dispatch(fetchAllUsersRequest());
         dispatch(fetchCategoryItemsRequest());
         dispatch(fetchLocationsRequest());
-    }, [dispatch, assignedUser]);
+
+        // Ensure user is connected to socket for live updates
+        if (loggedInUser && socket.connected) {
+            socket.emit("user_connected", {
+                serviceNum: loggedInUser.serviceNumber || loggedInUser.serviceNum,
+                userName: loggedInUser.userName || loggedInUser.name || loggedInUser.user_name,
+                role: loggedInUser.role,
+            });
+        }
+    }, [dispatch, assignedUser, loggedInUser]);
 
     // Socket.io: Listen for incident updates and refresh assigned incidents
     useEffect(() => {
         if (!assignedUser) return;
 
-        // Listen for incident update events
-        const handleIncidentUpdate = (data) => {
-            // Optionally filter by assignedUser if needed
+        // Handle general incident updates (no popup, just Redux update)
+        const handleIncidentUpdated = (data) => {
+            const updatedIncident = data.incident;
+            // Update the incident immediately in all lists for live update
+            dispatch(updateIncidentInList(updatedIncident));
+            
+            // Update selectedIncident if it's currently open in popup
+            if (selectedIncident && selectedIncident.incident_number === updatedIncident.incident_number) {
+                setSelectedIncident(updatedIncident);
+            }
+            
+            // Also refresh the assigned list as fallback
             dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
         };
 
-        socket.on('incidentUpdated', handleIncidentUpdate);
-
-        // Clean up listener on unmount
-        return () => {
-            socket.off('incidentUpdated', handleIncidentUpdate);
+        // Handle targeted incident updates for assigned handler (with popup)
+        const handleIncidentUpdatedAssigned = (data) => {
+            const updatedIncident = data.incident;
+            // Update the incident immediately in all lists for live update
+            dispatch(updateIncidentInList(updatedIncident));
+            
+            // Update selectedIncident if it's currently open in popup
+            if (selectedIncident && selectedIncident.incident_number === updatedIncident.incident_number) {
+                setSelectedIncident(updatedIncident);
+            }
+            
+            // Also refresh the assigned list as fallback
+            dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
         };
-    }, [dispatch, assignedUser]);
+
+        // Handle new incident assignments
+        const handleIncidentAssignedTechnician = (data) => {
+            const incident = data.incident;
+            // Add to assignedToMe immediately for live update
+            dispatch(addIncidentToAssignedToMe(incident));
+            // Also refresh the assigned list as fallback
+            dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+        };
+
+        // Listen for all relevant incident events
+        socket.on('incident_updated', handleIncidentUpdated);
+        socket.on('incident_updated_assigned', handleIncidentUpdatedAssigned);
+        socket.on('incident_assigned_technician', handleIncidentAssignedTechnician);
+
+        // Clean up listeners on unmount
+        return () => {
+            socket.off('incident_updated', handleIncidentUpdated);
+            socket.off('incident_updated_assigned', handleIncidentUpdatedAssigned);
+            socket.off('incident_assigned_technician', handleIncidentAssignedTechnician);
+        };
+    }, [dispatch, assignedUser, selectedIncident]);
 
     const getCategoryName = (categoryNumber) => {
         const category = categoryItems.find(item => item.grandchild_category_number === categoryNumber);
