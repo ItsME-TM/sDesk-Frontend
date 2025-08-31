@@ -197,6 +197,16 @@ const AdminMyTeamIncidentViewAll = () => {
   const currentRows = filteredData.slice(indexOfFirst, indexOfLast);
 
 
+  // Helper function to check if incident belongs to current admin's team
+  const isIncidentInAdminTeam = (incident) => {
+    if (!currentAdmin || !incident) return false;
+    
+    const adminTeamName = currentAdmin.parent_category_name || currentAdmin.teamName;
+    const incidentMainCategory = getMainCategoryNameFromDatabase(incident.category);
+    
+    return adminTeamName === incidentMainCategory;
+  };
+
   const handleRowClick = (refNo) => {
     const incident = transformedTeamIncidents.find(
       (item) => item.incident_number === refNo
@@ -458,6 +468,7 @@ const AdminMyTeamIncidentViewAll = () => {
                 isPopup={true}
                 loggedInUser={user}
                 updateBy={user?.userName}
+                showUpdateStatus={isIncidentInAdminTeam(selectedIncident)}
               />
             </div>
           </div>

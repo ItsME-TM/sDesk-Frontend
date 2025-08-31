@@ -23,6 +23,7 @@ const TechnicianInsident = ({
   isPopup,
   loggedInUser,
   affectedUserDetails,
+  showUpdateStatus = true, // Default to true for backward compatibility
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -481,7 +482,7 @@ const TechnicianInsident = ({
                 />
                 <br/>
               </div>
-              {currentIncident && (
+              {currentIncident && showUpdateStatus && (
                 <div className="col-12 section-gap">
                   <UpdateStatus
                     ref={updateStatusRef}
@@ -514,12 +515,14 @@ const TechnicianInsident = ({
                     Go Back
                   </button>
                 )}
-                <button
-                  className="technician-details-update-btn"
-                  onClick={handleUpdateClick}
-                >
-                  Update
-                </button>
+                {showUpdateStatus && (
+                  <button
+                    className="technician-details-update-btn"
+                    onClick={handleUpdateClick}
+                  >
+                    Update
+                  </button>
+                )}
               </div>
 
               {showSuccessMessage && (
