@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import socket from '../../../utils/socket';
 import { useDispatch, useSelector } from 'react-redux';
 import { FaHistory, FaSearch } from 'react-icons/fa';
 import { TiExportOutline } from 'react-icons/ti';
@@ -35,6 +36,7 @@ const AdminMyAssignedIncidents = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
+
     // Fetch assigned incidents and other data on component mount
     useEffect(() => {
         if (assignedUser) {
@@ -43,6 +45,24 @@ const AdminMyAssignedIncidents = () => {
         dispatch(fetchAllUsersRequest());
         dispatch(fetchCategoryItemsRequest());
         dispatch(fetchLocationsRequest());
+    }, [dispatch, assignedUser]);
+
+    // Socket.io: Listen for incident updates and refresh assigned incidents
+    useEffect(() => {
+        if (!assignedUser) return;
+
+        // Listen for incident update events
+        const handleIncidentUpdate = (data) => {
+            // Optionally filter by assignedUser if needed
+            dispatch(fetchAssignedToMeRequest({ serviceNum: assignedUser }));
+        };
+
+        socket.on('incidentUpdated', handleIncidentUpdate);
+
+        // Clean up listener on unmount
+        return () => {
+            socket.off('incidentUpdated', handleIncidentUpdate);
+        };
     }, [dispatch, assignedUser]);
 
     const getCategoryName = (categoryNumber) => {
