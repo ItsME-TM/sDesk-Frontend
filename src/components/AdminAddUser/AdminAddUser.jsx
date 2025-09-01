@@ -166,7 +166,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       setErrors({});
    dispatch(clearUser());  
   }
-}, [isEdit, loggedInUser, dispatch, editUser, filteredSubCategories]);
+}, [isEdit, loggedInUser, dispatch, editUser]);
 
   
 
