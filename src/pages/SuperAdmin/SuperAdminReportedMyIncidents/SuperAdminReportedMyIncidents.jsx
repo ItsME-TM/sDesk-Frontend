@@ -304,10 +304,16 @@ const SuperAdminReportedMyIncidents = () => {
               </tr>
             </thead>
             <tbody>
-              {currentRows.length === 0 ? (
+              {tableData.length === 0 ? (
                 <tr>
                   <td colSpan="4" style={{ textAlign: 'center', color: '#787878ff', padding: '2rem' }}>
-                    No incidents found for your search.
+                    No incidents
+                  </td>
+                </tr>
+              ) : currentRows.length === 0 && (searchTerm || statusFilter || categoryFilter) ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', color: '#787878ff', padding: '2rem' }}>
+                    No results found
                   </td>
                 </tr>
               ) : (
