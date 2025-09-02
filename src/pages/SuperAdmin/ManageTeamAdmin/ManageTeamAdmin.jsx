@@ -280,10 +280,6 @@ const ManageTeamAdmin = () => {
     if (!form.email) errors.email = "Email is required";
     if (!form.teamId) errors.teamId = "Team ID is required";
     if (!form.teamName) errors.teamName = "Team Name is required";
-    if (selectedCategories.length === 0)
-      errors.categories = "At least one category must be selected";
-    if (selectedCategories.length > MAX_CATEGORIES)
-      errors.categories = `Maximum ${MAX_CATEGORIES} categories allowed`;
     return errors;
   };
 
@@ -518,53 +514,6 @@ const ManageTeamAdmin = () => {
                   </select>
                   {categoriesLoading && <div className="loading-text">Loading teams...</div>}
                   {categoriesError && <div className="error-text">{categoriesError}</div>}
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Accessible Categories (select up to 4)</label>
-                {subCategoriesLoading && <div className="loading-text">Loading categories...</div>}
-                {subCategoriesError && <div className="error-text">{subCategoriesError}</div>}
-                {!subCategoriesLoading && !subCategoriesError && availableCategories.length === 0 && (
-                  <div className="info-text">No categories found for this team.</div>
-                )}
-                <div className="category-checkbox-group-row">
-                    {Array.isArray(availableCategories) &&
-                      availableCategories.map((sub) => (
-                        <label key={sub.id} className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            value={sub.name}
-                            checked={selectedCategories.includes(sub.name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                if (
-                                  selectedCategories.length < MAX_CATEGORIES
-                                ) {
-                                  setSelectedCategories([
-                                    ...selectedCategories,
-                                    sub.name,
-                                  ]);
-                                }
-                              } else {
-                                setSelectedCategories(
-                                  selectedCategories.filter(
-                                    (c) => c !== sub.name
-                                  )
-                                );
-                              }
-                            }}
-                            disabled={
-                              !selectedCategories.includes(sub.name) &&
-                              selectedCategories.length >= MAX_CATEGORIES
-                            }
-                          />
-                          <span className="checkbox-custom"></span>
-                          <span>{sub.name}</span>
-                        </label>
-                      ))}
-                  </div>
-                <div className="selection-count">
-                  {selectedCategories.length}/{MAX_CATEGORIES} selected
                 </div>
               </div>
               {submitError && <div className="error-message form-error">{submitError}</div>}
