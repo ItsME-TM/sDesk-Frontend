@@ -6,6 +6,10 @@ import {
   getAssignedToMeRequest,
   getAssignedByMeRequest,
   fetchAllIncidentsRequest,
+  addIncidentToList,
+  addIncidentToAssignedToMe,
+  addIncidentToAssignedByMe,
+  updateIncidentInList,
 } from "../../redux/incident/incidentSlice.js";
 import { updateTechnician } from "../../redux/technicians/technicianService.js";
 import { fetchTechniciansRequest } from "../../redux/technicians/technicianSlice.js";
@@ -61,9 +65,24 @@ const SocketProvider = ({ children }) => {
     };
 
    // General incident creation events (everyone receives these - NO POPUP, only Redux update)
-    const handleIncidentCreated = () => {
+    const handleIncidentCreated = (data) => {
+      const newIncident = data.incident;
 
+      // Add to incidents list immediately for live update
+      dispatch(addIncidentToList(newIncident));
 
+      // Also add to specific user lists based on relationship
+      if (newIncident.informant === user.serviceNum) {
+        // If current user is the informant, add to assignedByMe
+        dispatch(addIncidentToAssignedByMe(newIncident));
+      }
+
+      if (newIncident.handler === user.serviceNum) {
+        // If current user is the handler, add to assignedToMe
+        dispatch(addIncidentToAssignedToMe(newIncident));
+      }
+
+      // Keep the existing role-based refresh logic as a fallback
       // Dispatch different Redux actions based on user role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
@@ -78,7 +97,10 @@ const SocketProvider = ({ children }) => {
     };
     // Targeted incident assignment (only for assigned handler - SHOW POPUP)
     const handleIncidentAssignedTechnician = (data) => {
+      const incident = data.incident;
 
+      // Add to assignedToMe immediately for live update
+      dispatch(addIncidentToAssignedToMe(incident));
 
       // Show popup for assigned handler
       addAlert({
@@ -107,8 +129,13 @@ const SocketProvider = ({ children }) => {
       }
     };
    // General incident update events (everyone receives these - NO POPUP, only Redux update)
-    const handleIncidentUpdated = () => {
+    const handleIncidentUpdated = (data) => {
+      const updatedIncident = data.incident;
 
+      // Update the incident immediately in all lists for live update
+      dispatch(updateIncidentInList(updatedIncident));
+
+      // Keep the existing role-based refresh logic as a fallback
       // Dispatch different Redux actions based on user role
       if (user.role === "admin" || user.role === "superAdmin") {
         dispatch(fetchAllIncidentsRequest());
@@ -129,7 +156,10 @@ const SocketProvider = ({ children }) => {
 
        // Targeted incident update notification (only for assigned handler - SHOW POPUP)
     const handleIncidentUpdatedAssigned = (data) => {
+      const updatedIncident = data.incident;
 
+      // Update the incident immediately in all lists for live update
+      dispatch(updateIncidentInList(updatedIncident));
 
       // Show popup for assigned handler
       addAlert({

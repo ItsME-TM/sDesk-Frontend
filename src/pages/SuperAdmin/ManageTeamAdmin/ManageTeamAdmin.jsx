@@ -75,18 +75,6 @@ const ManageTeamAdmin = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // Handle contact number validation - only allow digits and limit to 10 characters
-    if (name === "contactNumber") {
-      const numericValue = value.replace(/\D/g, ''); // Remove non-digit characters
-      if (numericValue.length <= 10) {
-        setForm((prev) => ({
-          ...prev,
-          [name]: numericValue,
-        }));
-      }
-      return;
-    }
-    
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -106,6 +94,22 @@ const ManageTeamAdmin = () => {
       }));
       setSubmitError("");
       return;
+    }
+
+    // Check if the user is already a team admin
+    if (!editMode && Array.isArray(teamAdmins)) {
+      const existingAdmin = teamAdmins.find(admin => admin.serviceNumber === value);
+      if (existingAdmin) {
+        setSubmitError("This User Already Team admin");
+        setForm((prev) => ({
+          ...prev,
+          userName: "",
+          designation: "admin",
+          email: "",
+          contactNumber: "",
+        }));
+        return;
+      }
     }
 
     setSubmitError("");
@@ -217,6 +221,7 @@ const ManageTeamAdmin = () => {
 
   const handleClose = () => {
     setShowModal(false);
+    setSubmitError("");
   };
 
   // When teamName changes, update teamId and fetch subcategories from backend
@@ -275,10 +280,6 @@ const ManageTeamAdmin = () => {
     if (!form.email) errors.email = "Email is required";
     if (!form.teamId) errors.teamId = "Team ID is required";
     if (!form.teamName) errors.teamName = "Team Name is required";
-    if (selectedCategories.length === 0)
-      errors.categories = "At least one category must be selected";
-    if (selectedCategories.length > MAX_CATEGORIES)
-      errors.categories = `Maximum ${MAX_CATEGORIES} categories allowed`;
     return errors;
   };
 
@@ -441,7 +442,7 @@ const ManageTeamAdmin = () => {
           <div className="modal-content teamadmin-form-container">
             <div className="modal-header">
               <h3>{editMode ? "Edit Team Admin" : "Add New Team Admin"}</h3>
-              <button className="close-btn" onClick={() => setShowModal(false)}>
+              <button className="close-btn" onClick={handleClose}>
                 &times;
               </button>
             </div>
@@ -468,13 +469,12 @@ const ManageTeamAdmin = () => {
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
-                    onChange={handleChange}
                     type="tel"
                     pattern="[0-9]{10}"
                     maxLength="10"
-                    placeholder="Enter 10-digit contact number"
                     title="Please enter exactly 10 digits"
                     required
+                    readOnly
                   />
                 </div>
                 <div className="form-group">
@@ -516,57 +516,10 @@ const ManageTeamAdmin = () => {
                   {categoriesError && <div className="error-text">{categoriesError}</div>}
                 </div>
               </div>
-              <div className="form-group">
-                <label>Accessible Categories (select up to 4)</label>
-                {subCategoriesLoading && <div className="loading-text">Loading categories...</div>}
-                {subCategoriesError && <div className="error-text">{subCategoriesError}</div>}
-                {!subCategoriesLoading && !subCategoriesError && availableCategories.length === 0 && (
-                  <div className="info-text">No categories found for this team.</div>
-                )}
-                <div className="category-checkbox-group-row">
-                    {Array.isArray(availableCategories) &&
-                      availableCategories.map((sub) => (
-                        <label key={sub.id} className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            value={sub.name}
-                            checked={selectedCategories.includes(sub.name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                if (
-                                  selectedCategories.length < MAX_CATEGORIES
-                                ) {
-                                  setSelectedCategories([
-                                    ...selectedCategories,
-                                    sub.name,
-                                  ]);
-                                }
-                              } else {
-                                setSelectedCategories(
-                                  selectedCategories.filter(
-                                    (c) => c !== sub.name
-                                  )
-                                );
-                              }
-                            }}
-                            disabled={
-                              !selectedCategories.includes(sub.name) &&
-                              selectedCategories.length >= MAX_CATEGORIES
-                            }
-                          />
-                          <span className="checkbox-custom"></span>
-                          <span>{sub.name}</span>
-                        </label>
-                      ))}
-                  </div>
-                <div className="selection-count">
-                  {selectedCategories.length}/{MAX_CATEGORIES} selected
-                </div>
-              </div>
               {submitError && <div className="error-message form-error">{submitError}</div>}
               {submitSuccess && <div className="success-message form-success">Admin added!</div>}
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn-cancel" onClick={handleClose}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-submit">

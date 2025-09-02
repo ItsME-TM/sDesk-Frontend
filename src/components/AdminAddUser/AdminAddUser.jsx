@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserByServiceNumberRequest, clearUser } from '../../redux/sltusers/sltusersSlice';
+import { fetchSubCategoriesByMainCategoryIdRequest, fetchMainCategoriesRequest } from '../../redux/categories/categorySlice';
 import './AdminAddUser.css';
 import { IoIosClose } from 'react-icons/io';
 import socket from '../../utils/socket';
@@ -17,6 +17,8 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
   const dispatch = useDispatch();
 
   const loggedInUser = useSelector(state => state.auth?.user);
+  const mainCategories = useSelector(state => state.categories?.mainCategories || []);
+  const subCategories = useSelector(state => state.categories?.subCategories || []);
 
   const [formData, setFormData] = useState({
     id: '',
@@ -28,13 +30,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
     tier: 'tier1'||'tier2',
     active: true,
     teamId:loggedInUser?.teamId|| '',
-    categories: [
-      loggedInUser?.cat1,
-      loggedInUser?.cat2,
-      loggedInUser?.cat3,
-      loggedInUser?.cat4
-
-    ].filter(Boolean), 
+    categories: [],
   });
 
   const [errors, setErrors] = useState({});
@@ -43,13 +39,37 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
   const sltUserLoading = useSelector(state => state.sltusers.loading);
   const sltUserError = useSelector(state => state.sltusers.error);
 
-  // Define filteredSubCategories from loggedInUser's categories
-  const filteredSubCategories = [
-    loggedInUser?.cat1,
-    loggedInUser?.cat2,
-    loggedInUser?.cat3,
-    loggedInUser?.cat4
-  ].filter(Boolean).map(cat => ({ id: cat, name: cat }));
+  // Get subcategories based on the logged-in TeamAdmin's team
+  const filteredSubCategories = subCategories.filter(subCat => {
+    // Find the main category that matches the logged-in user's team
+    const userMainCategory = mainCategories.find(mainCat => 
+      mainCat.name === loggedInUser?.teamName || 
+      mainCat.category_code === loggedInUser?.teamId
+    );
+    
+    // Filter subcategories that belong to this main category
+    return userMainCategory && subCat.mainCategory?.id === userMainCategory.id;
+  });
+
+  // Fetch main categories when component mounts
+  useEffect(() => {
+    dispatch(fetchMainCategoriesRequest());
+  }, [dispatch]);
+
+  // Fetch subcategories when component mounts or when loggedInUser changes
+  useEffect(() => {
+    if (loggedInUser?.teamId || loggedInUser?.teamName) {
+      // Find the main category that matches the logged-in user's team
+      const userMainCategory = mainCategories.find(mainCat => 
+        mainCat.name === loggedInUser?.teamName || 
+        mainCat.category_code === loggedInUser?.teamId
+      );
+      
+      if (userMainCategory) {
+        dispatch(fetchSubCategoriesByMainCategoryIdRequest(userMainCategory.id));
+      }
+    }
+  }, [dispatch, loggedInUser, mainCategories]);
 
 
   // Debounce service number input
@@ -103,6 +123,15 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       // This prevents stale data from appearing in the name/email fields.
       dispatch(clearUser());
 
+      // For edit mode, we need to convert the existing category names back to IDs
+      const editCategories = [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4]
+        .filter(Boolean)
+        .map(catName => {
+          // Find the subcategory that matches this name
+          const subCat = filteredSubCategories.find(sub => sub.name === catName);
+          return subCat ? subCat.id : catName; // fallback to name if not found
+        });
+
       // When editing, completely re-initialize the form data from the editUser prop.
       // This prevents stale state from a previous user from persisting.
       setFormData({
@@ -115,7 +144,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
         position: editUser.position|| 'technician'||'teamLeader',
         active: editUser.active !== undefined ? editUser.active : true,
         teamId: loggedInUser?.teamId || '',
-        categories: editUser.categories || [editUser.cat1, editUser.cat2, editUser.cat3, editUser.cat4].filter(Boolean),
+        categories: editCategories,
       });
     }
   }, [isEdit, editUser, loggedInUser, dispatch]);
@@ -137,7 +166,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
       setErrors({});
    dispatch(clearUser());  
   }
-}, [isEdit, loggedInUser, dispatch]);
+}, [isEdit, loggedInUser, dispatch, editUser]);
 
   
 
@@ -182,7 +211,7 @@ const AdminAddUser = ({ onSubmit, onClose, isEdit = false, editUser = null, addT
 
 
 const selectedCategories = formData.categories || [];
-const handleSubmit = e => {
+const handleSubmit = (e) => {
   e.preventDefault();
 
   // Failsafe validation for user role
@@ -227,6 +256,12 @@ const handleSubmit = e => {
   setErrors(newErrors);
   if (Object.keys(newErrors).length > 0) return;
 
+  // Convert category IDs back to names for the backend
+  const categoryNames = formData.categories.map(catId => {
+    const subCat = filteredSubCategories.find(sub => sub.id === catId);
+    return subCat ? subCat.name : catId; // fallback to catId if not found
+  });
+
   const payload = {
     serviceNum: formData.id,
     email: emailToUse,
@@ -235,10 +270,10 @@ const handleSubmit = e => {
     team: formData.teamName,
     tier:  String(formData.tier) === 'tier1' ? 'tier1' : 'tier2',
     active: formData.active,
-    cat1: formData.categories[0] || '',
-    cat2: formData.categories[1] || '',
-    cat3: formData.categories[2] || '',
-    cat4: formData.categories[3] || '',
+    cat1: categoryNames[0] || '',
+    cat2: categoryNames[1] || '',
+    cat3: categoryNames[2] || '',
+    cat4: categoryNames[3] || '',
    position: formData.position,
     contactNumber: formData.contactNumber,
     
