@@ -150,7 +150,11 @@ function TechnicalOfficers() {
     const matchesSearch =
       user.serviceNum.toLowerCase().includes(searchLower) ||
       user.name.toLowerCase().includes(searchLower) ||
-      (user.active ? "active" : "inactive").includes(searchLower) ||
+      (searchLower === "active"
+        ? user.active
+        : searchLower === "inactive"
+        ? !user.active
+        : (user.active ? "active" : "inactive").includes(searchLower)) ||
       user.tier.toString().toLowerCase().includes(searchLower) ||
       user.email.toLowerCase().includes(searchLower) ||
       user.contactNumber.toLowerCase().includes(searchLower);
