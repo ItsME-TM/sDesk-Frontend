@@ -204,7 +204,7 @@ const UserViewIncident = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="4">No incidents found.</td>
+                  <td colSpan="4">No incidents found in here.</td>
                 </tr>
               )}
             </tbody>
