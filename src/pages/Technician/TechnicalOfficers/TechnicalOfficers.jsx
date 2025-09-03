@@ -50,7 +50,7 @@ function TechnicalOfficers() {
 
     const handleStatusChange = ({ serviceNum, active }) => {
       dispatch(updateTechnicianOnlineStatus({ serviceNum, active }));
-      dispatch(fetchTechniciansRequest());
+      dispatch(fetchTechniciansRequest(user.teamId));
     };
 
     socket.on("technician_status_changed", handleStatusChange);
@@ -72,8 +72,11 @@ function TechnicalOfficers() {
   };
 
   const transformedData = useMemo(() => {
+    // Only show technicians belonging to the teamLeader's team
     const filteredTechnicians = technicians.filter(
-      (user) => user.position === "technician"
+      (tech) =>
+        tech.position === "technician" &&
+        (isTeamLeader ? tech.teamId === user.teamId : true)
     );
 
     const transformed = filteredTechnicians.map((user) => ({
@@ -92,7 +95,7 @@ function TechnicalOfficers() {
     }));
 
     return transformed;
-  }, [technicians, getTeamName, getSubCategoryName]);
+  }, [technicians, getTeamName, getSubCategoryName, isTeamLeader, user.teamId]);
 
   const handleChange = (e) => setSelectShowOption(e.target.value);
   const handleSearch = (e) => setSearchQuery(e.target.value);
