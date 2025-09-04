@@ -215,7 +215,7 @@ function AdminUserList() {
             <FaSearch />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search by name, service number, team, tier, position, or active status (true/false)..."
               value={searchQuery}
               onChange={handleSearch}
               className="AdminUserList-showSearchBar-SearchBar-input"
@@ -246,16 +246,31 @@ function AdminUserList() {
                       return true;
                     })
                     .filter((user) => {
+                      if (!searchQuery.trim()) return true; // Show all if no search query
+                      
                       const searchString = searchQuery.toLowerCase();
-                      return (
+                      const matchesSearch = (
                         (user.email && user.email.toLowerCase().includes(searchString)) ||
                         (user.name && user.name.toLowerCase().includes(searchString)) ||
                         (user.team && user.team.toLowerCase().includes(searchString)) ||
                         (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                       (user.tier && user.tier.toLowerCase().includes(searchString)) ||
-                      (user.position && user.role.toLowerCase().includes(searchString))
+                        (user.tier && user.tier.toLowerCase().includes(searchString)) ||
+                        (user.position && user.position.toLowerCase().includes(searchString)) ||
+                        // Add Active column search (True/False)
+                        (user.active ? "true" : "false").includes(searchString) ||
+                        (user.active ? "active" : "inactive").includes(searchString)
                       );
+                      
+                      // Debug logging for search issues
+                      if (searchQuery.trim() && !matchesSearch) {
+                        
+                      }
+                      
+                      return matchesSearch;
                     });
+                  
+                  
+                  
                   if (filteredUsers.length > 0) {
                     return filteredUsers.map((user) => (
                       <tr key={user.serviceNum}>
@@ -299,7 +314,7 @@ function AdminUserList() {
                   } else {
                     return (
                       <tr>
-                        <td colSpan="6" style={{ textAlign: "center" }}>
+                        <td colSpan="7" style={{ textAlign: "center" }}>
                           No users found
                         </td>
                       </tr>
