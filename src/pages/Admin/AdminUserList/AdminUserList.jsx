@@ -211,7 +211,7 @@ function AdminUserList() {
             <FaSearch />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search by name, service number, team, tier, position, or active status (true/false)..."
               value={searchQuery}
               onChange={handleSearch}
               className="AdminUserList-showSearchBar-SearchBar-input"
