@@ -63,7 +63,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
     }
   };
 
-  // Auto-fill form when user data is found, but only fill empty fields (do not overwrite manual edits)
+  // Auto-fill form when user data is found, butonly fill empty fields (do not overwrite manual edits)
   useEffect(() => {
     if (user) {
       setFormData((prevData) => ({
