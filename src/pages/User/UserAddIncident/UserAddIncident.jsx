@@ -196,6 +196,8 @@ const UserAddIncident = () => {
       document.getElementById("file-upload").value = "";
     }
     setSubmitSuccess(true);
+    // Clear user lookup status after submit
+    dispatch(clearLookupUser());
 
     setTimeout(() => {
       setSubmitSuccess(false);
