@@ -63,15 +63,15 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
     }
   };
 
-  // Auto-fill form when user data is found
+  // Auto-fill form when user data is found, but only fill empty fields (do not overwrite manual edits)
   useEffect(() => {
     if (user) {
       setFormData((prevData) => ({
         ...prevData,
-        name: user.display_name || "",
-        email: user.email || "",
-        designation: user.role || "", // Auto-fill designation with user role
-        tpNumber: user.contactNumber || "", // Auto-fill TP Number with contactNumber from backend
+        name: prevData.name || user.display_name || "",
+        email: prevData.email || user.email || "",
+        designation: prevData.designation || user.role || "",
+        tpNumber: prevData.tpNumber || user.contactNumber || "",
       }));
     }
   }, [user, setFormData]);
@@ -124,7 +124,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
               type="text"
               name="tpNumber"
               value={formData.tpNumber}
-              readOnly
+              onChange={handleInputChange}
               placeholder="TP Number"
             />
           </div>
@@ -138,7 +138,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
               type="text"
               name="name"
               value={formData.name}
-              readOnly
+              onChange={handleInputChange}
               placeholder="Full Name"
             />
           </div>
@@ -152,7 +152,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
               type="text"
               name="designation"
               value={formData.designation}
-              readOnly
+              onChange={handleInputChange}
               placeholder="Designation"
             />
           </div>
@@ -166,7 +166,7 @@ const AffectedUserDetails = ({ formData, setFormData, handleInputChange }) => {
               type="email"
               name="email"
               value={formData.email}
-              readOnly
+              onChange={handleInputChange}
               placeholder="Email"
             />
           </div>
