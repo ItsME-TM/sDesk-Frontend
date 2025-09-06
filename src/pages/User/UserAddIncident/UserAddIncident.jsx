@@ -8,14 +8,18 @@ import LocationDropdown from "../../../components/LocationDropdown/LocationDropd
 import { IoIosArrowForward } from "react-icons/io";
 import {
   createIncidentRequest,
+  createIncidentWithAttachmentRequest,
   clearError,
 } from "../../../redux/incident/incidentSlice";
+// eslint-disable-next-line no-unused-vars
 import { clearLookupUser } from "../../../redux/userLookup/userLookupSlice";
 
 const UserAddIncident = () => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.incident);
+  // eslint-disable-next-line no-unused-vars
   const { user } = useSelector((state) => state.auth);
+  // eslint-disable-next-line no-unused-vars
   const { error: userLookupError, user: lookupUser } = useSelector((state) => state.userLookup);
 
   const [formData, setFormData] = useState({
@@ -96,26 +100,6 @@ const UserAddIncident = () => {
         return;
     }
 
-  const allowedTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'application/pdf',
-    'application/msword', // .doc
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-    'application/vnd.ms-excel', // .xls
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'application/vnd.ms-powerpoint', // .ppt
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
-    'text/plain', // .txt
-  ];
-
-  if (!allowedTypes.includes(file.type)) {
-    alert("Invalid file type. Only PDF , common document formats and image files are allowed.");
-    e.target.value = ""; 
-    return;
-  }
-
     if (file.size > 50 * 1024 * 1024) { 
         alert("File size exceeds 50MB. Please choose a smaller file.");
         e.target.value = ""; 
@@ -163,22 +147,41 @@ const UserAddIncident = () => {
 
     const incidentNumber = `INC-${Date.now()}`;
 
-    const incidentData = {
-      incident_number: incidentNumber,
-      informant: formData.serviceNo, // Affected User's service number
-      location: formData.location.name, // Use location name, not number
-      handler: formData.serviceNo, // Affected User's service number as handler
-      update_by: formData.serviceNo, // Affected User's service number
-      category: formData.category.name,
-      update_on: new Date().toISOString().split("T")[0],
-      status: "Open",
-      priority: formData.priority,
-      description: formData.description,
-      notify_informant: true,
-      Attachment: selectedFile ? selectedFile.name : null,
-    };
+    if (selectedFile) {
+      const incidentFormData = new FormData();
+      incidentFormData.append('file', selectedFile);
+      incidentFormData.append('incident_number', incidentNumber);
+      incidentFormData.append('informant', formData.serviceNo);
+      incidentFormData.append('location', formData.location.name);
+      incidentFormData.append('handler', formData.serviceNo);
+      incidentFormData.append('update_by', formData.serviceNo);
+      incidentFormData.append('category', formData.category.name);
+      incidentFormData.append('update_on', new Date().toISOString().split("T")[0]);
+      incidentFormData.append('status', "Open");
+      incidentFormData.append('priority', formData.priority);
+      incidentFormData.append('description', formData.description);
+      incidentFormData.append('notify_informant', 'true');
+      incidentFormData.append('Attachment', selectedFile.name);
 
-    dispatch(createIncidentRequest(incidentData));
+      dispatch(createIncidentWithAttachmentRequest(incidentFormData));
+    } else {
+      const incidentData = {
+        incident_number: incidentNumber,
+        informant: formData.serviceNo,
+        location: formData.location.name,
+        handler: formData.serviceNo,
+        update_by: formData.serviceNo,
+        category: formData.category.name,
+        update_on: new Date().toISOString().split("T")[0],
+        status: "Open",
+        priority: formData.priority,
+        description: formData.description,
+        notify_informant: true,
+        Attachment: null,
+      };
+
+      dispatch(createIncidentRequest(incidentData));
+    }
 
     setFormData({
       serviceNo: "",

@@ -32,6 +32,7 @@ function TechnicalOfficers() {
   );
 
   const [selectShowOption, setSelectShowOption] = useState("All");
+  const [selectLevelOption, setSelectLevelOption] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isTogglePopupOpen, setIsTogglePopupOpen] = useState(false);
   const [technicianToToggle, setTechnicianToToggle] = useState(null);
@@ -221,6 +222,18 @@ function TechnicalOfficers() {
               <option value="All">All</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div className="TechnicalOfficers-content2-content3-left">
+            <label>Level:</label>
+            <select
+              value={selectLevelOption}
+              onChange={(e) => setSelectLevelOption(e.target.value)}
+              className="TechnicalOfficers-content2-content3-dropdown"
+            >
+              <option value="All">All</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
             </select>
           </div>
           <div className="TechnicalOfficers-content2-content3-right">
