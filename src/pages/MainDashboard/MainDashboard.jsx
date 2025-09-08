@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
-import { FaBell, FaSnowflake, FaTag, FaTruck } from "react-icons/fa";
+import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
 import { fetchDashboardStatsRequest } from "../../redux/incident/incidentSlice";
 import { fetchMainCategoriesRequest } from "../../redux/categories/categorySlice";
 
@@ -54,6 +54,7 @@ function MainDashboard() {
     { title: "Hold", color: "#00c4b4", icon: <FaSnowflake /> },
     { title: "In Progress", color: "#4a90e2", icon: <FaTag /> },
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
+    { title: "Pending Assignment", color: "#ff6b6b", icon: <FaUsers /> },
   ];
 
 
@@ -70,6 +71,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
     };
     
     // Total counts for all time
@@ -78,6 +80,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
     };
   } else if (isTechnician) {
     // For Technician: card value = today's assigned incidents, total = all assigned incidents
@@ -89,6 +92,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
     };
     
     // Total incidents ever assigned to this technician
@@ -97,6 +101,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
     };
   } else if (isAdmin) {
     // For Admin: card value = today's incidents under their main categories, total = all incidents under their main categories
@@ -108,6 +113,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
     };
     
     // Total incidents under admin's main categories and subcategories
@@ -116,6 +122,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
+      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
     };
   } else {
     // For other user types, use existing logic
@@ -239,10 +246,10 @@ function MainDashboard() {
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                High Priority (Today)
+                Unresolved (Today)
               </span>
               <span className="MainDashboard-summary-value">
-                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
+                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0) + (cardCounts["Pending Assignment"] || 0)}
               </span>
             </div>
           </div>
