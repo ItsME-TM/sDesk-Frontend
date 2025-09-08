@@ -2,18 +2,17 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
 import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
-import { fetchDashboardStatsRequest } from "../../redux/incident/incidentSlice";
+import { fetchDashboardStatsRequest, fetchAssignedToMeRequest } from "../../redux/incident/incidentSlice";
 import { fetchMainCategoriesRequest } from "../../redux/categories/categorySlice";
 
 function MainDashboard() {
   const dispatch = useDispatch();
-  const { dashboardStats, loading, error } = useSelector(
+  const { dashboardStats, assignedToMe, loading, error } = useSelector(
     (state) => state.incident
   );
-  const { mainCategories } = useSelector((state) => state.categories);
   const { user } = useSelector((state) => state.auth);
 
-  const userType = user?.userType || user?.role || user?.type || "Unknown";
+  const userType = user.role;
 
   // Determine user role for data filtering
   const isSuperAdmin = 
@@ -29,13 +28,12 @@ function MainDashboard() {
 
   useEffect(() => {
     dispatch(fetchMainCategoriesRequest());
-    if (userType === "Technician" && user?.id) {
-      dispatch(
-        fetchDashboardStatsRequest({
-          userType,
-          technicianId: user.id,
-        })
-      );
+    // Always fetch global dashboard stats for pending assignment counts
+    dispatch(fetchDashboardStatsRequest({}));
+    
+    if (isTechnician && user?.serviceNum) {
+      // For technicians, use getAssignedToMe directly
+      dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
     } else if (isAdmin && user?.serviceNum) {
       dispatch(
         fetchDashboardStatsRequest({
@@ -43,11 +41,35 @@ function MainDashboard() {
           adminServiceNum: user.serviceNum,
         })
       );
-    } else {
-      dispatch(fetchDashboardStatsRequest({ userType }));
     }
-  }, [dispatch, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
+  }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin]);
 
+  // Helper function to calculate stats from assignedToMe incidents for technicians
+  const calculateTechnicianStats = (incidents) => {
+    if (!incidents || !Array.isArray(incidents)) {
+      return { cardCounts: {}, cardSubCounts: {} };
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const cardCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open' && inc.update_on === today).length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold' && inc.update_on === today).length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && inc.update_on === today).length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed' && inc.update_on === today).length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && inc.update_on === today).length,
+    };
+
+    const cardSubCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open').length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold').length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress').length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed').length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment').length,
+    };
+
+    return { cardCounts, cardSubCounts };
+  };
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -61,6 +83,11 @@ function MainDashboard() {
   let cardCounts = {};
   let cardSubCounts = {};
 
+  // Get global pending assignment counts for all roles
+  const globalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
+  const globalPendingAssignmentToday = globalCounts["Pending Assignment (Today)"] || 0;
+  const globalPendingAssignmentTotal = globalCounts["Pending Assignment"] || 0;
+
   if (isSuperAdmin) {
     // For Super Admin: card value = today's count, total = all-time count
     const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
@@ -71,7 +98,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
+      "Pending Assignment": globalPendingAssignmentToday,
     };
     
     // Total counts for all time
@@ -80,28 +107,18 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
+      "Pending Assignment": globalPendingAssignmentTotal,
     };
   } else if (isTechnician) {
-    // For Technician: card value = today's assigned incidents, total = all assigned incidents
-    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
-    
-    // Today's incidents assigned to this technician
+    // For Technician: use assignedToMe incidents directly, but global pending assignment
+    const technicianStats = calculateTechnicianStats(assignedToMe);
     cardCounts = {
-      "Open": totalCounts["Open (Today)"] || 0,
-      "Hold": totalCounts["Hold (Today)"] || 0,
-      "In Progress": totalCounts["In Progress (Today)"] || 0,
-      "Closed": totalCounts["Closed (Today)"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
+      ...technicianStats.cardCounts,
+      "Pending Assignment": globalPendingAssignmentToday, // Override with global count
     };
-    
-    // Total incidents ever assigned to this technician
     cardSubCounts = {
-      "Open": totalCounts["Open"] || 0,
-      "Hold": totalCounts["Hold"] || 0,
-      "In Progress": totalCounts["In Progress"] || 0,
-      "Closed": totalCounts["Closed"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
+      ...technicianStats.cardSubCounts,
+      "Pending Assignment": globalPendingAssignmentTotal, // Override with global count
     };
   } else if (isAdmin) {
     // For Admin: card value = today's incidents under their main categories, total = all incidents under their main categories
@@ -113,7 +130,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment (Today)"] || 0,
+      "Pending Assignment": globalPendingAssignmentToday,
     };
     
     // Total incidents under admin's main categories and subcategories
@@ -122,12 +139,21 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
-      "Pending Assignment": totalCounts["Pending Assignment"] || 0,
+      "Pending Assignment": globalPendingAssignmentTotal,
     };
   } else {
-    // For other user types, use existing logic
-    cardCounts = dashboardStats?.todayStatusCounts || {};
-    cardSubCounts = dashboardStats?.totalStatusCounts || {};
+    // For other user types, use existing logic but with global pending assignment
+    const todayStats = dashboardStats?.todayStatusCounts || {};
+    const totalStats = dashboardStats?.totalStatusCounts || {};
+    
+    cardCounts = {
+      ...todayStats,
+      "Pending Assignment": globalPendingAssignmentToday,
+    };
+    cardSubCounts = {
+      ...totalStats,
+      "Pending Assignment": globalPendingAssignmentTotal,
+    };
   }
 
   if (loading) {
@@ -156,13 +182,11 @@ function MainDashboard() {
             className="MainDashboard-retry-button"
             onClick={() => {
               dispatch(fetchMainCategoriesRequest());
-              if (userType === "Technician" && user?.id) {
-                dispatch(
-                  fetchDashboardStatsRequest({
-                    userType,
-                    technicianId: user.id,
-                  })
-                );
+              // Always fetch global dashboard stats for pending assignment counts
+              dispatch(fetchDashboardStatsRequest({}));
+              
+              if (isTechnician && user?.serviceNum) {
+                dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
               } else if (isAdmin && user?.serviceNum) {
                 dispatch(
                   fetchDashboardStatsRequest({
@@ -170,8 +194,6 @@ function MainDashboard() {
                     adminServiceNum: user.serviceNum,
                   })
                 );
-              } else {
-                dispatch(fetchDashboardStatsRequest({ userType }));
               }
             }}
           >

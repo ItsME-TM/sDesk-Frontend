@@ -13,14 +13,14 @@ export const fetchAllIncidents = async () => {
 
 export const fetchDashboardStats = async (params?: {
   userType?: string;
-  technicianId?: string;
+  technicianServiceNum?: string;
   teamName?: string;
   adminServiceNum?: string;
 }) => {
   try {
     const queryParams: Record<string, any> = {};
     if (params?.userType) queryParams.userType = params.userType;
-    if (params?.technicianId) queryParams.technicianId = params.technicianId;
+    if (params?.technicianServiceNum) queryParams.technicianServiceNum = params.technicianServiceNum;
     if (params?.teamName) queryParams.teamName = params.teamName;
     if (params?.adminServiceNum) queryParams.adminServiceNum = params.adminServiceNum;
     
