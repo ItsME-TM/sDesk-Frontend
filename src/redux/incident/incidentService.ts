@@ -285,3 +285,31 @@ export const downloadAttachment = async (filename: string) => {
   }
 };
 
+// Fetch admin team data (combined)
+export const fetchAdminTeamData = async () => {
+  try {
+    const [
+      incidentsResponse,
+      mainCategoriesResponse,
+      categoryItemsResponse,
+      usersResponse,
+      locationsResponse,
+    ] = await Promise.all([
+      apiClient.get(buildUrl(API_BASE, "/incident/all-teams")),
+      apiClient.get(buildUrl(API_BASE, "/categories/main")),
+      apiClient.get(buildUrl(API_BASE, "/categories/item")),
+      apiClient.get(buildUrl(API_BASE, "/sltusers")),
+      apiClient.get(buildUrl(API_BASE, "/locations")),
+    ]);
+
+    return {
+      incidents: incidentsResponse.data,
+      mainCategories: mainCategoriesResponse.data,
+      categoryItems: categoryItemsResponse.data,
+      users: usersResponse.data,
+      locations: locationsResponse.data,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
