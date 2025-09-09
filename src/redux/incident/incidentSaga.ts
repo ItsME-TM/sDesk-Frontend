@@ -16,9 +16,10 @@ import {
   fetchCategoryItems,
   fetchAllUsers,
   fetchAllLocations,
-  fetchAdminTeamData,
+
   fetchDashboardStats,
   uploadAttachment,
+
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -60,9 +61,7 @@ import {
   fetchCurrentTechnicianRequest,
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
-  fetchAdminTeamDataRequest,
-  fetchAdminTeamDataSuccess,
-  fetchAdminTeamDataFailure,
+
   fetchMainCategoriesRequest,
   fetchMainCategoriesSuccess,
   fetchMainCategoriesFailure,
@@ -78,6 +77,7 @@ import {
   uploadAttachmentRequest,
   uploadAttachmentSuccess,
   uploadAttachmentFailure,
+
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -236,18 +236,7 @@ function* handleFetchCurrentTechnician(action) {
   }
 }
 
-function* handleFetchAdminTeamData() {
-  try {
-    const response = yield call(fetchAdminTeamData);
-    yield put(fetchAdminTeamDataSuccess(response));
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Failed to fetch admin team data";
-    yield put(fetchAdminTeamDataFailure(errorMessage));
-  }
-}
+
 
 function* handleFetchMainCategories() {
   try {
@@ -329,13 +318,14 @@ export default function* incidentSaga() {
   yield takeLatest(getTeamIncidentsByServiceNumRequest.type, handleGetTeamIncidentsByServiceNum);
   yield takeLatest(fetchIncidentHistoryRequest.type, handleFetchIncidentHistory);
   yield takeLatest(fetchCurrentTechnicianRequest.type, handleFetchCurrentTechnician);
-  yield takeLatest(fetchAdminTeamDataRequest.type, handleFetchAdminTeamData);
+
   yield takeLatest(fetchMainCategoriesRequest.type, handleFetchMainCategories);
   yield takeLatest(fetchCategoryItemsRequest.type, handleFetchCategoryItems);
   yield takeLatest(fetchAllUsersRequest.type, handleFetchAllUsers);
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
   yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
+
 }
 
 function* handleUploadAttachment(action: any) {
@@ -350,3 +340,5 @@ function* handleUploadAttachment(action: any) {
     yield put(uploadAttachmentFailure(errorMessage));
   }
 }
+
+
