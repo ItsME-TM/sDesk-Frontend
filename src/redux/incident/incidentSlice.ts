@@ -284,25 +284,7 @@ const incidentSlice = createSlice({
       state.error = action.payload;
     },
 
-    // Fetch admin team data (combined action)
-    fetchAdminTeamDataRequest(state) {
-      state.loading = true;
-      state.error = null;
-    },
-    fetchAdminTeamDataSuccess(state, action) {
-      state.loading = false;
-      const { incidents, mainCategories, categoryItems, users, locations } =
-        action.payload;
-      state.incidents = incidents || [];
-      state.mainCategories = mainCategories || [];
-      state.categoryItems = categoryItems || [];
-      state.users = users || [];
-      state.locations = locations || [];
-    },
-    fetchAdminTeamDataFailure(state, action) {
-      state.loading = false;
-      state.error = action.payload;
-    },
+
 
     // Fetch main categories
     fetchMainCategoriesRequest(state) {
@@ -492,9 +474,7 @@ export const {
   fetchCurrentTechnicianRequest,
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
-  fetchAdminTeamDataRequest,
-  fetchAdminTeamDataSuccess,
-  fetchAdminTeamDataFailure,
+
   fetchMainCategoriesRequest,
   fetchMainCategoriesSuccess,
   fetchMainCategoriesFailure,

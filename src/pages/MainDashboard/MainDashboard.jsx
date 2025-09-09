@@ -2,8 +2,11 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
 import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
-import { fetchDashboardStatsRequest, fetchAssignedToMeRequest } from "../../redux/incident/incidentSlice";
-import { fetchMainCategoriesRequest } from "../../redux/categories/categorySlice";
+import { 
+  fetchDashboardStatsRequest, 
+  fetchAssignedToMeRequest
+} from "../../redux/incident/incidentSlice";
+
 
 function MainDashboard() {
   const dispatch = useDispatch();
@@ -27,20 +30,12 @@ function MainDashboard() {
   const isAdmin = userType.toLowerCase() === "admin";
 
   useEffect(() => {
-    dispatch(fetchMainCategoriesRequest());
     // Always fetch global dashboard stats for pending assignment counts
     dispatch(fetchDashboardStatsRequest({}));
     
     if (isTechnician && user?.serviceNum) {
       // For technicians, use getAssignedToMe directly
       dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
-    } else if (isAdmin && user?.serviceNum) {
-      dispatch(
-        fetchDashboardStatsRequest({
-          userType,
-          adminServiceNum: user.serviceNum,
-        })
-      );
     }
   }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin]);
 
@@ -85,6 +80,8 @@ function MainDashboard() {
 
     return { cardCounts, cardSubCounts };
   };
+
+
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -138,10 +135,9 @@ function MainDashboard() {
       "Pending Assignment": globalPendingAssignmentTotal, // Override with global count
     };
   } else if (isAdmin) {
-    // For Admin: card value = today's incidents under their main categories, total = all incidents under their main categories
+    // For Admin: use global stats for now (will be customized later)
     const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
     
-    // Today's incidents under admin's main categories and subcategories
     cardCounts = {
       "Open": totalCounts["Open (Today)"] || 0,
       "Hold": totalCounts["Hold (Today)"] || 0,
@@ -149,8 +145,6 @@ function MainDashboard() {
       "Closed": totalCounts["Closed (Today)"] || 0,
       "Pending Assignment": globalPendingAssignmentToday,
     };
-    
-    // Total incidents under admin's main categories and subcategories
     cardSubCounts = {
       "Open": totalCounts["Open"] || 0,
       "Hold": totalCounts["Hold"] || 0,
@@ -198,19 +192,11 @@ function MainDashboard() {
           <button
             className="MainDashboard-retry-button"
             onClick={() => {
-              dispatch(fetchMainCategoriesRequest());
               // Always fetch global dashboard stats for pending assignment counts
               dispatch(fetchDashboardStatsRequest({}));
               
               if (isTechnician && user?.serviceNum) {
                 dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
-              } else if (isAdmin && user?.serviceNum) {
-                dispatch(
-                  fetchDashboardStatsRequest({
-                    userType,
-                    adminServiceNum: user.serviceNum,
-                  })
-                );
               }
             }}
           >
