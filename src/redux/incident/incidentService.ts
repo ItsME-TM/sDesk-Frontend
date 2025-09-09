@@ -313,3 +313,14 @@ export const fetchAdminTeamData = async () => {
     throw error;
   }
 };
+
+// Get incidents by main category code
+export const fetchIncidentsByMainCategoryCode = async (mainCategoryCode: string) => {
+  try {
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/by-main-category/${mainCategoryCode}`)
+    );
+  } catch (error) {
+    throw error;
+  }
+};

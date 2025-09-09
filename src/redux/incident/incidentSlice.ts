@@ -20,6 +20,7 @@ const initialState: IncidentState = {
   users: [],
   locations: [],
   uploadedAttachment: null, // Add uploaded attachment state
+  incidentsByMainCategory: [], // Add incidents by main category
   loading: false,
   error: null,
 };
@@ -380,6 +381,22 @@ const incidentSlice = createSlice({
       state.uploadedAttachment = null;
     },
 
+    // Fetch incidents by main category code
+    fetchIncidentsByMainCategoryCodeRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchIncidentsByMainCategoryCodeSuccess(state, action) {
+      state.loading = false;
+      state.incidentsByMainCategory = Array.isArray(action.payload)
+        ? action.payload
+        : action.payload?.data || [];
+    },
+    fetchIncidentsByMainCategoryCodeFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
     updateIncidentInList(state, action) {
       const updatedIncident = action.payload;
       const update = (list) =>
@@ -511,6 +528,9 @@ export const {
   uploadAttachmentSuccess,
   uploadAttachmentFailure,
   clearUploadedAttachment,
+  fetchIncidentsByMainCategoryCodeRequest,
+  fetchIncidentsByMainCategoryCodeSuccess,
+  fetchIncidentsByMainCategoryCodeFailure,
   updateIncidentInList,
   addIncidentToList,
   addIncidentToAssignedToMe,
