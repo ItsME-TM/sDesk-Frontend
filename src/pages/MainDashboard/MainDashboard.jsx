@@ -1,19 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
 import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
 import { 
   fetchDashboardStatsRequest, 
-  fetchAssignedToMeRequest
+  fetchAssignedToMeRequest,
+  fetchIncidentsByMainCategoryCodeRequest
 } from "../../redux/incident/incidentSlice";
+import { fetchTeamAdminByServiceNumber } from "../../redux/teamAdmin/teamAdminService";
 
 
 function MainDashboard() {
   const dispatch = useDispatch();
-  const { dashboardStats, assignedToMe, loading, error } = useSelector(
+  const { dashboardStats, assignedToMe, incidentsByMainCategory, loading, error } = useSelector(
     (state) => state.incident
   );
   const { user } = useSelector((state) => state.auth);
+  
+  // State to store admin's team information
+  const [adminTeamInfo, setAdminTeamInfo] = useState(null);
 
   const userType = user.role;
 
@@ -34,10 +39,25 @@ function MainDashboard() {
     dispatch(fetchDashboardStatsRequest({}));
     
     if (isTechnician && user?.serviceNum) {
-      // For technicians, use getAssignedToMe directly
+      // For technicians, use getAssignedToMe for personal stats AND team incidents for pending assignments
       dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+      
+      // Also fetch team-specific incidents if technician has teamId
+      if (user?.teamId) {
+        dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+      }
+    } else if (isAdmin && user?.teamId) {
+      // For admin users, use team information from user object directly
+      setAdminTeamInfo({
+        teamId: user.teamId,
+        teamName: user.teamName,
+        serviceNumber: user.serviceNumber
+      });
+      
+      // Use teamId as the main category code to fetch incidents
+      dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
     }
-  }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin]);
+  }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin, user?.teamId]);
 
   // Helper function to calculate stats from assignedToMe incidents for technicians
   const calculateTechnicianStats = (incidents) => {
@@ -81,7 +101,47 @@ function MainDashboard() {
     return { cardCounts, cardSubCounts };
   };
 
+  // Helper function to calculate stats from incidentsByMainCategory for admin users
+  const calculateAdminStats = (incidents) => {
+    if (!incidents || !Array.isArray(incidents)) {
+      return { cardCounts: {}, cardSubCounts: {} };
+    }
 
+    const today = new Date().toISOString().split('T')[0];
+
+    // Helper function to check if an incident's update_on matches today
+    const isTodayIncident = (incident) => {
+      if (!incident.update_on) return false;
+      
+      let incidentDate = incident.update_on;
+      if (typeof incidentDate === 'string') {
+        // If it's already in YYYY-MM-DD format, use as is
+        if (incidentDate.includes('T')) {
+          incidentDate = incidentDate.split('T')[0];
+        }
+      }
+      
+      return incidentDate === today;
+    };
+
+    const cardCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open' && isTodayIncident(inc)).length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold' && isTodayIncident(inc)).length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && isTodayIncident(inc)).length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed' && isTodayIncident(inc)).length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && isTodayIncident(inc)).length,
+    };
+
+    const cardSubCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open').length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold').length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress').length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed').length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment').length,
+    };
+
+    return { cardCounts, cardSubCounts };
+  };
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -124,34 +184,60 @@ function MainDashboard() {
       "Pending Assignment": globalPendingAssignmentTotal,
     };
   } else if (isTechnician) {
-    // For Technician: use assignedToMe incidents directly, but global pending assignment
+    // For Technician: use assignedToMe incidents for personal stats, but team-specific pending assignment
     const technicianStats = calculateTechnicianStats(assignedToMe);
+    
+    // Calculate team-specific pending assignments if team incidents are available
+    let teamPendingToday = 0;
+    let teamPendingTotal = 0;
+    
+    if (incidentsByMainCategory && Array.isArray(incidentsByMainCategory)) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const teamPendingIncidents = incidentsByMainCategory.filter(inc => inc.status === 'Pending Assignment');
+      teamPendingTotal = teamPendingIncidents.length;
+      
+      teamPendingToday = teamPendingIncidents.filter(inc => {
+        if (!inc.update_on) return false;
+        let incidentDate = inc.update_on;
+        if (typeof incidentDate === 'string' && incidentDate.includes('T')) {
+          incidentDate = incidentDate.split('T')[0];
+        }
+        return incidentDate === today;
+      }).length;
+    }
+    
     cardCounts = {
       ...technicianStats.cardCounts,
-      "Pending Assignment": globalPendingAssignmentToday, // Override with global count
+      "Pending Assignment": teamPendingToday || globalPendingAssignmentToday, // Use team-specific or fallback to global
     };
     cardSubCounts = {
       ...technicianStats.cardSubCounts,
-      "Pending Assignment": globalPendingAssignmentTotal, // Override with global count
+      "Pending Assignment": teamPendingTotal || globalPendingAssignmentTotal, // Use team-specific or fallback to global
     };
   } else if (isAdmin) {
-    // For Admin: use global stats for now (will be customized later)
-    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
-    
-    cardCounts = {
-      "Open": totalCounts["Open (Today)"] || 0,
-      "Hold": totalCounts["Hold (Today)"] || 0,
-      "In Progress": totalCounts["In Progress (Today)"] || 0,
-      "Closed": totalCounts["Closed (Today)"] || 0,
-      "Pending Assignment": globalPendingAssignmentToday,
-    };
-    cardSubCounts = {
-      "Open": totalCounts["Open"] || 0,
-      "Hold": totalCounts["Hold"] || 0,
-      "In Progress": totalCounts["In Progress"] || 0,
-      "Closed": totalCounts["Closed"] || 0,
-      "Pending Assignment": globalPendingAssignmentTotal,
-    };
+    // For Admin: use team-specific incidents if available
+    if (incidentsByMainCategory && Array.isArray(incidentsByMainCategory)) {
+      const adminStats = calculateAdminStats(incidentsByMainCategory);
+      cardCounts = adminStats.cardCounts;
+      cardSubCounts = adminStats.cardSubCounts;
+    } else {
+      // Show zero counts while loading team data
+      cardCounts = {
+        "Open": 0,
+        "Hold": 0,
+        "In Progress": 0,
+        "Closed": 0,
+        "Pending Assignment": 0,
+      };
+      cardSubCounts = {
+        "Open": 0,
+        "Hold": 0,
+        "In Progress": 0,
+        "Closed": 0,
+        "Pending Assignment": 0,
+      };
+    }
   } else {
     // For other user types, use existing logic but with global pending assignment
     const todayStats = dashboardStats?.todayStatusCounts || {};
@@ -191,12 +277,24 @@ function MainDashboard() {
           <p className="MainDashboard-error-message">{error}</p>
           <button
             className="MainDashboard-retry-button"
-            onClick={() => {
+            onClick={async () => {
               // Always fetch global dashboard stats for pending assignment counts
               dispatch(fetchDashboardStatsRequest({}));
               
               if (isTechnician && user?.serviceNum) {
                 dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+                // Also retry team-specific incidents for technicians
+                if (user?.teamId) {
+                  dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+                }
+              } else if (isAdmin && user?.teamId) {
+                // Retry admin data fetching using user object
+                setAdminTeamInfo({
+                  teamId: user.teamId,
+                  teamName: user.teamName,
+                  serviceNumber: user.serviceNumber
+                });
+                dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
               }
             }}
           >
