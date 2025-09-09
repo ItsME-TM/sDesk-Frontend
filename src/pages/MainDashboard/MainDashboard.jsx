@@ -8,7 +8,6 @@ import {
   fetchAssignedToMeRequest,
   fetchIncidentsByMainCategoryCodeRequest
 } from "../../redux/incident/incidentSlice";
-import { fetchTeamAdminByServiceNumber } from "../../redux/teamAdmin/teamAdminService";
 
 
 function MainDashboard() {
@@ -54,7 +53,7 @@ function MainDashboard() {
       dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
 
     }
-  }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin, user?.teamId]);
+  }, [dispatch, isTechnician, isAdmin, user?.serviceNum, user?.teamId]);
 
   // Helper function to calculate stats from assignedToMe incidents for technicians
   const calculateTechnicianStats = (incidents) => {
