@@ -52,12 +52,27 @@ function MainDashboard() {
 
     const today = new Date().toISOString().split('T')[0];
 
+    // Helper function to check if an incident's update_on matches today
+    const isTodayIncident = (incident) => {
+      if (!incident.update_on) return false;
+      
+      let incidentDate = incident.update_on;
+      if (typeof incidentDate === 'string') {
+        // If it's already in YYYY-MM-DD format, use as is
+        if (incidentDate.includes('T')) {
+          incidentDate = incidentDate.split('T')[0];
+        }
+      }
+      
+      return incidentDate === today;
+    };
+
     const cardCounts = {
-      "Open": incidents.filter(inc => inc.status === 'Open' && inc.update_on === today).length,
-      "Hold": incidents.filter(inc => inc.status === 'Hold' && inc.update_on === today).length,
-      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && inc.update_on === today).length,
-      "Closed": incidents.filter(inc => inc.status === 'Closed' && inc.update_on === today).length,
-      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && inc.update_on === today).length,
+      "Open": incidents.filter(inc => inc.status === 'Open' && isTodayIncident(inc)).length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold' && isTodayIncident(inc)).length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && isTodayIncident(inc)).length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed' && isTodayIncident(inc)).length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && isTodayIncident(inc)).length,
     };
 
     const cardSubCounts = {
@@ -87,6 +102,8 @@ function MainDashboard() {
   const globalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
   const globalPendingAssignmentToday = globalCounts["Pending Assignment (Today)"] || 0;
   const globalPendingAssignmentTotal = globalCounts["Pending Assignment"] || 0;
+
+
 
   if (isSuperAdmin) {
     // For Super Admin: card value = today's count, total = all-time count
@@ -255,7 +272,11 @@ function MainDashboard() {
                 Total Incidents
               </span>
               <span className="MainDashboard-summary-value">
-                {Object.values(cardSubCounts).reduce((a, b) => a + b, 0)}
+                {(globalCounts["Open"] || 0) + 
+                 (globalCounts["Hold"] || 0) + 
+                 (globalCounts["In Progress"] || 0) + 
+                 (globalCounts["Closed"] || 0) + 
+                 (globalCounts["Pending Assignment"] || 0)}
               </span>
             </div>
             <div className="MainDashboard-summary-item">
@@ -263,7 +284,11 @@ function MainDashboard() {
                 Today's Activity
               </span>
               <span className="MainDashboard-summary-value">
-                {Object.values(cardCounts).reduce((a, b) => a + b, 0)}
+                {(globalCounts["Open (Today)"] || 0) + 
+                 (globalCounts["Hold (Today)"] || 0) + 
+                 (globalCounts["In Progress (Today)"] || 0) + 
+                 (globalCounts["Closed (Today)"] || 0) + 
+                 (globalCounts["Pending Assignment (Today)"] || 0)}
               </span>
             </div>
             <div className="MainDashboard-summary-item">
@@ -271,7 +296,9 @@ function MainDashboard() {
                 Unresolved (Today)
               </span>
               <span className="MainDashboard-summary-value">
-                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0) + (cardCounts["Pending Assignment"] || 0)}
+                {(globalCounts["Hold (Today)"] || 0) + 
+                 (globalCounts["In Progress (Today)"] || 0) + 
+                 (globalCounts["Pending Assignment (Today)"] || 0)}
               </span>
             </div>
           </div>
