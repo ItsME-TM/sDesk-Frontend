@@ -41,14 +41,8 @@ function MainDashboard() {
     dispatch(fetchDashboardStatsRequest({}));
     
     if (isTechnician && user?.serviceNum) {
-      // For technicians, use getAssignedToMe for personal stats AND team incidents for pending assignments
+      // For technicians, use getAssignedToMe directly
       dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
-
-      
-      // Also fetch team-specific incidents if technician has teamId
-      if (user?.teamId) {
-        dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
-      }
     } else if (isAdmin && user?.teamId) {
       // For admin users, use team information from user object directly
       setAdminTeamInfo({
@@ -190,36 +184,15 @@ function MainDashboard() {
       "Pending Assignment": globalPendingAssignmentTotal,
     };
   } else if (isTechnician) {
-    // For Technician: use assignedToMe incidents for personal stats, but team-specific pending assignment
+    // For Technician: use assignedToMe incidents directly, but global pending assignment
     const technicianStats = calculateTechnicianStats(assignedToMe);
-    
-    // Calculate team-specific pending assignments if team incidents are available
-    let teamPendingToday = 0;
-    let teamPendingTotal = 0;
-    
-    if (incidentsByMainCategory && Array.isArray(incidentsByMainCategory)) {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const teamPendingIncidents = incidentsByMainCategory.filter(inc => inc.status === 'Pending Assignment');
-      teamPendingTotal = teamPendingIncidents.length;
-      
-      teamPendingToday = teamPendingIncidents.filter(inc => {
-        if (!inc.update_on) return false;
-        let incidentDate = inc.update_on;
-        if (typeof incidentDate === 'string' && incidentDate.includes('T')) {
-          incidentDate = incidentDate.split('T')[0];
-        }
-        return incidentDate === today;
-      }).length;
-    }
-    
     cardCounts = {
       ...technicianStats.cardCounts,
-      "Pending Assignment": teamPendingToday || globalPendingAssignmentToday, // Use team-specific or fallback to global
+      "Pending Assignment": globalPendingAssignmentToday, // Override with global count
     };
     cardSubCounts = {
       ...technicianStats.cardSubCounts,
-      "Pending Assignment": teamPendingTotal || globalPendingAssignmentTotal, // Use team-specific or fallback to global
+      "Pending Assignment": globalPendingAssignmentTotal, // Override with global count
     };
   } else if (isAdmin) {
     // For Admin: use team-specific incidents if available
@@ -292,11 +265,6 @@ function MainDashboard() {
               
               if (isTechnician && user?.serviceNum) {
                 dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
-
-                // Also retry team-specific incidents for technicians
-                if (user?.teamId) {
-                  dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
-                }
               } else if (isAdmin && user?.teamId) {
                 // Retry admin data fetching using user object
                 setAdminTeamInfo({
