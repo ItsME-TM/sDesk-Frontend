@@ -20,6 +20,7 @@ import {
   fetchDashboardStats,
   uploadAttachment,
   fetchIncidentsByMainCategoryCode,
+
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -82,6 +83,7 @@ import {
   fetchIncidentsByMainCategoryCodeRequest,
   fetchIncidentsByMainCategoryCodeSuccess,
   fetchIncidentsByMainCategoryCodeFailure,
+
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -354,6 +356,7 @@ export default function* incidentSaga() {
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
   yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
   yield takeLatest(fetchIncidentsByMainCategoryCodeRequest.type, handleFetchIncidentsByMainCategoryCode);
+
 }
 
 function* handleUploadAttachment(action: any) {
@@ -368,3 +371,4 @@ function* handleUploadAttachment(action: any) {
     yield put(uploadAttachmentFailure(errorMessage));
   }
 }
+

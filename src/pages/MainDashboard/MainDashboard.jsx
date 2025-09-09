@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
 import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
+
 import { 
   fetchDashboardStatsRequest, 
   fetchAssignedToMeRequest,
@@ -35,12 +36,14 @@ function MainDashboard() {
   const isAdmin = userType.toLowerCase() === "admin";
 
   useEffect(() => {
+    dispatch(fetchMainCategoriesRequest());
     // Always fetch global dashboard stats for pending assignment counts
     dispatch(fetchDashboardStatsRequest({}));
     
     if (isTechnician && user?.serviceNum) {
       // For technicians, use getAssignedToMe for personal stats AND team incidents for pending assignments
       dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+
       
       // Also fetch team-specific incidents if technician has teamId
       if (user?.teamId) {
@@ -56,6 +59,7 @@ function MainDashboard() {
       
       // Use teamId as the main category code to fetch incidents
       dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+
     }
   }, [dispatch, userType, user?.serviceNum, isTechnician, isAdmin, user?.teamId]);
 
@@ -101,6 +105,7 @@ function MainDashboard() {
     return { cardCounts, cardSubCounts };
   };
 
+
   // Helper function to calculate stats from incidentsByMainCategory for admin users
   const calculateAdminStats = (incidents) => {
     if (!incidents || !Array.isArray(incidents)) {
@@ -142,6 +147,7 @@ function MainDashboard() {
 
     return { cardCounts, cardSubCounts };
   };
+
 
   const cardData = [
     { title: "Open", color: "#f5a623", icon: <FaBell /> },
@@ -238,6 +244,7 @@ function MainDashboard() {
         "Pending Assignment": 0,
       };
     }
+
   } else {
     // For other user types, use existing logic but with global pending assignment
     const todayStats = dashboardStats?.todayStatusCounts || {};
@@ -277,12 +284,15 @@ function MainDashboard() {
           <p className="MainDashboard-error-message">{error}</p>
           <button
             className="MainDashboard-retry-button"
+
             onClick={async () => {
+
               // Always fetch global dashboard stats for pending assignment counts
               dispatch(fetchDashboardStatsRequest({}));
               
               if (isTechnician && user?.serviceNum) {
                 dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+
                 // Also retry team-specific incidents for technicians
                 if (user?.teamId) {
                   dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
@@ -295,6 +305,7 @@ function MainDashboard() {
                   serviceNumber: user.serviceNumber
                 });
                 dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+
               }
             }}
           >
