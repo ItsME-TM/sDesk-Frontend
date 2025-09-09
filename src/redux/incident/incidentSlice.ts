@@ -284,7 +284,25 @@ const incidentSlice = createSlice({
       state.error = action.payload;
     },
 
-
+    // Fetch admin team data (combined action)
+    fetchAdminTeamDataRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchAdminTeamDataSuccess(state, action) {
+      state.loading = false;
+      const { incidents, mainCategories, categoryItems, users, locations } =
+        action.payload;
+      state.incidents = incidents || [];
+      state.mainCategories = mainCategories || [];
+      state.categoryItems = categoryItems || [];
+      state.users = users || [];
+      state.locations = locations || [];
+    },
+    fetchAdminTeamDataFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
 
     // Fetch main categories
     fetchMainCategoriesRequest(state) {
@@ -386,43 +404,6 @@ const incidentSlice = createSlice({
         };
       }
     },
-
-    // Socket-based live incident addition
-    addIncidentToList(state, action) {
-      const newIncident = action.payload;
-      
-      // Add to incidents array if not already present
-      const incidentExists = state.incidents.some(
-        (incident) => incident.incident_number === newIncident.incident_number
-      );
-      if (!incidentExists) {
-        state.incidents.unshift(newIncident); // Add to beginning for newest first
-      }
-    },
-
-    // Socket-based live incident addition to assignedToMe
-    addIncidentToAssignedToMe(state, action) {
-      const newIncident = action.payload;
-      
-      const incidentExists = state.assignedToMe.some(
-        (incident) => incident.incident_number === newIncident.incident_number
-      );
-      if (!incidentExists) {
-        state.assignedToMe.unshift(newIncident);
-      }
-    },
-
-    // Socket-based live incident addition to assignedByMe
-    addIncidentToAssignedByMe(state, action) {
-      const newIncident = action.payload;
-      
-      const incidentExists = state.assignedByMe.some(
-        (incident) => incident.incident_number === newIncident.incident_number
-      );
-      if (!incidentExists) {
-        state.assignedByMe.unshift(newIncident);
-      }
-    },
   },
 });
 
@@ -474,7 +455,9 @@ export const {
   fetchCurrentTechnicianRequest,
   fetchCurrentTechnicianSuccess,
   fetchCurrentTechnicianFailure,
-
+  fetchAdminTeamDataRequest,
+  fetchAdminTeamDataSuccess,
+  fetchAdminTeamDataFailure,
   fetchMainCategoriesRequest,
   fetchMainCategoriesSuccess,
   fetchMainCategoriesFailure,
@@ -492,9 +475,6 @@ export const {
   uploadAttachmentFailure,
   clearUploadedAttachment,
   updateIncidentInList,
-  addIncidentToList,
-  addIncidentToAssignedToMe,
-  addIncidentToAssignedByMe,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage
