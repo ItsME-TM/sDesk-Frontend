@@ -36,7 +36,6 @@ function MainDashboard() {
   const isAdmin = userType.toLowerCase() === "admin";
 
   useEffect(() => {
-    dispatch(fetchMainCategoriesRequest());
     // Always fetch global dashboard stats for pending assignment counts
     dispatch(fetchDashboardStatsRequest({}));
     
