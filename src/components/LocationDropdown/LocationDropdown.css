@@ -48,6 +48,69 @@
     justify-content: center;
     color: #ee3838;
   }
+
+  .AdminLocationTree-content-TreePopup-SearchBox {
+    position: relative;
+    margin: 10px 0 15px;
+    padding: 0 5px;
+  }
+
+  .AdminLocationTree-content-TreePopup-SearchInput {
+    width: 100%;
+    padding: 8px 35px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .AdminLocationTree-content-TreePopup-SearchInput:focus {
+    border-color: #007bff;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 18px;
+  }
+
+  .AdminLocationTree-search-results {
+    padding: 5px;
+  }
+
+  .AdminLocationTree-search-result-item {
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 5px;
+  }
+
+  .AdminLocationTree-search-result-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  .AdminLocationTree-search-result-item .location-name {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .AdminLocationTree-search-result-item .location-path {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 14px;
+  }
   
   .AdminLocationTree-node {
     margin-bottom: 8px;

@@ -14,7 +14,7 @@
 .MainDashboard-direction-bar {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #838281 0%, #7c7c7a 100%);
+  background: linear-gradient(135deg, #3333ff 0%, #ccddff 100%);
   color: white;
   height: 40px;
   padding-left: 20px;
