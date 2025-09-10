@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IoMdArrowDropright, IoMdArrowDropdown } from 'react-icons/io';
 import { IoIosClose } from 'react-icons/io';
+import { IoSearchOutline } from 'react-icons/io5';
 import './LocationDropdown.css';
 import { fetchLocationsRequest } from '../../redux/location/locationSlice';
 
 const LocationDropdown = ({ onSelect, onClose }) => {
     const [expanded, setExpanded] = useState({});
     const [regions, setRegions] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const dispatch = useDispatch();
     
     // Get data from Redux store
@@ -60,6 +63,25 @@ const LocationDropdown = ({ onSelect, onClose }) => {
         onClose();
     };
 
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        const results = locations.filter(location => {
+            const searchTerm = query.toLowerCase();
+            return (
+                location.locationName.toLowerCase().includes(searchTerm) ||
+                (location.region && location.region.toLowerCase().includes(searchTerm)) ||
+                (location.province && location.province.toLowerCase().includes(searchTerm))
+            );
+        });
+
+        setSearchResults(results);
+    };
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => {
@@ -87,8 +109,35 @@ const LocationDropdown = ({ onSelect, onClose }) => {
                         <IoIosClose size={30} />
                     </button>
                 </div>
+                <div className="AdminLocationTree-content-TreePopup-SearchBox">
+                    <IoSearchOutline className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search locations..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="AdminLocationTree-content-TreePopup-SearchInput"
+                    />
+                </div>
                 <div className="AdminLocationTree-content-TreePopup-Body">
-                    {regions.map((region, regionIndex) => (
+                    {searchQuery ? (
+                        <div className="AdminLocationTree-search-results">
+                            {searchResults.map((location, index) => (
+                                <div
+                                    key={index}
+                                    className="AdminLocationTree-search-result-item"
+                                    onClick={() => handleSelect(location)}
+                                >
+                                    <div className="location-name">{location.locationName}</div>
+                                    <div className="location-path">{location.region} {'>'} {location.province}</div>
+                                </div>
+                            ))}
+                            {searchResults.length === 0 && (
+                                <div className="no-results">No locations found</div>
+                            )}
+                        </div>
+                    ) : 
+                        regions.map((region, regionIndex) => (
                         <div key={regionIndex} className="AdminLocationTree-node">
                             <div
                                 className="AdminLocationTree-content-TreePopup-Body-Label"
