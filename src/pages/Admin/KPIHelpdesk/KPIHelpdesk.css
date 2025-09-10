@@ -10,11 +10,15 @@
 .kpi-direction-bar {
   display: flex;
   align-items: center;
-  background-color: antiquewhite;
-  margin: -20px 0 0 -20px;
-  min-height: 30px;
+  background: linear-gradient(135deg, #3333ff 0%, #ccddff 100%);
+  color: white;
+  height: 40px;
   padding-left: 20px;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0px -20px 20px -3px;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .kpi-time-date-container {
