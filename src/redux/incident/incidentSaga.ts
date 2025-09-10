@@ -19,6 +19,8 @@ import {
   fetchAdminTeamData,
   fetchDashboardStats,
   uploadAttachment,
+  fetchIncidentsByMainCategoryCode,
+
 } from "./incidentService";
 import {
   fetchDashboardStatsRequest,
@@ -78,6 +80,10 @@ import {
   uploadAttachmentRequest,
   uploadAttachmentSuccess,
   uploadAttachmentFailure,
+  fetchIncidentsByMainCategoryCodeRequest,
+  fetchIncidentsByMainCategoryCodeSuccess,
+  fetchIncidentsByMainCategoryCodeFailure,
+
 } from "./incidentSlice";
 
 function* handleFetchAllIncidents() {
@@ -313,6 +319,19 @@ function* handleFetchDashboardStats(action) {
   }
 }
 
+function* handleFetchIncidentsByMainCategoryCode(action) {
+  try {
+    const response = yield call(fetchIncidentsByMainCategoryCode, action.payload);
+    yield put(fetchIncidentsByMainCategoryCodeSuccess(response.data));
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to fetch incidents by main category";
+    yield put(fetchIncidentsByMainCategoryCodeFailure(errorMessage));
+  }
+}
+
 
 export default function* incidentSaga() {
   yield takeLatest(fetchAllIncidentsRequest.type, handleFetchAllIncidents);
@@ -336,6 +355,8 @@ export default function* incidentSaga() {
   yield takeLatest(fetchAllLocationsRequest.type, handleFetchAllLocations);
   yield takeLatest(fetchDashboardStatsRequest.type, handleFetchDashboardStats);
   yield takeLatest(uploadAttachmentRequest.type, handleUploadAttachment);
+  yield takeLatest(fetchIncidentsByMainCategoryCodeRequest.type, handleFetchIncidentsByMainCategoryCode);
+
 }
 
 function* handleUploadAttachment(action: any) {
@@ -350,3 +371,4 @@ function* handleUploadAttachment(action: any) {
     yield put(uploadAttachmentFailure(errorMessage));
   }
 }
+

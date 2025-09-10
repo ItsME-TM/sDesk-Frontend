@@ -26,6 +26,7 @@ const initialForm = {
   cat4: "",
   teamId: "",
   teamName: "",
+  userRole: "",
 };
 
 const MAX_CATEGORIES = 4;
@@ -75,18 +76,6 @@ const ManageTeamAdmin = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // Handle contact number validation - only allow digits and limit to 10 characters
-    if (name === "contactNumber") {
-      const numericValue = value.replace(/\D/g, ''); // Remove non-digit characters
-      if (numericValue.length <= 10) {
-        setForm((prev) => ({
-          ...prev,
-          [name]: numericValue,
-        }));
-      }
-      return;
-    }
-    
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -108,6 +97,22 @@ const ManageTeamAdmin = () => {
       return;
     }
 
+    // Check if the user is already a team admin
+    if (!editMode && Array.isArray(teamAdmins)) {
+      const existingAdmin = teamAdmins.find(admin => admin.serviceNumber === value);
+      if (existingAdmin) {
+        setSubmitError("This User Already Team admin");
+        setForm((prev) => ({
+          ...prev,
+          userName: "",
+          designation: "admin",
+          email: "",
+          contactNumber: "",
+        }));
+        return;
+      }
+    }
+
     setSubmitError("");
     setForm((prev) => ({
       ...prev,
@@ -120,12 +125,27 @@ const ManageTeamAdmin = () => {
       const response = await fetchUserByServiceNum(value);
       const user = response.data;
       if (user) {
+        // Check if user role is valid for promotion to admin
+        const userRole = user.role?.toLowerCase();
+        if (userRole === "technician" || userRole === "team leader") {
+          setForm((prev) => ({
+            ...prev,
+            userName: "",
+            designation: "admin",
+            email: "",
+            contactNumber: "",
+          }));
+          setSubmitError(`Cannot add user with role "${user.role}" as admin. Only users with role "user" can be promoted to admin.`);
+          return;
+        }
+        
         setForm((prev) => ({
           ...prev,
           userName: user.display_name || "",
           designation: "admin",
           email: user.email || "",
           contactNumber: user.contactNumber ? user.contactNumber.replace(/\D/g, '').slice(0, 10) : "",
+          userRole: user.role || "", // Store user role for validation
         }));
         setSubmitError("");
       } else {
@@ -217,6 +237,7 @@ const ManageTeamAdmin = () => {
 
   const handleClose = () => {
     setShowModal(false);
+    setSubmitError("");
   };
 
   // When teamName changes, update teamId and fetch subcategories from backend
@@ -275,10 +296,6 @@ const ManageTeamAdmin = () => {
     if (!form.email) errors.email = "Email is required";
     if (!form.teamId) errors.teamId = "Team ID is required";
     if (!form.teamName) errors.teamName = "Team Name is required";
-    if (selectedCategories.length === 0)
-      errors.categories = "At least one category must be selected";
-    if (selectedCategories.length > MAX_CATEGORIES)
-      errors.categories = `Maximum ${MAX_CATEGORIES} categories allowed`;
     return errors;
   };
 
@@ -287,8 +304,22 @@ const ManageTeamAdmin = () => {
     e.preventDefault();
     setSubmitError("");
     setSubmitSuccess(false);
-    // Always set designation to 'admin' for add
+    
+    // Check if this is edit mode
     const isEdit = editMode && editId;
+    
+    // Additional validation for new admin creation - check user role
+    if (!isEdit) {
+      const userRole = form.userRole?.toLowerCase();
+      if (userRole === "technician" || userRole === "team leader") {
+        setSubmitError(`Cannot promote user with role "${form.userRole}" to admin. Only users with role "user" can be promoted to admin.`);
+        return;
+      }
+      if (userRole && userRole !== "user") {
+        setSubmitError(`Invalid user role "${form.userRole}". Only users with role "user" can be promoted to admin.`);
+        return;
+      }
+    }
     const payload = {
       serviceNumber: form.serviceNumber,
       userName: form.userName,
@@ -441,7 +472,7 @@ const ManageTeamAdmin = () => {
           <div className="modal-content teamadmin-form-container">
             <div className="modal-header">
               <h3>{editMode ? "Edit Team Admin" : "Add New Team Admin"}</h3>
-              <button className="close-btn" onClick={() => setShowModal(false)}>
+              <button className="close-btn" onClick={handleClose}>
                 &times;
               </button>
             </div>
@@ -468,13 +499,12 @@ const ManageTeamAdmin = () => {
                   <input
                     name="contactNumber"
                     value={form.contactNumber}
-                    onChange={handleChange}
                     type="tel"
                     pattern="[0-9]{10}"
                     maxLength="10"
-                    placeholder="Enter 10-digit contact number"
                     title="Please enter exactly 10 digits"
                     required
+                    readOnly
                   />
                 </div>
                 <div className="form-group">
@@ -516,57 +546,10 @@ const ManageTeamAdmin = () => {
                   {categoriesError && <div className="error-text">{categoriesError}</div>}
                 </div>
               </div>
-              <div className="form-group">
-                <label>Accessible Categories (select up to 4)</label>
-                {subCategoriesLoading && <div className="loading-text">Loading categories...</div>}
-                {subCategoriesError && <div className="error-text">{subCategoriesError}</div>}
-                {!subCategoriesLoading && !subCategoriesError && availableCategories.length === 0 && (
-                  <div className="info-text">No categories found for this team.</div>
-                )}
-                <div className="category-checkbox-group-row">
-                    {Array.isArray(availableCategories) &&
-                      availableCategories.map((sub) => (
-                        <label key={sub.id} className="checkbox-label">
-                          <input
-                            type="checkbox"
-                            value={sub.name}
-                            checked={selectedCategories.includes(sub.name)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                if (
-                                  selectedCategories.length < MAX_CATEGORIES
-                                ) {
-                                  setSelectedCategories([
-                                    ...selectedCategories,
-                                    sub.name,
-                                  ]);
-                                }
-                              } else {
-                                setSelectedCategories(
-                                  selectedCategories.filter(
-                                    (c) => c !== sub.name
-                                  )
-                                );
-                              }
-                            }}
-                            disabled={
-                              !selectedCategories.includes(sub.name) &&
-                              selectedCategories.length >= MAX_CATEGORIES
-                            }
-                          />
-                          <span className="checkbox-custom"></span>
-                          <span>{sub.name}</span>
-                        </label>
-                      ))}
-                  </div>
-                <div className="selection-count">
-                  {selectedCategories.length}/{MAX_CATEGORIES} selected
-                </div>
-              </div>
               {submitError && <div className="error-message form-error">{submitError}</div>}
               {submitSuccess && <div className="success-message form-success">Admin added!</div>}
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn-cancel" onClick={handleClose}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-submit">

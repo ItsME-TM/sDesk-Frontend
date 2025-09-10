@@ -1,4 +1,3 @@
-
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
@@ -18,7 +17,6 @@ import {
   updateTechnicianRequest,
   forceLogoutTechnicianRequest,
   updateTechnicianOnlineStatus,
-
 } from "../../../redux/technicians/technicianSlice";
 
 import { fetchSubCategoriesRequest } from "../../../redux/categories/categorySlice";
@@ -74,7 +72,6 @@ function AdminUserList() {
     };
   }, [dispatch, selectShowOption]);
 
- 
   const getTeamName = (teamId) => {
     const main = mainCategories.find((m) => m.id === teamId);
     return main ? main.name : teamId || "Unknown";
@@ -102,15 +99,15 @@ function AdminUserList() {
           name: user.name,
           team: getTeamName(user.team),
           teamId: getTeamId(user.teamId),
-          tier:user.tier,
-          position:user.position,
+          tier: user.tier,
+          position: user.position,
           cat1: getSubCategoryName(user.cat1),
           cat2: getSubCategoryName(user.cat2),
           cat3: getSubCategoryName(user.cat3),
           cat4: getSubCategoryName(user.cat4),
           active: Boolean(user.active),
           isOnline: user.active,
-          
+
           id: user.id,
         })),
     [technicians, adminTeamName, getTeamName, getTeamId, getSubCategoryName]
@@ -131,7 +128,6 @@ function AdminUserList() {
       setIsEditUserOpen(true);
     }
   };
-
 
   const handleDelete = (serviceNumber) => {
     const user = technicians.find(
@@ -215,7 +211,7 @@ function AdminUserList() {
             <FaSearch />
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder="Search by name, service number, team, tier, position, or active status (true/false)..."
               value={searchQuery}
               onChange={handleSearch}
               className="AdminUserList-showSearchBar-SearchBar-input"
@@ -224,90 +220,104 @@ function AdminUserList() {
         </div>
 
         <div className="AdminUserList-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Service Number</th>
-                  <th>Name</th>
-                  <th>Team</th>
-                  <th>Active</th>
-              
-                   <th>Tier</th>
+          <table>
+            <thead>
+              <tr>
+                <th>Service Number</th>
+                <th>Name</th>
+                <th>Team</th>
+                <th>Active</th>
+
+                <th>Tier</th>
                 <th>Position</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(() => {
-                  const filteredUsers = users
-                    .filter((user) => {
-                      if (selectShowOption === "Active")
-                        return user.active === true;
-                      return true;
-                    })
-                    .filter((user) => {
-                      const searchString = searchQuery.toLowerCase();
-                      return (
-                        (user.email && user.email.toLowerCase().includes(searchString)) ||
-                        (user.name && user.name.toLowerCase().includes(searchString)) ||
-                        (user.team && user.team.toLowerCase().includes(searchString)) ||
-                        (user.serviceNum && user.serviceNum.toLowerCase().includes(searchString)) ||
-                       (user.tier && user.tier.toLowerCase().includes(searchString)) ||
-                      (user.position && user.role.toLowerCase().includes(searchString))
-                      );
-                    });
-                  if (filteredUsers.length > 0) {
-                    return filteredUsers.map((user) => (
-                      <tr key={user.serviceNum}>
-                        <td>{user.serviceNum}</td>
-                        <td>{user.name}</td>
-                        <td>{user.team}</td>
-                        <td>
-                          <span
-                            style={{
-                              height: "10px",
-                              width: "10px",
-                              backgroundColor: user.isOnline
-                                ? "#2de37d"
-                                : "#ff4d4d",
-                              borderRadius: "50%",
-                              display: "inline-block",
-                              marginRight: "5px",
-                            }}
-                          />
-                          {user.active ? "True" : "False"}
-                        </td>
-                        <td>{user.tier}</td>
-                         <td>{user.position}</td>
-                        <td>
-                          <button
-                            className="AdminUserList-table-edit-btn"
-                            onClick={() => handleEdit(user.serviceNum)}
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            className="AdminUserList-table-delete-btn"
-                            onClick={() => handleDelete(user.serviceNum)}
-                          >
-                            <FaTrash />
-                          </button>
-                       
-                        </td>
-                      </tr>
-                    ));
-                  } else {
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(() => {
+                const filteredUsers = users
+                  .filter((user) => {
+                    if (selectShowOption === "Active")
+                      return user.active === true;
+                    return true;
+                  })
+                  .filter((user) => {
+                    const searchString = searchQuery.toLowerCase();
+                    
+                    // Active search logic
+                    if (searchString === "true") return user.active === true;
+                    if (searchString === "false") return user.active === false;
+
+                    // If searching for 'active' or 'inactive', filter strictly by active status
+                    if (searchString === "active") return user.active === true;
+                    if (searchString === "inactive") return user.active === false;
+
+                    // Otherwise, search all fields
                     return (
-                      <tr>
-                        <td colSpan="6" style={{ textAlign: "center" }}>
-                          No users found
-                        </td>
-                      </tr>
+                      (user.serviceNum &&
+                        user.serviceNum.toLowerCase().includes(searchString)) ||
+                      (user.name &&
+                        user.name.toLowerCase().includes(searchString)) ||
+                      (user.team &&
+                        user.team.toLowerCase().includes(searchString)) ||
+                      (user.tier &&
+                        user.tier.toLowerCase().includes(searchString)) ||
+                      (user.position &&
+                        user.position.toLowerCase().includes(searchString)) ||
+                      String(user.active).toLowerCase().includes(searchString)
                     );
-                  }
-                })()}
-              </tbody>
-            </table>
+                  });
+                if (filteredUsers.length > 0) {
+                  return filteredUsers.map((user) => (
+                    <tr key={user.serviceNum}>
+                      <td>{user.serviceNum}</td>
+                      <td>{user.name}</td>
+                      <td>{user.team}</td>
+                      <td>
+                        <span
+                          style={{
+                            height: "10px",
+                            width: "10px",
+                            backgroundColor: user.isOnline
+                              ? "#2de37d"
+                              : "#ff4d4d",
+                            borderRadius: "50%",
+                            display: "inline-block",
+                            marginRight: "5px",
+                          }}
+                        />
+                        {user.active ? "True" : "False"}
+                      </td>
+                      <td>{user.tier}</td>
+                      <td>{user.position}</td>
+                      <td>
+                        <button
+                          className="AdminUserList-table-edit-btn"
+                          onClick={() => handleEdit(user.serviceNum)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="AdminUserList-table-delete-btn"
+                          onClick={() => handleDelete(user.serviceNum)}
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ));
+                } else {
+                  return (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
+                        No users found
+                      </td>
+                    </tr>
+                  );
+                }
+              })()}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -320,7 +330,7 @@ function AdminUserList() {
               if (newUser.serviceNum) {
                 try {
                   await updateUserRoleById(newUser.serviceNum, "technician");
-                // eslint-disable-next-line no-empty
+                  // eslint-disable-next-line no-empty
                 } catch (err) {}
               }
 

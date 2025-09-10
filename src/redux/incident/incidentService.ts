@@ -13,14 +13,14 @@ export const fetchAllIncidents = async () => {
 
 export const fetchDashboardStats = async (params?: {
   userType?: string;
-  technicianId?: string;
+  technicianServiceNum?: string;
   teamName?: string;
   adminServiceNum?: string;
 }) => {
   try {
     const queryParams: Record<string, any> = {};
     if (params?.userType) queryParams.userType = params.userType;
-    if (params?.technicianId) queryParams.technicianId = params.technicianId;
+    if (params?.technicianServiceNum) queryParams.technicianServiceNum = params.technicianServiceNum;
     if (params?.teamName) queryParams.teamName = params.teamName;
     if (params?.adminServiceNum) queryParams.adminServiceNum = params.adminServiceNum;
     
@@ -309,6 +309,17 @@ export const fetchAdminTeamData = async () => {
       users: usersResponse.data,
       locations: locationsResponse.data,
     };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Get incidents by main category code
+export const fetchIncidentsByMainCategoryCode = async (mainCategoryCode: string) => {
+  try {
+    return await apiClient.get(
+      buildUrl(API_BASE, `/incident/by-main-category/${mainCategoryCode}`)
+    );
   } catch (error) {
     throw error;
   }

@@ -1,19 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./MainDashboard.css";
-import { FaBell, FaSnowflake, FaTag, FaTruck } from "react-icons/fa";
-import { fetchDashboardStatsRequest } from "../../redux/incident/incidentSlice";
-import { fetchMainCategoriesRequest } from "../../redux/categories/categorySlice";
+import { FaBell, FaSnowflake, FaTag, FaTruck,FaUsers } from "react-icons/fa";
+
+import { 
+  fetchDashboardStatsRequest, 
+  fetchAssignedToMeRequest,
+  fetchIncidentsByMainCategoryCodeRequest
+} from "../../redux/incident/incidentSlice";
+
 
 function MainDashboard() {
   const dispatch = useDispatch();
-  const { dashboardStats, loading, error } = useSelector(
+  const { dashboardStats, assignedToMe, incidentsByMainCategory, loading, error } = useSelector(
     (state) => state.incident
   );
-  const { mainCategories } = useSelector((state) => state.categories);
   const { user } = useSelector((state) => state.auth);
+  
+  // State to store admin's team information
+  const [adminTeamInfo, setAdminTeamInfo] = useState(null);
 
-  const userType = user?.userType || user?.role || user?.type || "Unknown";
+  const userType = user.role;
 
   // Determine user role for data filtering
   const isSuperAdmin = 
@@ -28,25 +35,110 @@ function MainDashboard() {
   const isAdmin = userType.toLowerCase() === "admin";
 
   useEffect(() => {
-    dispatch(fetchMainCategoriesRequest());
-    if (userType === "Technician" && user?.id) {
-      dispatch(
-        fetchDashboardStatsRequest({
-          userType,
-          technicianId: user.id,
-        })
-      );
-    } else if (isAdmin && user?.serviceNum) {
-      dispatch(
-        fetchDashboardStatsRequest({
-          userType,
-          adminServiceNum: user.serviceNum,
-        })
-      );
-    } else {
-      dispatch(fetchDashboardStatsRequest({ userType }));
+    // Always fetch global dashboard stats for pending assignment counts
+    dispatch(fetchDashboardStatsRequest({}));
+    
+    if (isTechnician && user?.serviceNum) {
+      // For technicians, use getAssignedToMe directly
+      dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+    } else if (isAdmin && user?.teamId) {
+      // For admin users, use team information from user object directly
+      setAdminTeamInfo({
+        teamId: user.teamId,
+        teamName: user.teamName,
+        serviceNumber: user.serviceNumber
+      });
+      
+      // Use teamId as the main category code to fetch incidents
+      dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+
     }
-  }, [dispatch, userType, user?.id, user?.serviceNum, isTechnician, isAdmin]);
+  }, [dispatch, isTechnician, isAdmin, user?.serviceNum, user?.teamId]);
+
+  // Helper function to calculate stats from assignedToMe incidents for technicians
+  const calculateTechnicianStats = (incidents) => {
+    if (!incidents || !Array.isArray(incidents)) {
+      return { cardCounts: {}, cardSubCounts: {} };
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Helper function to check if an incident's update_on matches today
+    const isTodayIncident = (incident) => {
+      if (!incident.update_on) return false;
+      
+      let incidentDate = incident.update_on;
+      if (typeof incidentDate === 'string') {
+        // If it's already in YYYY-MM-DD format, use as is
+        if (incidentDate.includes('T')) {
+          incidentDate = incidentDate.split('T')[0];
+        }
+      }
+      
+      return incidentDate === today;
+    };
+
+    const cardCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open' && isTodayIncident(inc)).length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold' && isTodayIncident(inc)).length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && isTodayIncident(inc)).length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed' && isTodayIncident(inc)).length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && isTodayIncident(inc)).length,
+    };
+
+    const cardSubCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open').length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold').length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress').length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed').length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment').length,
+    };
+
+    return { cardCounts, cardSubCounts };
+  };
+
+
+  // Helper function to calculate stats from incidentsByMainCategory for admin users
+  const calculateAdminStats = (incidents) => {
+    if (!incidents || !Array.isArray(incidents)) {
+      return { cardCounts: {}, cardSubCounts: {} };
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Helper function to check if an incident's update_on matches today
+    const isTodayIncident = (incident) => {
+      if (!incident.update_on) return false;
+      
+      let incidentDate = incident.update_on;
+      if (typeof incidentDate === 'string') {
+        // If it's already in YYYY-MM-DD format, use as is
+        if (incidentDate.includes('T')) {
+          incidentDate = incidentDate.split('T')[0];
+        }
+      }
+      
+      return incidentDate === today;
+    };
+
+    const cardCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open' && isTodayIncident(inc)).length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold' && isTodayIncident(inc)).length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress' && isTodayIncident(inc)).length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed' && isTodayIncident(inc)).length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment' && isTodayIncident(inc)).length,
+    };
+
+    const cardSubCounts = {
+      "Open": incidents.filter(inc => inc.status === 'Open').length,
+      "Hold": incidents.filter(inc => inc.status === 'Hold').length,
+      "In Progress": incidents.filter(inc => inc.status === 'In Progress').length,
+      "Closed": incidents.filter(inc => inc.status === 'Closed').length,
+      "Pending Assignment": incidents.filter(inc => inc.status === 'Pending Assignment').length,
+    };
+
+    return { cardCounts, cardSubCounts };
+  };
 
 
   const cardData = [
@@ -54,11 +146,19 @@ function MainDashboard() {
     { title: "Hold", color: "#00c4b4", icon: <FaSnowflake /> },
     { title: "In Progress", color: "#4a90e2", icon: <FaTag /> },
     { title: "Closed", color: "#007bff", icon: <FaTruck /> },
+    { title: "Pending Assignment", color: "#ff6b6b", icon: <FaUsers /> },
   ];
 
 
   let cardCounts = {};
   let cardSubCounts = {};
+
+  // Get global pending assignment counts for all roles
+  const globalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
+  const globalPendingAssignmentToday = globalCounts["Pending Assignment (Today)"] || 0;
+  const globalPendingAssignmentTotal = globalCounts["Pending Assignment"] || 0;
+
+
 
   if (isSuperAdmin) {
     // For Super Admin: card value = today's count, total = all-time count
@@ -70,6 +170,7 @@ function MainDashboard() {
       "Hold": totalCounts["Hold (Today)"] || 0,
       "In Progress": totalCounts["In Progress (Today)"] || 0,
       "Closed": totalCounts["Closed (Today)"] || 0,
+      "Pending Assignment": globalPendingAssignmentToday,
     };
     
     // Total counts for all time
@@ -78,49 +179,56 @@ function MainDashboard() {
       "Hold": totalCounts["Hold"] || 0,
       "In Progress": totalCounts["In Progress"] || 0,
       "Closed": totalCounts["Closed"] || 0,
+      "Pending Assignment": globalPendingAssignmentTotal,
     };
   } else if (isTechnician) {
-    // For Technician: card value = today's assigned incidents, total = all assigned incidents
-    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
-    
-    // Today's incidents assigned to this technician
+    // For Technician: use assignedToMe incidents directly, but global pending assignment
+    const technicianStats = calculateTechnicianStats(assignedToMe);
     cardCounts = {
-      "Open": totalCounts["Open (Today)"] || 0,
-      "Hold": totalCounts["Hold (Today)"] || 0,
-      "In Progress": totalCounts["In Progress (Today)"] || 0,
-      "Closed": totalCounts["Closed (Today)"] || 0,
+      ...technicianStats.cardCounts,
+      "Pending Assignment": globalPendingAssignmentToday, // Override with global count
     };
-    
-    // Total incidents ever assigned to this technician
     cardSubCounts = {
-      "Open": totalCounts["Open"] || 0,
-      "Hold": totalCounts["Hold"] || 0,
-      "In Progress": totalCounts["In Progress"] || 0,
-      "Closed": totalCounts["Closed"] || 0,
+      ...technicianStats.cardSubCounts,
+      "Pending Assignment": globalPendingAssignmentTotal, // Override with global count
     };
   } else if (isAdmin) {
-    // For Admin: card value = today's incidents under their main categories, total = all incidents under their main categories
-    const totalCounts = dashboardStats?.overallStatusCounts || dashboardStats?.statusCounts || {};
-    
-    // Today's incidents under admin's main categories and subcategories
-    cardCounts = {
-      "Open": totalCounts["Open (Today)"] || 0,
-      "Hold": totalCounts["Hold (Today)"] || 0,
-      "In Progress": totalCounts["In Progress (Today)"] || 0,
-      "Closed": totalCounts["Closed (Today)"] || 0,
-    };
-    
-    // Total incidents under admin's main categories and subcategories
-    cardSubCounts = {
-      "Open": totalCounts["Open"] || 0,
-      "Hold": totalCounts["Hold"] || 0,
-      "In Progress": totalCounts["In Progress"] || 0,
-      "Closed": totalCounts["Closed"] || 0,
-    };
+    // For Admin: use team-specific incidents if available
+    if (incidentsByMainCategory && Array.isArray(incidentsByMainCategory)) {
+      const adminStats = calculateAdminStats(incidentsByMainCategory);
+      cardCounts = adminStats.cardCounts;
+      cardSubCounts = adminStats.cardSubCounts;
+    } else {
+      // Show zero counts while loading team data
+      cardCounts = {
+        "Open": 0,
+        "Hold": 0,
+        "In Progress": 0,
+        "Closed": 0,
+        "Pending Assignment": 0,
+      };
+      cardSubCounts = {
+        "Open": 0,
+        "Hold": 0,
+        "In Progress": 0,
+        "Closed": 0,
+        "Pending Assignment": 0,
+      };
+    }
+
   } else {
-    // For other user types, use existing logic
-    cardCounts = dashboardStats?.todayStatusCounts || {};
-    cardSubCounts = dashboardStats?.totalStatusCounts || {};
+    // For other user types, use existing logic but with global pending assignment
+    const todayStats = dashboardStats?.todayStatusCounts || {};
+    const totalStats = dashboardStats?.totalStatusCounts || {};
+    
+    cardCounts = {
+      ...todayStats,
+      "Pending Assignment": globalPendingAssignmentToday,
+    };
+    cardSubCounts = {
+      ...totalStats,
+      "Pending Assignment": globalPendingAssignmentTotal,
+    };
   }
 
   if (loading) {
@@ -147,24 +255,23 @@ function MainDashboard() {
           <p className="MainDashboard-error-message">{error}</p>
           <button
             className="MainDashboard-retry-button"
-            onClick={() => {
-              dispatch(fetchMainCategoriesRequest());
-              if (userType === "Technician" && user?.id) {
-                dispatch(
-                  fetchDashboardStatsRequest({
-                    userType,
-                    technicianId: user.id,
-                  })
-                );
-              } else if (isAdmin && user?.serviceNum) {
-                dispatch(
-                  fetchDashboardStatsRequest({
-                    userType,
-                    adminServiceNum: user.serviceNum,
-                  })
-                );
-              } else {
-                dispatch(fetchDashboardStatsRequest({ userType }));
+
+            onClick={async () => {
+
+              // Always fetch global dashboard stats for pending assignment counts
+              dispatch(fetchDashboardStatsRequest({}));
+              
+              if (isTechnician && user?.serviceNum) {
+                dispatch(fetchAssignedToMeRequest({ serviceNum: user.serviceNum }));
+              } else if (isAdmin && user?.teamId) {
+                // Retry admin data fetching using user object
+                setAdminTeamInfo({
+                  teamId: user.teamId,
+                  teamName: user.teamName,
+                  serviceNumber: user.serviceNumber
+                });
+                dispatch(fetchIncidentsByMainCategoryCodeRequest(user.teamId));
+
               }
             }}
           >
@@ -226,7 +333,11 @@ function MainDashboard() {
                 Total Incidents
               </span>
               <span className="MainDashboard-summary-value">
-                {Object.values(cardSubCounts).reduce((a, b) => a + b, 0)}
+                {(globalCounts["Open"] || 0) + 
+                 (globalCounts["Hold"] || 0) + 
+                 (globalCounts["In Progress"] || 0) + 
+                 (globalCounts["Closed"] || 0) + 
+                 (globalCounts["Pending Assignment"] || 0)}
               </span>
             </div>
             <div className="MainDashboard-summary-item">
@@ -234,15 +345,21 @@ function MainDashboard() {
                 Today's Activity
               </span>
               <span className="MainDashboard-summary-value">
-                {Object.values(cardCounts).reduce((a, b) => a + b, 0)}
+                {(globalCounts["Open (Today)"] || 0) + 
+                 (globalCounts["Hold (Today)"] || 0) + 
+                 (globalCounts["In Progress (Today)"] || 0) + 
+                 (globalCounts["Closed (Today)"] || 0) + 
+                 (globalCounts["Pending Assignment (Today)"] || 0)}
               </span>
             </div>
             <div className="MainDashboard-summary-item">
               <span className="MainDashboard-summary-label">
-                High Priority (Today)
+                Unresolved (Today)
               </span>
               <span className="MainDashboard-summary-value">
-                {(cardCounts["Hold"] || 0) + (cardCounts["In Progress"] || 0)}
+                {(globalCounts["Hold (Today)"] || 0) + 
+                 (globalCounts["In Progress (Today)"] || 0) + 
+                 (globalCounts["Pending Assignment (Today)"] || 0)}
               </span>
             </div>
           </div>

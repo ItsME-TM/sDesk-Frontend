@@ -20,6 +20,7 @@ const initialState: IncidentState = {
   users: [],
   locations: [],
   uploadedAttachment: null, // Add uploaded attachment state
+  incidentsByMainCategory: [], // Add incidents by main category
   loading: false,
   error: null,
 };
@@ -380,6 +381,22 @@ const incidentSlice = createSlice({
       state.uploadedAttachment = null;
     },
 
+    // Fetch incidents by main category code
+    fetchIncidentsByMainCategoryCodeRequest(state) {
+      state.loading = true;
+      state.error = null;
+    },
+    fetchIncidentsByMainCategoryCodeSuccess(state, action) {
+      state.loading = false;
+      state.incidentsByMainCategory = Array.isArray(action.payload)
+        ? action.payload
+        : action.payload?.data || [];
+    },
+    fetchIncidentsByMainCategoryCodeFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
     updateIncidentInList(state, action) {
       const updatedIncident = action.payload;
       const update = (list) =>
@@ -402,6 +419,43 @@ const incidentSlice = createSlice({
           ...state.currentIncident,
           ...updatedIncident,
         };
+      }
+    },
+
+    // Socket-based live incident addition
+    addIncidentToList(state, action) {
+      const newIncident = action.payload;
+      
+      // Add to incidents array if not already present
+      const incidentExists = state.incidents.some(
+        (incident) => incident.incident_number === newIncident.incident_number
+      );
+      if (!incidentExists) {
+        state.incidents.unshift(newIncident); // Add to beginning for newest first
+      }
+    },
+
+    // Socket-based live incident addition to assignedToMe
+    addIncidentToAssignedToMe(state, action) {
+      const newIncident = action.payload;
+      
+      const incidentExists = state.assignedToMe.some(
+        (incident) => incident.incident_number === newIncident.incident_number
+      );
+      if (!incidentExists) {
+        state.assignedToMe.unshift(newIncident);
+      }
+    },
+
+    // Socket-based live incident addition to assignedByMe
+    addIncidentToAssignedByMe(state, action) {
+      const newIncident = action.payload;
+      
+      const incidentExists = state.assignedByMe.some(
+        (incident) => incident.incident_number === newIncident.incident_number
+      );
+      if (!incidentExists) {
+        state.assignedByMe.unshift(newIncident);
       }
     },
   },
@@ -474,7 +528,13 @@ export const {
   uploadAttachmentSuccess,
   uploadAttachmentFailure,
   clearUploadedAttachment,
+  fetchIncidentsByMainCategoryCodeRequest,
+  fetchIncidentsByMainCategoryCodeSuccess,
+  fetchIncidentsByMainCategoryCodeFailure,
   updateIncidentInList,
+  addIncidentToList,
+  addIncidentToAssignedToMe,
+  addIncidentToAssignedByMe,
 } = incidentSlice.actions;
 
 // Export aliases for consistency with component usage
