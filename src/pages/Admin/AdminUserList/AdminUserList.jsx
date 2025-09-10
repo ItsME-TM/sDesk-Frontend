@@ -243,11 +243,15 @@ function AdminUserList() {
                   })
                   .filter((user) => {
                     const searchString = searchQuery.toLowerCase();
+                    
                     // Active search logic
+                    if (searchString === "true") return user.active === true;
+                    if (searchString === "false") return user.active === false;
+
                     // If searching for 'active' or 'inactive', filter strictly by active status
                     if (searchString === "active") return user.active === true;
-                    if (searchString === "inactive")
-                      return user.active === false;
+                    if (searchString === "inactive") return user.active === false;
+
                     // Otherwise, search all fields
                     return (
                       (user.serviceNum &&
@@ -259,7 +263,8 @@ function AdminUserList() {
                       (user.tier &&
                         user.tier.toLowerCase().includes(searchString)) ||
                       (user.position &&
-                        user.position.toLowerCase().includes(searchString))
+                        user.position.toLowerCase().includes(searchString)) ||
+                      String(user.active).toLowerCase().includes(searchString)
                     );
                   });
                 if (filteredUsers.length > 0) {

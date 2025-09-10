@@ -210,14 +210,6 @@ const SuperAdminAllIncident = () => {
               No incidents found.
             </td>
           </tr>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <td className="team-refno">TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className="team-status-text">Open</td>
-          </tr>
         </>
       );
     }
