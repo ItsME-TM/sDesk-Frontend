@@ -49,17 +49,32 @@ const SuperAdminAllIncident = () => {
     return <div>Error: Admin user not found.</div>;
   }
 
-  // Use Redux state for categoryItems/mainCategories
+  
   const getMainCategoryNameFromDatabase = (categoryItemCode) => {
-    // First, try to find from the loaded categoryItems
-    const categoryItem = categoryItems?.find(
+    
+    const transformedCategories = categoryItems?.map((item) => ({
+      grandchild_category_number: item.category_code,
+      grandchild_category_name: item.name,
+      child_category_name: item.subCategory?.name || "Unknown Sub",
+      child_category_number: item.subCategory?.category_code || "Unknown",
+      parent_category_number:
+        item.subCategory?.mainCategory?.category_code || "Unknown",
+      parent_category_name: item.subCategory?.mainCategory?.name || "Unknown",
+      
+      category_code: item.category_code,
+      name: item.name,
+    })) || [];
+
+    
+    const categoryItem = transformedCategories.find(
       (cat) => cat.grandchild_category_number === categoryItemCode
     );
     if (categoryItem) {
       return categoryItem.parent_category_name;
     }
-    // If not found in categoryItems, search by name
-    const categoryByName = categoryItems?.find(
+
+  
+    const categoryByName = transformedCategories.find(
       (cat) =>
         cat.grandchild_category_name &&
         cat.grandchild_category_name.toLowerCase() ===
@@ -68,7 +83,8 @@ const SuperAdminAllIncident = () => {
     if (categoryByName) {
       return categoryByName.parent_category_name;
     }
-    // Check if the code itself is a main category
+
+  
     const mainCategory = mainCategories?.find(
       (mainCat) =>
         mainCat.category_code === categoryItemCode ||
@@ -77,21 +93,22 @@ const SuperAdminAllIncident = () => {
     if (mainCategory) {
       return mainCategory.name || mainCategory.parent_category_name;
     }
+
     return "Unknown";
   };
 
   const getCategoryName = (categoryNumber) => {
     const category = categoryItems?.find(
-      (cat) => cat.grandchild_category_number === categoryNumber
+      (cat) => cat.category_code === categoryNumber
     );
-    return category ? category.grandchild_category_name : categoryNumber;
+    return category ? category.name : categoryNumber;
   };
 
   const getSubcategoryName = (categoryNumber) => {
     const category = categoryItems?.find(
-      (cat) => cat.grandchild_category_number === categoryNumber
+      (cat) => cat.category_code === categoryNumber
     );
-    return category ? category.child_category_name : "Unknown";
+    return category ? category.subCategory?.name || "Unknown" : "Unknown";
   };
 
   const getUserName = (serviceNumber) => {
@@ -106,7 +123,7 @@ const SuperAdminAllIncident = () => {
     return location ? location.loc_name : locationCode;
   };
 
-  // Only use incidents from Redux state
+  
   const incidentsToUse = incidents || [];
 
 
@@ -141,12 +158,11 @@ const SuperAdminAllIncident = () => {
     refNo: incident.incident_number,
     assignedTo: incident.handler,
     affectedUser: incident.informant,
-    category: incident.category,
-    subcategory: incident.category,
+    category: getCategoryName(incident.category),
+    subcategory: getSubcategoryName(incident.category),
     mainCategory: getMainCategoryNameFromDatabase(incident.category),
-
     status: incident.status,
-    location: incident.location,
+    location: getLocationName(incident.location),
     rawCategory: incident.category,
   }));
 
@@ -194,14 +210,6 @@ const SuperAdminAllIncident = () => {
               No incidents found.
             </td>
           </tr>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <td className="team-refno">TEST001</td>
-            <td>Test Technician</td>
-            <td>Test User</td>
-            <td>Test Category</td>
-            <td>Test Location</td>
-            <td className="team-status-text">Open</td>
-          </tr>
         </>
       );
     }
@@ -224,10 +232,10 @@ const SuperAdminAllIncident = () => {
             {row.refNo}
           </a>
         </td>
-        <td>{row.assignedTo}</td>
-        <td>{row.affectedUser}</td>
+        <td>{getUserName(row.assignedTo)}</td>
+        <td>{getUserName(row.affectedUser)}</td>
         <td>{row.category}</td>
-        <td>{row.location}</td>
+        <td>{getLocationName(row.location)}</td>
         <td className="team-status-text">{row.status}</td>
       </tr>
     ));
@@ -369,7 +377,7 @@ const SuperAdminAllIncident = () => {
               className="SuperAdminincidentViewAll-showSearchBar-Show-select2"
             >
               <option value="">All Categories</option>
-              {mainCategories?.map((category) => (
+              {mainCategories && mainCategories.map((category) => (
                 <option
                   key={
                     category.category_code || category.parent_category_number

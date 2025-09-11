@@ -14,7 +14,7 @@
 .MainDashboard-direction-bar {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #838281 0%, #7c7c7a 100%);
+  background: linear-gradient(135deg, #3333ff 0%, #ccddff 100%);
   color: white;
   height: 40px;
   padding-left: 20px;
@@ -42,6 +42,17 @@
   font-size: 1.2rem;
   color: #718096;
   margin-bottom: 0;
+}
+
+.MainDashboard-admin-info {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: rgba(66, 153, 225, 0.1);
+  border: 1px solid rgba(66, 153, 225, 0.2);
+  border-radius: 8px;
+  display: inline-block;
+  color: #2b6cb0;
+  font-weight: 500;
 }
 
 .MainDashboard-cards-container {

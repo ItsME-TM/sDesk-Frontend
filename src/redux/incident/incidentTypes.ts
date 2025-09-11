@@ -93,6 +93,7 @@ export interface IncidentState {
   users: any[];
   locations: any[];
   uploadedAttachment: UploadedAttachment | null; // Add uploaded attachment state
+  incidentsByMainCategory: Incident[]; // Add incidents by main category
   loading: boolean;
   error: string | null;
 }

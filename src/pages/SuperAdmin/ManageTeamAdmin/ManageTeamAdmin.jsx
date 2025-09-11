@@ -26,6 +26,7 @@ const initialForm = {
   cat4: "",
   teamId: "",
   teamName: "",
+  userRole: "",
 };
 
 const MAX_CATEGORIES = 4;
@@ -124,12 +125,27 @@ const ManageTeamAdmin = () => {
       const response = await fetchUserByServiceNum(value);
       const user = response.data;
       if (user) {
+        // Check if user role is valid for promotion to admin
+        const userRole = user.role?.toLowerCase();
+        if (userRole === "technician" || userRole === "team leader") {
+          setForm((prev) => ({
+            ...prev,
+            userName: "",
+            designation: "admin",
+            email: "",
+            contactNumber: "",
+          }));
+          setSubmitError(`Cannot add user with role "${user.role}" as admin. Only users with role "user" can be promoted to admin.`);
+          return;
+        }
+        
         setForm((prev) => ({
           ...prev,
           userName: user.display_name || "",
           designation: "admin",
           email: user.email || "",
           contactNumber: user.contactNumber ? user.contactNumber.replace(/\D/g, '').slice(0, 10) : "",
+          userRole: user.role || "", // Store user role for validation
         }));
         setSubmitError("");
       } else {
@@ -288,8 +304,22 @@ const ManageTeamAdmin = () => {
     e.preventDefault();
     setSubmitError("");
     setSubmitSuccess(false);
-    // Always set designation to 'admin' for add
+    
+    // Check if this is edit mode
     const isEdit = editMode && editId;
+    
+    // Additional validation for new admin creation - check user role
+    if (!isEdit) {
+      const userRole = form.userRole?.toLowerCase();
+      if (userRole === "technician" || userRole === "team leader") {
+        setSubmitError(`Cannot promote user with role "${form.userRole}" to admin. Only users with role "user" can be promoted to admin.`);
+        return;
+      }
+      if (userRole && userRole !== "user") {
+        setSubmitError(`Invalid user role "${form.userRole}". Only users with role "user" can be promoted to admin.`);
+        return;
+      }
+    }
     const payload = {
       serviceNumber: form.serviceNumber,
       userName: form.userName,
